@@ -1,6 +1,3 @@
-import React from "react";
-
-
 // Settings tab component
 // This component is used to render the settings tab in the plugin settings
 export function SettingsTab() {
