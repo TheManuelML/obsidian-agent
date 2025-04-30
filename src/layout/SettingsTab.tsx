@@ -1,5 +1,29 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { PluginSettingTab, App } from "obsidian";
+import { ObsidianAgentPlugin } from "../plugin";
+
+// Settings tab class
+export class AgentSettingsTab extends PluginSettingTab {
+  plugin: ObsidianAgentPlugin;
+
+  constructor(app: App, plugin: ObsidianAgentPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  // Method that displays the settings tab
+  display(): void {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    const mountPoint = containerEl.createDiv();
+    const root = ReactDOM.createRoot(mountPoint);
+    root.render(React.createElement(SettingsTab));
+  }
+}
+
 // Settings tab component
-// This component is used to render the settings tab in the plugin settings
 export function SettingsTab() {
   return (
     <div>

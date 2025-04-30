@@ -1,17 +1,26 @@
 import React, { useState } from "react";
 import { setIcon } from "obsidian";
+import { callAgent } from "../backend/agent/agent";
+
 
 export const AgentInput: React.FC = () => {
   const [message, setMessage] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      console.log("Message:", message);
+  // Function to handle the message sending
+  const handleSend = async () => {
+    try {
+      // Calling the agent sending the message
+      const response: string = await callAgent(message, "1"); // Get thread_id from configuration
       setMessage("");
+
+      console.log("Response from agent:", response);
+    } catch (error: unknown) {
+      console.error("Error sending message to agent:", error);
     }
   };
 
+  // Function to handle file selection
   const handleFileChange = (type: string, files: FileList | null) => {
     if (files && files.length > 0) {
       console.log(`File ${type}:`, files[0]);

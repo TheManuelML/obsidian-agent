@@ -24,6 +24,11 @@
 		"typescript": "^4.7.4"
 	},
 	"dependencies": {
+		"@langchain/community": "^0.3.41",
+		"@langchain/core": "^0.3.49",
+		"@langchain/google-genai": "^0.2.5",
+		"@langchain/langgraph": "^0.2.67",
+		"@langchain/openai": "^0.5.7",
 		"lucide-react": "^0.503.0",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0"

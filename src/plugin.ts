@@ -1,15 +1,15 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { Plugin, PluginSettingTab, App, WorkspaceLeaf } from 'obsidian';
-
-import { SettingsTab } from "./layout/SettingsTab";
+import { Plugin, App, WorkspaceLeaf } from 'obsidian';
 import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatSidebar";
+import { AgentSettingsTab } from "./layout/SettingsTab";
 
+let pluginInstance: ObsidianAgentPlugin;
 
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
   // Method that loads the plugin
   async onload() {
+    pluginInstance = this;
+
     // Add settings tab
     this.addSettingTab(new AgentSettingsTab(this.app, this));
     
@@ -59,22 +59,7 @@ export class ObsidianAgentPlugin extends Plugin {
   }
 }
 
-// Settings tab class
-export class AgentSettingsTab extends PluginSettingTab {
-  plugin: ObsidianAgentPlugin;
-
-  constructor(app: App, plugin: ObsidianAgentPlugin) {
-    super(app, plugin);
-    this.plugin = plugin;
-  }
-
-  // Method that displays the settings tab
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
-
-    const mountPoint = containerEl.createDiv();
-    const root = ReactDOM.createRoot(mountPoint);
-    root.render(React.createElement(SettingsTab));
-  }
+// Function that returns the app property of the Plugin class
+export function getApp(): App {
+  return pluginInstance.app
 }
