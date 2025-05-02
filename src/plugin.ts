@@ -15,10 +15,12 @@ export class ObsidianAgentPlugin extends Plugin {
     
     // Add agent chat view
     this.registerView(VIEW_TYPE_AGENT, (leaf) => new AgentChatView(leaf)); 
-    await this.ensureAgentViewExists();
+    this.app.workspace.onLayoutReady(async () => {
+      await this.ensureAgentViewExists();
+    });
 
     // Add sidebar ribon icon that shows the view
-    this.addRibbonIcon('brain-cog', 'Obsidian Agent', () => {
+    this.addRibbonIcon('brain-cog', 'Chat with Agent', () => {
       this.activateAgentChatView();
     });
   }
@@ -27,12 +29,19 @@ export class ObsidianAgentPlugin extends Plugin {
   async ensureAgentViewExists() {
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_AGENT);
     if (leaves.length === 0) {
-      const leaf = this.app.workspace.getRightLeaf(false);
+      let leaf = this.app.workspace.getRightLeaf(false);
+  
+      // Si no existe un leaf, créalo explícitamente
+      if (!leaf) {
+        leaf = this.app.workspace.getRightLeaf(true); // crea uno si no hay
+      }
+  
       if (leaf) {
         await leaf.setViewState({ type: VIEW_TYPE_AGENT, active: false });
       }
     }
   }
+  
   // Method that opens the agent chat view
   async activateAgentChatView(): Promise<void> {
     const { workspace } = this.app;

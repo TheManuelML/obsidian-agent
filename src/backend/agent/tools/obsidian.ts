@@ -1,5 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
+import { TFile } from 'obsidian';
 import { z } from 'zod';
 import { llm } from "../agent";
 import { getApp } from "src/plugin";
@@ -13,7 +14,9 @@ export const create_note = tool(async (input) => {
     console.log('Input:', input);
 
     // System prompt
-    let sysPrompt: string = `You are a helpful assistant that write notes. Return every note you write in markdown format.\n Use the following context to write the note ${context}`;
+    let sysPrompt: string = `You are a helpful assistant that write notes.`;
+    // If needed are more rules to write the notes.
+
     if (context) {
         sysPrompt += ` Use the following context to write the note: ${context}`;
     }
@@ -51,15 +54,32 @@ export const create_note = tool(async (input) => {
         }
     }
 
-    // Check if the note already exist
+    // Check if the note already exists
     try {
-        const existing = app.vault.getAbstractFileByPath(note.path);
-        if (existing) {
-            console.warn(`Note already exists at: ${note.path}`);
-            throw new Error(`A note already exists at path: ${note.path}`);
+        let fileName = note.path;
+        if (fileName.startsWith('/')) {
+            fileName = fileName.substring(1);
         }
 
-        // Write the note in obsidian
+        // Function to find the next available file name
+        const getNextAvailableFileName = (baseName: string) => {
+            let number = 1;
+            let newFileName = baseName.replace(/\.md$/, ` (${number}).md`);
+            while (app.vault.getAbstractFileByPath(newFileName)) {
+                number++;
+                newFileName = baseName.replace(/\.md$/, ` (${number}).md`);
+            }
+            return newFileName;
+        };
+
+        // If the file already exists, find the next available name
+        const existing = app.vault.getAbstractFileByPath(fileName);
+        if (existing && existing instanceof TFile) {
+            fileName = getNextAvailableFileName(fileName);  // Get the next available file name
+        }
+
+        // Write the note in Obsidian
+        note.path = fileName;
         await app.vault.create(note.path, note.content);
         console.log(`Note created at: ${note.path}`);
     } catch (e) {
@@ -67,14 +87,14 @@ export const create_note = tool(async (input) => {
         throw e;
     }
 
-    return 'Note created successfully';
+    return `Note created\nContent: ${note.content}\nTitle: ${note.title}\nDirectory: ${note.dir_path}`;
 }, {
     // Tool schema and metadata
     name: 'write_note',
-    description: 'Write a note in Obsidian',
+    description: 'Write a note in Obsidian. No parameters are needed.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
-        title: z.string().optional().describe('The title'),
+        title: z.string().optional().describe('The title, only use the one the user provides'),
         context: z.string().optional().describe('Context to use for the note'),
         dir_path: z.string().optional().describe('The path of the directory where the note is going to be stored'),
     })
