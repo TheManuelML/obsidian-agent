@@ -27,7 +27,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   });
 
   return (
-    <div className="dropdown" style={{ display: "flex", alignItems: "center" }}>
+    <div className="dropdown" style={{ display: "flex", alignItems: "center", padding: "0" }}>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -38,7 +38,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           background: "none",
           border: "none",
           outline: "none",
-          padding: "0 0.9em 0 0.4em",
+          padding: "0 2em 0 0.4em",
         }}
       >
         {!value && <option value="" disabled hidden>{placeholder}</option>}

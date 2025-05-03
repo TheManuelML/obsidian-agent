@@ -2,13 +2,14 @@ import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { TFile } from 'obsidian';
 import { z } from 'zod';
-import { llm } from "../agent";
-import { getApp } from "src/plugin";
+import { getLLM } from "../agent";
+import { getApp, getPlugin } from "../../plugin";
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
+    const plugin = getPlugin();
     let { topic, title, context, dir_path } = input; 
 
     console.log('Input:', input);
@@ -42,7 +43,9 @@ export const create_note = tool(async (input) => {
         // Ask gemini to write a note about a topic
         const humanPrompt = `Write a note about ${topic}.`;
         try {
-            const response = await llm.invoke([
+            const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
+            const apiKey = plugin?.settings?.apiKey ?? '';
+            const response = await getLLM(model, apiKey).invoke([
                 new SystemMessage(sysPrompt),
                 new HumanMessage(humanPrompt),
             ]);

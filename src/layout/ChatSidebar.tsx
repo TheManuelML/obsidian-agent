@@ -1,15 +1,18 @@
+import { createRoot, Root } from 'react-dom/client';
 import { ItemView, WorkspaceLeaf, IconName } from 'obsidian';
-import ReactDOM from 'react-dom/client';
 import { AgentInput } from '../components/AgentInput';
+import { ObsidianAgentPlugin } from '../plugin';
 
 
 export const VIEW_TYPE_AGENT = 'agent-chat-view';
 
 export class AgentChatView extends ItemView {
-  private reactRoot: ReactDOM.Root | null = null;
+  plugin: ObsidianAgentPlugin;
+  reactRoot: Root;
 
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf, plugin: ObsidianAgentPlugin) {
     super(leaf);
+    this.plugin = plugin;
   }
 
   getViewType(): string {
@@ -24,15 +27,13 @@ export class AgentChatView extends ItemView {
     return 'brain-cog'
   }
 
-  async onOpen(): Promise<void> {
-    const container = this.containerEl.children[1];
-    container.empty();
-
-    this.reactRoot = ReactDOM.createRoot(container);
-    this.reactRoot.render(<AgentInput />);
+  async onOpen() {
+    const root = createRoot(this.containerEl);
+    root.render(<AgentInput plugin={this.plugin} />);
+    this.reactRoot = root;
   }
 
   async onClose(): Promise<void> {
-    this.reactRoot?.unmount();
+    this.reactRoot.unmount();
   }
 }

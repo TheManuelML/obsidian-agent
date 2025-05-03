@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { setIcon } from "obsidian";
-import { callAgent } from "../backend/agent/agent";
+import { callAgent } from "../backend/agent";
 import { Dropdown } from "./ui/Dropdown";
+import { ObsidianAgentPlugin } from "../plugin";
 
+interface AgentInputProps {
+  plugin: ObsidianAgentPlugin;
+}
 
-export const AgentInput: React.FC = () => {
+export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
   let [message, setMessage] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-flash");
   const [selectedFolder, setSelectedFolder] = useState("");
 
   // Function to handle the message sending
   const handleSend = async () => {
+    let fullMessage = message;
     if (selectedFolder) {
-      message += `\nActual directory path: ${selectedFolder}`;
+      fullMessage += `\nActual directory path: ${selectedFolder}`;
     }
 
     try {
@@ -22,13 +26,11 @@ export const AgentInput: React.FC = () => {
       setConversation(prev => [...prev, { sender: "User", text: message }]);
 
       // Calling the agent sending the message
-      const response: string = await callAgent(message, "1"); // Get thread_id from configuration
+      const response: string = await callAgent(plugin, fullMessage, "1");
       setMessage("");
 
       // Add agent response to conversation
       setConversation(prev => [...prev, { sender: "Agent", text: response }]);
-
-      console.log("Response from agent:", response);
     } catch (error: unknown) {
       console.error("Error sending message to agent:", error);
     }
@@ -55,7 +57,7 @@ export const AgentInput: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", padding: "0.5rem" }}>
       <div className="chat-input__field" style={{
         display: "flex",
         alignItems: "center",
@@ -66,25 +68,6 @@ export const AgentInput: React.FC = () => {
         padding: "0.25rem",
         position: "relative"
       }}>
-        <div style={{
-          position: "absolute",
-          top: "0.25rem",
-          left: "0.25rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.25rem"
-        }}>
-          <Dropdown
-            value={selectedFolder}
-            onChange={setSelectedFolder}
-            options={[
-              {"value": "Engineering", "option": "Engineering"}, 
-              {"value": "Engineering/Knowledge Base", "option": "Knowledge Base"},  
-              {"value": "Engineering/Knowledge Base/Artificial Intelligence", "option": "Artificial Intelligence"},
-            ]}
-            placeholder="Select folder"
-          />
-        </div>
         <textarea
           className="input"
           placeholder="Send a message..."
@@ -104,7 +87,7 @@ export const AgentInput: React.FC = () => {
           onBlur={() => setIsFocused(false)}
           style={{
             flex: "1",
-            padding: "2.5rem 0.5rem 0.5rem 0.5rem",
+            padding: "0.5rem 0.5rem 0.5rem 0.5rem",
             fontSize: "var(--font-ui-small)",
             border: "none",
             backgroundColor: "transparent",
@@ -125,14 +108,15 @@ export const AgentInput: React.FC = () => {
           left: "0.25rem"
         }}>
           <Dropdown
-            value={selectedModel}
-            onChange={setSelectedModel}
+            value={selectedFolder}
+            onChange={setSelectedFolder}
             options={[
-              { value: "gemini-1.5-flash", option: "gemini-1.5-flash" },
-              { value: "gemini-2.0-flash", option: "gemini-2.0-flash" },
-              { value: "gemini-1.5-pro", option: "gemini-1.5-pro" }
+              {"value": "", "option": "No folder" },
+              {"value": "Engineering", "option": "Engineering"}, 
+              {"value": "Engineering/Knowledge Base", "option": "Knowledge Base"},  
+              {"value": "Engineering/Knowledge Base/Artificial Intelligence", "option": "Artificial Intelligence"},
             ]}
-            placeholder="Auto"
+            placeholder="Select folder"
             showClearButton={false}
           />
         </div>

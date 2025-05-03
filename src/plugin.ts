@@ -1,20 +1,24 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
 import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatSidebar";
-import { AgentSettingsTab } from "./layout/SettingsTab";
+import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
 
 let pluginInstance: ObsidianAgentPlugin;
 
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
+  settings: AgentSettings;
+
   // Method that loads the plugin
   async onload() {
     pluginInstance = this;
-
-    // Add settings tab
-    this.addSettingTab(new AgentSettingsTab(this.app, this));
+    setPlugin(this);
     
+    // Add settings tab
+    await this.loadSettings();
+    this.addSettingTab(new AgentSettingsTab(this.app, this));
+
     // Add agent chat view
-    this.registerView(VIEW_TYPE_AGENT, (leaf) => new AgentChatView(leaf)); 
+    this.registerView(VIEW_TYPE_AGENT, (leaf) => new AgentChatView(leaf, this)); 
     this.app.workspace.onLayoutReady(async () => {
       await this.ensureAgentViewExists();
     });
@@ -23,6 +27,14 @@ export class ObsidianAgentPlugin extends Plugin {
     this.addRibbonIcon('brain-cog', 'Chat with Agent', () => {
       this.activateAgentChatView();
     });
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   // Method that ensures that the tab for the agent chat view exists
@@ -71,4 +83,15 @@ export class ObsidianAgentPlugin extends Plugin {
 // Function that returns the app property of the Plugin class
 export function getApp(): App {
   return pluginInstance.app
+}
+
+export function setPlugin(p: ObsidianAgentPlugin) {
+  pluginInstance = p;
+}
+
+export function getPlugin(): ObsidianAgentPlugin {
+  if (!pluginInstance) {
+    throw new Error("Plugin instance not set yet");
+  }
+  return pluginInstance;
 }
