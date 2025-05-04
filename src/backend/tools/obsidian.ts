@@ -4,6 +4,7 @@ import { TFile } from 'obsidian';
 import { z } from 'zod';
 import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
+import { getAllFiles, findClosestFile } from "../../utils/files";
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -102,3 +103,31 @@ export const create_note = tool(async (input) => {
         dir_path: z.string().optional().describe('The path of the directory where the note is going to be stored'),
     })
 })
+
+
+// Tool principal
+export const read_note = tool(async (input) => {
+    const app = getApp();
+    const { fileName } = input;
+
+    const files = getAllFiles(app);
+    const matchedFile = findClosestFile(fileName, files);
+
+    if (!matchedFile) {
+        throw new Error(`Could not find any note similar to "${fileName}".`);
+    }
+
+    try {
+        const content = await app.vault.read(matchedFile);
+        return content;
+    } catch (err) {
+        console.error("Error reading file:", err);
+        throw err;
+    }
+}, {
+    name: 'read_note',
+    description: 'Reads the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
+    schema: z.object({
+        fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
+    })
+});

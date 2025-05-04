@@ -3,8 +3,9 @@ import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { HumanMessage } from "@langchain/core/messages";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
-import { create_note } from "./tools/obsidian";
+import { create_note, read_note } from "./tools/obsidian";
 import { ObsidianAgentPlugin } from "../plugin";
+import { read } from "fs";
 
 // Function to create a Google Generative AI instance
 export function getLLM(model: string, apiKey: string) {
@@ -36,7 +37,7 @@ export async function callAgent(
     // Creates the agent
     const agent = createReactAgent({
         llm: llm,
-        tools: [create_note],
+        tools: [create_note, read_note],
         checkpointSaver: new MemorySaver(),
     });
 
