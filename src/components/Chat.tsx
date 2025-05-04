@@ -4,7 +4,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { callAgent } from "../backend/agent";
-import { AgentInput } from "./AgentInput";
+import { AgentInput } from "./Input";
 import { ObsidianAgentPlugin } from "../plugin";
 
 interface AgentChatProps {

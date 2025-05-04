@@ -1,5 +1,5 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
-import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/AgentChatView";
+import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatView";
 import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
 
 let pluginInstance: ObsidianAgentPlugin;
