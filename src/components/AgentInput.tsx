@@ -1,47 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { setIcon } from "obsidian";
-import { callAgent } from "../backend/agent";
 import { Dropdown } from "./ui/Dropdown";
 import { ObsidianAgentPlugin, getApp } from "../plugin";
 import { getFiles, getFolders } from "../utils/files";
 
 interface AgentInputProps {
   plugin: ObsidianAgentPlugin;
+  onSend: (message: string, folder?: string) => void;
 }
 
-export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
-  let [message, setMessage] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-  const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
+export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [message, setMessage] = useState("");
   const [selectedFolder, setSelectedFolder] = useState("");
+
+  const [isFocused, setIsFocused] = useState(false);
 
   // List available folders
   const folderList = [
     ...getFolders(getApp().vault).map(folder => ({
       value: folder.path,
       option: folder.name
-    })), {value: "", option: "None"}
+    })), 
+      {value: "", option: "None"}
   ];
 
   // Function to handle the message sending
-  const handleSend = async () => {
-    let fullMessage = message;
-    if (selectedFolder) {
-      fullMessage += `\nActual directory path: ${selectedFolder}`;
-    }
-
-    try {
-      // Add user message to conversation
-      setConversation(prev => [...prev, { sender: "User", text: message }]);
-
-      // Calling the agent sending the message
-      const response: string = await callAgent(plugin, fullMessage, "1");
-      setMessage("");
-
-      // Add agent response to conversation
-      setConversation(prev => [...prev, { sender: "Agent", text: response }]);
-    } catch (error: unknown) {
-      console.error("Error sending message to agent:", error);
+  const handleSend = () => {
+    if (message.trim()) {
+      onSend(message.trim(), selectedFolder); // Call the parent function to handle the message
+      setMessage(""); // Clear the input field
+      if (textAreaRef.current) {
+        textAreaRef.current.style.height = "2.5rem"; // Reset height
+      }
     }
   };
 
@@ -67,7 +58,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
 
   return (
     <div style={{ position: "relative", padding: "0.5rem" }}>
-      <div className="chat-input__field" style={{
+      <div style={{
         display: "flex",
         alignItems: "center",
         gap: "0.5rem",
@@ -78,7 +69,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
         position: "relative"
       }}>
         <textarea
-          className="input"
+          ref={textAreaRef}
           placeholder="Send a message..."
           value={message}
           onChange={(e) => {
@@ -111,11 +102,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
             marginBottom: "2rem",
           }}
         />
-        <div style={{
-          position: "absolute",
-          bottom: "0.25rem",
-          left: "0.25rem"
-        }}>
+        <div style={{position: "absolute", bottom: "0.25rem", left: "0.25rem"}}>
           <Dropdown
             value={selectedFolder}
             onChange={setSelectedFolder}
@@ -131,7 +118,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
           display: "flex",
           gap: "0.25rem"
         }}>
-          <label className="attachment-button" style={{
+          <label style={{
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -169,19 +156,6 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
             <div style={{display: "flex", alignItems: "center", justifyContent: "center"}} ref={sendIconRef}></div>
           </button>
         </div>
-      </div>
-      <div className="conversation-history" style={{ marginTop: "1rem" }}>
-        {conversation.map((msg, index) => (
-          <div key={index} style={{
-            textAlign: msg.sender === "User" ? "right" : "left",
-            margin: "0.5rem 0",
-            padding: "0.5rem",
-            backgroundColor: msg.sender === "User" ? "var(--background-modifier-hover)" : "var(--background-secondary)",
-            borderRadius: "var(--radius-s)"
-          }}>
-            <strong>{msg.sender}:</strong> {msg.text}
-          </div>
-        ))}
       </div>
     </div>
   );
