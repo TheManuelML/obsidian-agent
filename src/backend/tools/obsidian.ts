@@ -90,7 +90,7 @@ export const create_note = tool(async (input) => {
         throw e;
     }
 
-    return `Note created\nContent: ${note.content}\nTitle: ${note.title}\nDirectory: ${note.dir_path}`;
+    return `Note sucessfully created.\nTitle: ${note.title}\nContent: ${note.content}\nDirectory: ${note.dir_path}`;
 }, {
     // Tool schema and metadata
     name: 'write_note',

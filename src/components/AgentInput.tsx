@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { setIcon } from "obsidian";
 import { callAgent } from "../backend/agent";
 import { Dropdown } from "./ui/Dropdown";
-import { ObsidianAgentPlugin } from "../plugin";
+import { ObsidianAgentPlugin, getApp } from "../plugin";
+import { getFiles, getFolders } from "../utils/files";
 
 interface AgentInputProps {
   plugin: ObsidianAgentPlugin;
@@ -13,6 +14,14 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
   const [selectedFolder, setSelectedFolder] = useState("");
+
+  // List available folders
+  const folderList = [
+    ...getFolders(getApp().vault).map(folder => ({
+      value: folder.path,
+      option: folder.name
+    })), {value: "", option: "None"}
+  ];
 
   // Function to handle the message sending
   const handleSend = async () => {
@@ -110,12 +119,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin }) => {
           <Dropdown
             value={selectedFolder}
             onChange={setSelectedFolder}
-            options={[
-              {"value": "", "option": "No folder" },
-              {"value": "Engineering", "option": "Engineering"}, 
-              {"value": "Engineering/Knowledge Base", "option": "Knowledge Base"},  
-              {"value": "Engineering/Knowledge Base/Artificial Intelligence", "option": "Artificial Intelligence"},
-            ]}
+            options={folderList}
             placeholder="Select folder"
             showClearButton={false}
           />

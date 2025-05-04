@@ -1,5 +1,5 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
-import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatSidebar";
+import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/AgentChatView";
 import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
 
 let pluginInstance: ObsidianAgentPlugin;
@@ -12,7 +12,7 @@ export class ObsidianAgentPlugin extends Plugin {
   async onload() {
     pluginInstance = this;
     setPlugin(this);
-    
+
     // Add settings tab
     await this.loadSettings();
     this.addSettingTab(new AgentSettingsTab(this.app, this));
