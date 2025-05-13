@@ -1,11 +1,11 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
-import { create_note, read_note } from "./tools/obsidian";
+import { create_note, read_note, update_note } from "./tools/obsidian_files";
+import { create_dir } from "./tools/obsidian_dirs";
 import { ObsidianAgentPlugin } from "../plugin";
-import { read } from "fs";
 
 // Function to create a Google Generative AI instance
 export function getLLM(model: string, apiKey: string) {
@@ -25,6 +25,7 @@ export function getLLM(model: string, apiKey: string) {
 }
 
 // Function to call the agent
+//! Mover la creacion del agente fuera de la funcion, para que no se cree un nuevo agente en cada llamada. Y la memoria del agente se guarde en el plugin.
 export async function callAgent(
     plugin: ObsidianAgentPlugin,
     message: string,
@@ -34,15 +35,17 @@ export async function callAgent(
     const apiKey = plugin.settings.apiKey;
     const llm = getLLM(modelName, apiKey);
 
+    const sysPrompt = `You are a helpful assistant that can create, read and update notes in Obsidian.\nYou cannot remove sections and content, or delete files or folders.`;
+
     // Creates the agent
     const agent = createReactAgent({
         llm: llm,
-        tools: [create_note, read_note],
+        tools: [create_note, read_note, update_note, create_dir],
         checkpointSaver: new MemorySaver(),
     });
 
     const invokePromise = agent.invoke(
-        {messages: [new HumanMessage(message)]}, 
+        {messages: [new SystemMessage(sysPrompt), new HumanMessage(message)]}, 
         {configurable: { thread_id: threadId }},
     ) as Promise<{ messages: { content: string }[] }>;
 

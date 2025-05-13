@@ -59,3 +59,10 @@ export function findClosestFile(target: string, files: TFile[]): TFile | null {
 
   return minDistance <= 10 ? bestMatch : null;
 }
+
+// Finds the closest folder path to the target string using Levenshtein distance
+export function findMatchingFolder(dirInput: string, app: App): TFolder | null {
+    const allFolders = app.vault.getAllLoadedFiles().filter(f => f instanceof TFolder) as TFolder[];
+    const lowerDir = dirInput.toLowerCase();
+    return allFolders.find(folder => folder.path.toLowerCase().includes(lowerDir)) || null;
+}
