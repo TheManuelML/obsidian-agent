@@ -6,6 +6,7 @@ import { MemorySaver } from "@langchain/langgraph";
 import { create_note, read_note, update_note } from "./tools/obsidian_files";
 import { create_dir } from "./tools/obsidian_dirs";
 import { ObsidianAgentPlugin } from "../plugin";
+import { getSamplePrompt } from "../utils/samplePrompts";
 
 // Function to create a Google Generative AI instance
 export function getLLM(model: string, apiKey: string) {
@@ -24,34 +25,44 @@ export function getLLM(model: string, apiKey: string) {
     });
 }
 
+// Function to create the agent and store it in the plugin
+export function initializeAgent(plugin: ObsidianAgentPlugin) {
+    if (!plugin.agent || !plugin.memorySaver) {
+        console.log(plugin.memorySaver);
+        console.log(plugin.agent);
+
+        const llm = getLLM(plugin.settings.model, plugin.settings.apiKey);
+        const memorySaver = new MemorySaver();
+        plugin.agent = createReactAgent({
+            llm,
+            tools: [create_note, read_note, update_note, create_dir],
+            checkpointSaver: memorySaver,
+        });
+        plugin.memorySaver = memorySaver;
+    }
+}
+
 // Function to call the agent
-//! Mover la creacion del agente fuera de la funcion, para que no se cree un nuevo agente en cada llamada. Y la memoria del agente se guarde en el plugin.
 export async function callAgent(
     plugin: ObsidianAgentPlugin,
     message: string,
     threadId: string
 ): Promise<string> {
-    const modelName = plugin.settings.model;
-    const apiKey = plugin.settings.apiKey;
-    const llm = getLLM(modelName, apiKey);
+    initializeAgent(plugin);
+    
+    // Get the system prompt
+    const sysPrompt = getSamplePrompt('agent');
+    const userMessage = `${sysPrompt}\n\n${message}`;
 
-    const sysPrompt = `You are a helpful assistant that can create, read and update notes in Obsidian.\nYou cannot remove sections and content, or delete files or folders.`;
-
-    // Creates the agent
-    const agent = createReactAgent({
-        llm: llm,
-        tools: [create_note, read_note, update_note, create_dir],
-        checkpointSaver: new MemorySaver(),
-    });
-
-    const invokePromise = agent.invoke(
-        {messages: [new SystemMessage(sysPrompt), new HumanMessage(message)]}, 
+    // Invoke the agent
+    const invokePromise = plugin.agent!.invoke(
+        {messages: [new HumanMessage(userMessage)]},
         {configurable: { thread_id: threadId }},
     ) as Promise<{ messages: { content: string }[] }>;
 
     // Handle timeout
-    const timeoutPromise: Promise<never> = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Agent timeout")), 10000) // 10 segundos
+    const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Agent timeout")), 10000) // 10 seconds
     );
 
     // Wait for the agent to finish or timeout

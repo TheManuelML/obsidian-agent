@@ -43,7 +43,7 @@ export const create_dir = tool(async (input) => {
     };
 }, {
     // Tool schema and metadata
-    name: 'Create directory',
+    name: 'create_directory',
     description: 'Create a directory in Obsidian. No parameters are needed.',
     schema: z.object({
         name: z.string().optional().describe('The name of the directory'),

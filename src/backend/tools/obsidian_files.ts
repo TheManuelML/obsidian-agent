@@ -91,7 +91,7 @@ export const create_note = tool(async (input) => {
     };    
 }, {
     // Tool schema and metadata
-    name: 'Write note',
+    name: 'create_note',
     description: 'Write a note in Obsidian. No parameters are needed.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
@@ -136,7 +136,7 @@ export const read_note = tool(async (input) => {
     }
 }, {
     // Tool schema and metadata
-    name: 'Read note',
+    name: 'read_note',
     description: 'Reads the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
     schema: z.object({
         fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
@@ -209,7 +209,7 @@ export const update_note = tool(async ({ fileName, section, newContent }) => {
     };
 }, {
     // Tool schema and metadata
-    name: 'Update note',
+    name: 'update_note',
     description: 'Replaces the content of a note. Can be used to update a specific section or the whole note.',
     schema: z.object({
       fileName: z.string().describe('The name or path of the note to update'),

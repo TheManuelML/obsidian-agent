@@ -29,7 +29,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Model name")
-      .setDesc("Select the model to use")
+      .setDesc("Select the model to use, if changed restart the plugin to apply the changes.")
       .addDropdown((dropdown: DropdownComponent) =>
         dropdown
           .addOption("gemini-1.5-flash", "gemini-1.5-flash") 
@@ -44,7 +44,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("API Key")
-      .setDesc("Enter your API key")
+      .setDesc("Enter your API key, if changed restart the plugin to apply the changes.")
       .addText((text) =>
         text
           .setPlaceholder("Enter your API key")

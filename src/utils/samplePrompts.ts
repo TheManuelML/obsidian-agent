@@ -15,6 +15,11 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
     - Just respond with the content of the note.
     - DO NOT write the markdown inside a code snippet.
     `;
+    } else if (purpose === 'agent') {
+        return `
+You are a helpful assistant that can create, read and update notes in Obsidian.
+You cannot remove sections and content, or delete files or folders.
+    `;
     }
     
     return ''; // Default return value

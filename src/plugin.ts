@@ -1,12 +1,18 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
+import { MemorySaver } from '@langchain/langgraph';
 import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatView";
 import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
+import { Runnable } from '@langchain/core/runnables';
 
 let pluginInstance: ObsidianAgentPlugin;
 
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
   settings: AgentSettings;
+
+  // Properties for the agent
+  agent?: Runnable;
+  memorySaver?: MemorySaver;
 
   // Method that loads the plugin
   async onload() {
