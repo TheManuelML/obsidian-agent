@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { setIcon } from "obsidian";
 import { Dropdown } from "./ui/Dropdown";
 import { ObsidianAgentPlugin, getApp } from "../plugin";
-import { getFiles, getFolders } from "../utils/files";
+import { getFolders } from "../utils/files";
 
 interface AgentInputProps {
   plugin: ObsidianAgentPlugin;

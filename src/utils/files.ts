@@ -1,15 +1,6 @@
 import { App, TFile, TFolder, Vault } from "obsidian";
 import levenshtein from "js-levenshtein";
 
-// Returns a list of all files in the vault and their paths
-// [{ name: "file1.md", path: "path/to/file1.md" }, ...]
-export function getFiles(vault: Vault): { name: string, path: string }[] {
-  return vault.getFiles().map((file: TFile) => ({
-    name: file.name,
-    path: file.path,
-  }));
-}
-
 // Returns a list of all folders in the vault and their paths
 // [{ name: "folder1", path: "path/to/folder1" }, ...]
 export function getFolders(vault: Vault): { name: string, path: string }[] {
@@ -20,7 +11,7 @@ export function getFolders(vault: Vault): { name: string, path: string }[] {
 }
 
 // Auxiliary function to get all files in the vault
-export function getAllFiles(app: App): TFile[] {
+export function getFiles(app: App): TFile[] {
   const files: TFile[] = [];
   function traverse(folder: TFolder) {
       for (const child of folder.children) {
@@ -34,6 +25,18 @@ export function getAllFiles(app: App): TFile[] {
   traverse(app.vault.getRoot());
   return files;
 }
+
+
+// Append a number to a name if the file or the folder already exists
+export function getNextAvailableFileName(base: string, app: App) {
+    let i = 1;
+    let newName = base.replace(/\.md$/, ` (${i}).md`);
+    while (app.vault.getAbstractFileByPath(newName)) {
+        newName = base.replace(/\.md$/, ` (${++i}).md`);
+    }
+    return newName;
+};
+
 
 // Finds the closest file path to the target string using Levenshtein distance
 export function findClosestFile(target: string, files: TFile[]): TFile | null {

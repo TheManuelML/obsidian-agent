@@ -3,16 +3,9 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
 import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
-import { getAllFiles, findClosestFile, findMatchingFolder } from "../../utils/files";
-
-
-function sanitizePath(path: string): string {
-    return path.replace(/(\.\.\/|\/{2,})/g, '/').replace(/\/+$/, '') + '/';
-}
-
-function formatTags(tags: string[]): string {
-    return `---\ntags:\n- ${tags.join('\n- ')}\n---\n`;
-}
+import { getFiles, findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
+import { sanitizePath, formatTags } from '../../utils/sanitize';
+import { getSamplePrompt, appendContentToPrompt } from '../../utils/samplePrompts';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -20,8 +13,6 @@ export const create_note = tool(async (input) => {
     const app = getApp();
     const plugin = getPlugin();
     let { topic, title = 'Generated note', tags = [], context, dir_path = '/' } = input; 
-
-    console.log('Input:', input);
 
     // Sanitize the path
     dir_path = sanitizePath(dir_path);
@@ -39,34 +30,25 @@ export const create_note = tool(async (input) => {
     };
 
     // System prompt
-    let sysPrompt: string = `You are a helpful assistant that writes notes in Obsidian. Follow this rules that Obsidian has:
-    - The note must be written in markdown format.
-    - Link other files using [[FILE_PATH]]
-    - If tags are required, add them at the beginning of the note this way:
-        ---
-        tags:
-        - tag1
-        - tag2
-        - ...
-        ---
-    - Just return the content of the note.
-    - DO NOT write the markdown inside a code snippet.`; // If needed are more rules to write the notes.
+    let sysPrompt = getSamplePrompt('write');
     if (context) {
-        sysPrompt += `\nUse the following context to write the note: ${context}`;
+        sysPrompt = appendContentToPrompt(sysPrompt, `\nUse the following context to write the note: ${context}`);
     }
-
 
     // Content generation
     try {
         if (topic) {
             const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
             const apiKey = plugin?.settings?.apiKey ?? '';
+            
             let humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
+            
             const response = await getLLM(model, apiKey).invoke([
                 new SystemMessage(sysPrompt),
                 new HumanMessage(humanPrompt),
             ]);
             note.content = response.content;
+
         } else if (tags.length > 0) {
             note.content = formatTags(tags);
         }
@@ -82,18 +64,9 @@ export const create_note = tool(async (input) => {
     try {
         let filePath = note.path.startsWith('/') ? note.path.slice(1) : note.path;
 
-        // Function to find the next available file name
-        const getNextAvailableFileName = (base: string) => {
-            let i = 1;
-            let newName = base.replace(/\.md$/, ` (${i}).md`);
-            while (app.vault.getAbstractFileByPath(newName)) {
-                newName = base.replace(/\.md$/, ` (${++i}).md`);
-            }
-            return newName;
-        };
-
+        // Append a number to the file name if it already exists
         if (app.vault.getAbstractFileByPath(filePath)) {
-            filePath = getNextAvailableFileName(filePath);
+            filePath = getNextAvailableFileName(filePath, app);
         }
 
         // Write the note in Obsidian
@@ -118,7 +91,7 @@ export const create_note = tool(async (input) => {
     };    
 }, {
     // Tool schema and metadata
-    name: 'write_note',
+    name: 'Write note',
     description: 'Write a note in Obsidian. No parameters are needed.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
@@ -135,9 +108,10 @@ export const read_note = tool(async (input) => {
     const app = getApp();
     const { fileName } = input;
 
-    const files = getAllFiles(app);
+    // Get all files
+    const files = getFiles(app);
+    // Find the closest file
     const matchedFile = findClosestFile(fileName, files);
-
     if (!matchedFile) {
         return {
             success: false,
@@ -145,6 +119,7 @@ export const read_note = tool(async (input) => {
         };
     }
 
+    // Read the file
     try {
         const content = await app.vault.read(matchedFile);
         return {
@@ -161,7 +136,7 @@ export const read_note = tool(async (input) => {
     }
 }, {
     // Tool schema and metadata
-    name: 'read_note',
+    name: 'Read note',
     description: 'Reads the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
     schema: z.object({
         fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
@@ -173,33 +148,30 @@ export const read_note = tool(async (input) => {
 export const update_note = tool(async ({ fileName, section, newContent }) => {
     const app = getApp();
     const plugin = getPlugin();
-    const file = findClosestFile(fileName, getAllFiles(app));
-    if (!file) throw new Error(`Note not found: ${fileName}`);
-  
-    let text = await app.vault.read(file);
+
+    // Get all files
+    const files = getFiles(app);
+    // Find the closest file
+    const matchedFile = findClosestFile(fileName, files);
+    if (!matchedFile) {
+        return {
+            success: false,
+            error: `Could not find any note similar to "${fileName}".`
+        };
+    }
+
+    // Read the file
+    let text = await app.vault.read(matchedFile);
     let newNoteContent = '';
 
-    // Content generation
+    // Configure the prompts
     let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`;
-    let sysPrompt = `You are a helpful assistant that writes notes in Obsidian. Follow this rules that Obsidian has:
-    - The note must be written in markdown format.
-    - Link other files using [[FILE_PATH]]
-    - If tags are required, add them at the beginning of the note this way:
-        ---
-        tags:
-        - tag1
-        - tag2
-        - ...
-        ---
-    - Just return the content of the note.
-    - DO NOT write the markdown inside a code snippet.`;
-
+    let sysPrompt = getSamplePrompt('write');
     if (section) {
-        humanPrompt += `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`;
-    } else {
-        humanPrompt += `\nWrite the new content on the whole note.`;
+        sysPrompt = appendContentToPrompt(sysPrompt, `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`);
     }
-    
+
+    // Content generation
     try {
         if (newContent) {
             const model = plugin?.settings?.model ?? 'gemini-2.0-flash';
@@ -221,7 +193,7 @@ export const update_note = tool(async ({ fileName, section, newContent }) => {
   
     // Update the note
     try {
-        await app.vault.modify(file, newNoteContent);
+        await app.vault.modify(matchedFile, newNoteContent);
     } catch (err) {
         console.error('Error updating file:', err);
         return {
@@ -232,11 +204,12 @@ export const update_note = tool(async ({ fileName, section, newContent }) => {
   
     return { 
         success: true, 
-        path: file.path,
+        path: matchedFile.path,
         newContent: newNoteContent,
     };
 }, {
-    name: 'update_note',
+    // Tool schema and metadata
+    name: 'Update note',
     description: 'Replaces the content of a note. Can be used to update a specific section or the whole note.',
     schema: z.object({
       fileName: z.string().describe('The name or path of the note to update'),
