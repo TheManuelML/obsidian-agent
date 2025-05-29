@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { getApp } from "../../plugin";
 import { sanitizePath } from '../../utils/sanitize';
 import { getNextAvailableFolderName, buildTree, findMatchingFolder } from '../../utils/files';
-import { TFolder } from 'obsidian';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {
@@ -52,28 +51,28 @@ export const list_files = tool(async (input) => {
     const app = getApp();
     let { dir_path = '/' } = input;
 
+    // Find the matching folder if the path is not absolute    
     const matchingFolder = findMatchingFolder(dir_path, app);
-    dir_path = matchingFolder ? matchingFolder.path : dir_path;
-
-    // Sanitize the path
-    dir_path = sanitizePath(dir_path);
-
+    
     // Check if the directory exists
-    const root = app.vault.getAbstractFileByPath(dir_path);
-    if (!root || !(root instanceof TFolder)) {
+    if (!matchingFolder) {
         console.error('Directory not found:', dir_path);
         return {
             success: false,
             error: 'Directory not found'
         };
     }
+
+    // Sanitize the path
+    dir_path = sanitizePath(dir_path);
+
     
     try {
         const tree = {
             type: 'folder',
-            name: root.name,
-            path: root.path,
-            children: buildTree(root)
+            name: matchingFolder.name,
+            path: matchingFolder.path,
+            children: buildTree(matchingFolder)
         };
 
         return {
@@ -97,59 +96,3 @@ export const list_files = tool(async (input) => {
 })
 
 
-// Rename a dirctory
-export const rename_dir = tool(async (input) => {
-    const app = getApp();
-    let { dir_path, new_name } = input;
-
-    // Find the matching folder if the path is not absolute
-    const matchingFolder = findMatchingFolder(dir_path, app);
-    dir_path = matchingFolder ? matchingFolder.path : dir_path;
-
-    // Sanitize the path
-    dir_path = sanitizePath(dir_path).replace(/\/$/, ''); // Remove trailing slash if present
-
-    // Check if the directory exists
-    const root = app.vault.getAbstractFileByPath(dir_path);
-    if (!root || !(root instanceof TFolder)) {
-        console.error('Directory not found:', dir_path);
-        return {
-            success: false,
-            error: 'Directory not found'
-        };
-    }
-
-    // Validate the new name, if it already exists, append a number to it
-    const parentDir = root.path.split('/').slice(0, -1).join('/');
-    let newPath = parentDir ? `${parentDir}/${new_name}` : new_name;
-
-    if (app.vault.getAbstractFileByPath(newPath)) {
-        new_name = getNextAvailableFolderName(new_name, app, parentDir);
-        newPath = parentDir ? `${parentDir}/${new_name}` : new_name;
-    }
-
-    // Rename the directory
-    try {
-        await app.vault.rename(root, newPath);
-        
-        return {
-            success: true,
-            old_directory: root.path,
-            new_directory: newPath
-        };
-    } catch (err) {
-        console.error('Error renaming directory in Obsidian:', err);
-        return {
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error'
-        };
-    }
-}, {
-    // Tool schema and metadata
-    name: 'rename_directory',
-    description: 'Rename a directory in Obsidian.',
-    schema: z.object({
-        dir_path: z.string().describe('The path or name of the directory where it is located'),
-        new_name: z.string().describe('The new name for the directory'),
-    })
-})

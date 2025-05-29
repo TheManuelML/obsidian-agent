@@ -1,9 +1,13 @@
+//TODO: Refactor create_note tool to remove redundant fileMatch search
+//TODO: Add option to link files in create_note and update_note
+//TODO: Add the option to empty a file in update note
+
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
 import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
-import { getFiles, findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
+import { findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
 import { sanitizePath, formatTags } from '../../utils/sanitize';
 import { getSamplePrompt, appendContentToPrompt } from '../../utils/samplePrompts';
 
@@ -103,10 +107,10 @@ export const read_note = tool(async (input) => {
     const app = getApp();
     const { fileName } = input;
 
-    // Get all files
-    const files = getFiles(app);
     // Find the closest file
-    const matchedFile = findClosestFile(fileName, files);
+    const matchedFile = findClosestFile(fileName, app);
+    
+    // Check if the file exists
     if (!matchedFile) {
         console.error(`Could not find any note with the name or similar to "${fileName}".`);
         return {
@@ -141,14 +145,15 @@ export const read_note = tool(async (input) => {
 
 
 // Obsidian tool to update or write on existing notes
-export const edit_note = tool(async ({ fileName, section, newContent }) => {
+export const edit_note = tool(async (input) => {
     const app = getApp();
     const plugin = getPlugin();
+    let { fileName, section, newContent } = input;
 
-    // Get all files
-    const files = getFiles(app);
     // Find the closest file
-    const matchedFile = findClosestFile(fileName, files);
+    const matchedFile = findClosestFile(fileName, app);
+    
+    // Check if the file exists
     if (!matchedFile) {
         console.error(`Could not find any note with the name or similar to "${fileName}".`);
         return {
@@ -199,9 +204,10 @@ export const edit_note = tool(async ({ fileName, section, newContent }) => {
         };
     }
   
-    return { 
+    return {
         success: true, 
         path: matchedFile.path,
+        oldContent: text,
         newContent: newNoteContent,
     };
 }, {

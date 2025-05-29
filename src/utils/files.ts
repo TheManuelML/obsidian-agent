@@ -12,18 +12,18 @@ export function getFolders(vault: Vault): { name: string, path: string }[] {
 
 // Auxiliary function to get all files in the vault
 export function getFiles(app: App): TFile[] {
-  const files: TFile[] = [];
-  function traverse(folder: TFolder) {
-      for (const child of folder.children) {
-          if (child instanceof TFile) {
-              files.push(child);
-          } else if (child instanceof TFolder) {
-              traverse(child);
-          }
-      }
-  }
-  traverse(app.vault.getRoot());
-  return files; // reurn e.g: [TFile, TFile, ...]
+    const files: TFile[] = [];
+    function traverse(folder: TFolder) {
+        for (const child of folder.children) {
+            if (child instanceof TFile) {
+                files.push(child);
+            } else if (child instanceof TFolder) {
+                traverse(child);
+            }
+        }
+    }
+    traverse(app.vault.getRoot());
+    return files; // reurn e.g: [TFile, TFile, ...]
 }
 
 
@@ -60,38 +60,24 @@ export function getNextAvailableFolderName(base: string, app: App, parentPath: s
 
 
 // Finds the closest file path to the target string using Levenshtein distance
-export function findClosestFile(target: string, files: TFile[]): TFile | null {
-  const normalizedTarget = target.toLowerCase();
-  let bestMatch: TFile | null = null;
-  let minDistance = Infinity;
-
-  for (const file of files) {
-      const pathDist = levenshtein(normalizedTarget, file.path.toLowerCase());
-      const nameDist = levenshtein(normalizedTarget, file.name.toLowerCase());
-
-      const dist = Math.min(pathDist, nameDist);
-      if (dist < minDistance) {
-          minDistance = dist;
-          bestMatch = file;
-      }
-
-      // Prioritize exact matches
-      if (file.name.toLowerCase() === normalizedTarget || file.path.toLowerCase() === normalizedTarget) {
-          return file;
-      }
-  }
-
-  return minDistance <= 10 ? bestMatch : null; // return e.g: TFile or null if no close match found
+export function findClosestFile(fileName: string, app: App): TFile | null {
+    const exactMatch = app.vault.getFileByPath(fileName);
+    if (exactMatch) return exactMatch;
+    
+    // Only if it does not finds an exact match it tries fuzzy match
+    const allFiles = getFiles(app);
+    const lowerFileName = fileName.toLowerCase();
+    return allFiles.find(file => file.path.toLowerCase().includes(lowerFileName)) || null; // return e.g: TFile or null if no close match found
 }
 
 // Finds the closest folder path to the target string using Levenshtein distance
-export function findMatchingFolder(dirInput: string, app: App): TFolder | null {
-    const exactMatch = app.vault.getFolderByPath(dirInput);
+export function findMatchingFolder(dirName: string, app: App): TFolder | null {
+    const exactMatch = app.vault.getFolderByPath(dirName);
     if (exactMatch) return exactMatch;
 
     // Only if it does not finds an exact match it tries fuzzy match
     const allFolders = app.vault.getAllLoadedFiles().filter(f => f instanceof TFolder) as TFolder[];
-    const lowerDir = dirInput.toLowerCase();
+    const lowerDir = dirName.toLowerCase();
     return allFolders.find(folder => folder.path.toLowerCase().includes(lowerDir)) || null; // return e.g: TFolder or null if no match found
 }
 
