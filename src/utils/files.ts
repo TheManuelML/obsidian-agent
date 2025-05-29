@@ -7,7 +7,7 @@ export function getFolders(vault: Vault): { name: string, path: string }[] {
     return vault.getAllFolders().map((folder) => ({
         name: folder.name,
         path: folder.path,
-    }));
+    })); // return e.g: [{ name: "folder1", path: "path/to/folder1" }, ...]
 }
 
 // Auxiliary function to get all files in the vault
@@ -23,19 +23,40 @@ export function getFiles(app: App): TFile[] {
       }
   }
   traverse(app.vault.getRoot());
-  return files;
+  return files; // reurn e.g: [TFile, TFile, ...]
 }
 
 
 // Append a number to a name if the file or the folder already exists
-export function getNextAvailableFileName(base: string, app: App) {
+export function getNextAvailableFileName(base: string, app: App, parentPath: string): string {
     let i = 1;
-    let newName = base.replace(/\.md$/, ` (${i}).md`);
-    while (app.vault.getAbstractFileByPath(newName)) {
-        newName = base.replace(/\.md$/, ` (${++i}).md`);
+    let newName = base;
+    let fullPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+    while (app.vault.getAbstractFileByPath(fullPath)) {
+        const extMatch = base.match(/\.[^/.]+$/);
+        const nameWithoutExt = base.replace(/\.[^/.]+$/, ''); // Remove extension
+        const ext = extMatch ? extMatch[0] : '';
+        newName = `${nameWithoutExt} (${i++})${ext}`;
+        fullPath = parentPath ? `${parentPath}/${newName}` : newName;
     }
-    return newName;
-};
+
+    return newName; // e.g.: "file (1).md"
+}
+
+// Append a number to a folder name if the folder already exists
+export function getNextAvailableFolderName(base: string, app: App, parentPath: string): string {
+    let i = 1;
+    let newName = base;
+    let fullPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+    while (app.vault.getAbstractFileByPath(fullPath)) {
+        newName = `${base} (${i++})`;
+        fullPath = parentPath ? `${parentPath}/${newName}` : newName;
+    }
+
+    return newName; // return e.g: "folder (1)"
+}
 
 
 // Finds the closest file path to the target string using Levenshtein distance
@@ -54,18 +75,44 @@ export function findClosestFile(target: string, files: TFile[]): TFile | null {
           bestMatch = file;
       }
 
-      // Prioridad: coincidencia exacta por nombre
+      // Prioritize exact matches
       if (file.name.toLowerCase() === normalizedTarget || file.path.toLowerCase() === normalizedTarget) {
           return file;
       }
   }
 
-  return minDistance <= 10 ? bestMatch : null;
+  return minDistance <= 10 ? bestMatch : null; // return e.g: TFile or null if no close match found
 }
 
 // Finds the closest folder path to the target string using Levenshtein distance
 export function findMatchingFolder(dirInput: string, app: App): TFolder | null {
+    const exactMatch = app.vault.getFolderByPath(dirInput);
+    if (exactMatch) return exactMatch;
+
+    // Only if it does not finds an exact match it tries fuzzy match
     const allFolders = app.vault.getAllLoadedFiles().filter(f => f instanceof TFolder) as TFolder[];
     const lowerDir = dirInput.toLowerCase();
-    return allFolders.find(folder => folder.path.toLowerCase().includes(lowerDir)) || null;
+    return allFolders.find(folder => folder.path.toLowerCase().includes(lowerDir)) || null; // return e.g: TFolder or null if no match found
+}
+
+
+// Helper function to build the tree in a JSON format
+export function buildTree(folder: TFolder): any {
+    const children = folder.children.map(child => {
+        if (child instanceof TFolder) {
+            return {
+                type: 'folder',
+                name: child.name,
+                path: child.path,
+                children: buildTree(child)
+            };
+        } else if (child instanceof TFile) {
+            return {
+                type: 'file',
+                name: child.name,
+                path: child.path
+            };
+        }
+    });
+    return children; // return e.g: [{ type: 'folder', name: 'subfolder', path: 'path/to/subfolder', children: [...] }, { type: 'file', name: 'file.md', path: 'path/to/file.md' }, ...]
 }

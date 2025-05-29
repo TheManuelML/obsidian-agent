@@ -12,7 +12,10 @@ export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const plugin = getPlugin();
-    let { topic, title = 'Generated note', tags = [], context, dir_path = '/' } = input; 
+    let { topic, name = 'Generated note', tags = [], context, dir_path = '/' } = input; 
+
+    // Declaring the content variable
+    let content: any = '';
 
     // Sanitize the path
     dir_path = sanitizePath(dir_path);
@@ -20,20 +23,10 @@ export const create_note = tool(async (input) => {
     const matchedFolder = findMatchingFolder(dir_path, app);
     dir_path = sanitizePath(matchedFolder ? matchedFolder.path : '/');
 
-    // Declaring the note
-    let note: { [key: string] : any } = {
-        title,
-        tags,
-        content: "",
-        dir_path,
-        path: dir_path + title + '.md',
-    };
-
-    // System prompt
-    let sysPrompt = getSamplePrompt('write');
-    if (context) {
-        sysPrompt = appendContentToPrompt(sysPrompt, `\nUse the following context to write the note: ${context}`);
-    }
+    // Adding extension to name
+    name = name + '.md';
+    // Full path with the directory path and the name of the file
+    let full_path = dir_path + '/' + name;
 
     // Content generation
     try {
@@ -41,16 +34,21 @@ export const create_note = tool(async (input) => {
             const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
             const apiKey = plugin?.settings?.apiKey ?? '';
             
+            // System prompt
+            let sysPrompt = getSamplePrompt('write');
+            if (context) {
+                sysPrompt = appendContentToPrompt(sysPrompt, `\nUse the following context to write the note: ${context}`);
+            }
             let humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
             
             const response = await getLLM(model, apiKey).invoke([
                 new SystemMessage(sysPrompt),
                 new HumanMessage(humanPrompt),
             ]);
-            note.content = response.content;
+            content = response.content;
 
         } else if (tags.length > 0) {
-            note.content = formatTags(tags);
+            content = formatTags(tags);
         }
     } catch (err) {
         console.error('Error invoking LLM:', err);
@@ -62,17 +60,14 @@ export const create_note = tool(async (input) => {
 
     // Check if the note already exists
     try {
-        let filePath = note.path.startsWith('/') ? note.path.slice(1) : note.path;
-
         // Append a number to the file name if it already exists
-        if (app.vault.getAbstractFileByPath(filePath)) {
-            filePath = getNextAvailableFileName(filePath, app);
+        if (app.vault.getAbstractFileByPath(full_path)) {
+            name = getNextAvailableFileName(name, app, dir_path);
+            full_path = dir_path + '/' + name;
         }
 
         // Write the note in Obsidian
-        note.path = filePath;
-        await app.vault.create(note.path, note.content);
-        console.log(`Note created at: ${note.path}`);
+        await app.vault.create(full_path, content);
     } catch (err) {
         console.error('Error creating file in Obsidian:', err);
         return {
@@ -83,19 +78,19 @@ export const create_note = tool(async (input) => {
 
     return {
         success: true,
-        title: note.title,
-        tags: note.tags,
-        content: note.content,
-        path: note.path,
-        directory: note.dir_path
-    };    
+        name: name,
+        tags: tags,
+        content: content,
+        fullPath: full_path,
+        parentDir: dir_path
+    };
 }, {
     // Tool schema and metadata
     name: 'create_note',
     description: 'Write a note in Obsidian. No parameters are needed.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
-        title: z.string().optional().describe('The title the user provided'),
+        name: z.string().optional().describe('The name the user provided'),
         tags: z.array(z.string()).optional().describe('The tags the user wants to add to the note'),
         context: z.string().optional().describe('Context the user provided to write the note'),
         dir_path: z.string().optional().describe('The path of the directory where the note is going to be stored'),
@@ -113,6 +108,7 @@ export const read_note = tool(async (input) => {
     // Find the closest file
     const matchedFile = findClosestFile(fileName, files);
     if (!matchedFile) {
+        console.error(`Could not find any note with the name or similar to "${fileName}".`);
         return {
             success: false,
             error: `Could not find any note similar to "${fileName}".`
@@ -145,7 +141,7 @@ export const read_note = tool(async (input) => {
 
 
 // Obsidian tool to update or write on existing notes
-export const update_note = tool(async ({ fileName, section, newContent }) => {
+export const edit_note = tool(async ({ fileName, section, newContent }) => {
     const app = getApp();
     const plugin = getPlugin();
 
@@ -154,9 +150,10 @@ export const update_note = tool(async ({ fileName, section, newContent }) => {
     // Find the closest file
     const matchedFile = findClosestFile(fileName, files);
     if (!matchedFile) {
+        console.error(`Could not find any note with the name or similar to "${fileName}".`);
         return {
             success: false,
-            error: `Could not find any note similar to "${fileName}".`
+            error: `Could not find any note with the name or similar to "${fileName}".`
         };
     }
 
