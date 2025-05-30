@@ -41,9 +41,9 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
         plugin.agent = createReactAgent({
             llm,
             tools: [
-                create_note, // Allow to link files
+                create_note,
                 read_note,
-                edit_note, // Allow to link files
+                edit_note,
                 create_dir,
                 list_files,
                 search_note,
@@ -78,7 +78,7 @@ export async function callAgent(
 
     // Handle timeout
     const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Agent timeout")), 10000) // 10 seconds
+        setTimeout(() => reject(new Error("Agent timeout")), 20000) // 20 seconds
     );
 
     // Wait for the agent to finish or timeout

@@ -1,4 +1,3 @@
-//TODO: Refactor create_note tool to remove redundant fileMatch search
 //TODO: Add option to link files in create_note and update_note
 //TODO: Add the option to empty a file in update note
 
@@ -18,14 +17,19 @@ export const create_note = tool(async (input) => {
     const plugin = getPlugin();
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/' } = input; 
 
-    // Declaring the content variable
-    let content: any = '';
-
-    // Sanitize the path
-    dir_path = sanitizePath(dir_path);
     // Find the closest folder
     const matchedFolder = findMatchingFolder(dir_path, app);
-    dir_path = sanitizePath(matchedFolder ? matchedFolder.path : '/');
+    // Check if the folder exists
+    if (!matchedFolder) {
+        console.error(`Could not find any folder with the path "${dir_path}"`);
+        return {
+            success: false,
+            error: `Could not find any folder with the path "${dir_path}"`
+        };
+    }
+
+    // Sanitize the directory path
+    dir_path = sanitizePath(matchedFolder.path);
 
     // Adding extension to name
     name = name + '.md';
@@ -33,6 +37,7 @@ export const create_note = tool(async (input) => {
     let full_path = dir_path + '/' + name;
 
     // Content generation
+    let content: any = '';
     try {
         if (topic) {
             const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
@@ -64,8 +69,8 @@ export const create_note = tool(async (input) => {
 
     // Check if the note already exists
     try {
-        // Append a number to the file name if it already exists
         if (app.vault.getAbstractFileByPath(full_path)) {
+            // Append a number to the file name if it already exists
             name = getNextAvailableFileName(name, app, dir_path);
             full_path = dir_path + '/' + name;
         }
