@@ -8,6 +8,7 @@ import { create_note, read_note, edit_note } from "./tools/obsidian_files";
 import { create_dir, list_files } from "./tools/obsidian_dirs";
 import { rename_note, rename_dir } from "./tools/obsidian_rename";
 import { search_note, search_dir } from "./tools/obsidian_search";
+import { llm_answer } from "./tools/llm_answer";
 
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt } from "../utils/samplePrompts";
@@ -49,6 +50,7 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
                 search_dir,
                 rename_dir,
                 rename_note,
+                llm_answer,
             ],
             checkpointSaver: memorySaver,
         });
