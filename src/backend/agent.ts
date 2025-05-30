@@ -1,10 +1,14 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { HumanMessage } from "@langchain/core/messages";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
+
 import { create_note, read_note, edit_note } from "./tools/obsidian_files";
-import { create_dir, list_files, rename_dir } from "./tools/obsidian_dirs";
+import { create_dir, list_files } from "./tools/obsidian_dirs";
+import { rename_note, rename_dir } from "./tools/obsidian_rename";
+import { search_note, search_dir } from "./tools/obsidian_search";
+
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt } from "../utils/samplePrompts";
 
@@ -41,10 +45,10 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
                 edit_note, // Allow to link files
                 create_dir,
                 list_files,
-                // Search for a file
-                // Search for a directory
+                search_note,
+                search_dir,
                 rename_dir,
-                // Rename a file
+                rename_note,
             ],
             checkpointSaver: memorySaver,
         });
