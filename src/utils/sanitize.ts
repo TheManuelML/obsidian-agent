@@ -10,7 +10,39 @@ export function formatTags(tags: string[]): string {
     return `---\ntags:\n- ${tags.join('\n- ')}\n---\n`;
 }
 
-// Detects if the content is a code block
-export function detectCodeSnippet(content: string): boolean {
-    return /```[\s\S]*?```/.test(content);
-}
+// Detects if the content is a code block or inline code snippet
+// Returns: [{ text: string, isCode: boolean }, ...]
+export function parseCodeSnippets(content: string): { text: string, isCode: boolean }[] {
+    const regex = /```([\s\S]*?)```/g;
+    const result: { text: string, isCode: boolean }[] = [];
+    let lastIndex = 0;
+    let match;
+  
+    while ((match = regex.exec(content)) !== null) {
+      // Texto antes del bloque de código
+      if (match.index > lastIndex) {
+        result.push({
+          text: content.slice(lastIndex, match.index),
+          isCode: false
+        });
+      }
+  
+      // Bloque de código (sin los delimitadores ```)
+      result.push({
+        text: match[1],
+        isCode: true
+      });
+  
+      lastIndex = regex.lastIndex;
+    }
+  
+    // Texto restante después del último bloque de código
+    if (lastIndex < content.length) {
+      result.push({
+        text: content.slice(lastIndex),
+        isCode: false
+      });
+    }
+  
+    return result;
+  }

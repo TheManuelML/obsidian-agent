@@ -1,13 +1,13 @@
 import { createRoot, Root } from 'react-dom/client';
 import { ItemView, WorkspaceLeaf, IconName } from 'obsidian';
 import { ObsidianAgentPlugin } from '../plugin';
-import { AgentChat } from '../components/Chat';
+import { Chat } from '../components/Chat';
 
 export const VIEW_TYPE_AGENT = 'agent-chat-view';
 
 export class AgentChatView extends ItemView {
   plugin: ObsidianAgentPlugin;
-  reactRoot: Root;
+  reactRoot!: Root;
 
   constructor(leaf: WorkspaceLeaf, plugin: ObsidianAgentPlugin) {
     super(leaf);
@@ -21,7 +21,7 @@ export class AgentChatView extends ItemView {
 
   async onOpen() {
     const root = createRoot(this.containerEl);
-    root.render(<AgentChat plugin={this.plugin} />);
+    root.render(<Chat plugin={this.plugin} />);
     this.reactRoot = root;
   }
 

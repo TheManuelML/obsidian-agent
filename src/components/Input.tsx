@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { setIcon } from "obsidian";
 import { Dropdown } from "./ui/Dropdown";
 import { ObsidianAgentPlugin, getApp } from "../plugin";
@@ -9,11 +9,11 @@ interface AgentInputProps {
   onSend: (message: string, folder?: string) => void;
 }
 
-export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
+export const Input: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [message, setMessage] = useState("");
   const [selectedFolder, setSelectedFolder] = useState("");
-
+  
   const [isFocused, setIsFocused] = useState(false);
 
   // List available folders
@@ -57,7 +57,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
   }, []);
 
   return (
-    <div style={{ position: "relative", padding: "0.5rem" }}>
+    <div style={{ width: "100%" }}>
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -66,7 +66,8 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
         border: "1px solid var(--background-modifier-border)",
         borderRadius: "var(--radius-s)",
         padding: "0.25rem",
-        position: "relative"
+        position: "relative",
+        width: "100%",
       }}>
         <textarea
           ref={textAreaRef}
@@ -87,7 +88,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
           onBlur={() => setIsFocused(false)}
           style={{
             flex: "1",
-            padding: "0.5rem 0.5rem 0.5rem 0.5rem",
+            padding: "0.5rem",
             fontSize: "var(--font-ui-small)",
             border: "none",
             backgroundColor: "transparent",
@@ -96,7 +97,7 @@ export const AgentInput: React.FC<AgentInputProps> = ({ plugin, onSend }) => {
             boxShadow: "none",
             color: "var(--text-normal)",
             resize: "none",
-            overflow: "hidden",
+            overflow: "auto",
             minHeight: "2.5rem",
             maxHeight: "10rem",
             marginBottom: "2rem",

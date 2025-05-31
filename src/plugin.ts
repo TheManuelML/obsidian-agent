@@ -8,7 +8,7 @@ let pluginInstance: ObsidianAgentPlugin;
 
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
-  settings: AgentSettings;
+  settings!: AgentSettings;
 
   // Properties for the agent
   agent?: Runnable;

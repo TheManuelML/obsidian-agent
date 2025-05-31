@@ -1,31 +1,31 @@
-// Expandir verticalmente el bloque de mensaje cuando el mensaje sea largo
-// Si e mensaje esta entre ``` no expandir el bloque verticalmente, añadir un scroll horizontal
-// Si el mensaje es un bloque de codigo cambiar el color de fondo y el color del texto
-
 import React, { useState, useRef, useEffect } from "react";
-import { callAgent } from "../backend/agent";
-import { AgentInput } from "./Input";
 import { ObsidianAgentPlugin } from "../plugin";
+import { callAgent } from "../backend/agent";
+import { Input } from "./Input";
+import { parseCodeSnippets } from "../utils/sanitize";
+import { Clipboard } from "lucide-react";
 
 interface AgentChatProps {
   plugin: ObsidianAgentPlugin;
 }
 
-export const AgentChat: React.FC<AgentChatProps> = ({ plugin }) => {
+export const Chat: React.FC<AgentChatProps> = ({ plugin }) => {
   const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleSend = async (message: string, folder?: string) => {
     let fullMessage = message;
-    if (folder) {
-      fullMessage += `\nActual directory path: ${folder}`;
-    }
+    if (folder) fullMessage += `\nActual directory path: ${folder}`;
 
     try {
       const response = await callAgent(plugin, fullMessage, "1");
-      setConversation(prev => [...prev, { sender: "User", text: message }, { sender: "Agent", text: response }]);
+      setConversation((prev) => [
+        ...prev, 
+        { sender: "User", text: message }, 
+        { sender: "Agent", text: response }
+      ]);
     } catch (err) {
-      setConversation(prev => [...prev, { sender: "Agent", text: "Error processing message." }]);
+      setConversation((prev) => [...prev, { sender: "Agent", text: "Error processing message." }]);
       console.error("Agent error:", err);
     }
   };
@@ -36,19 +36,26 @@ export const AgentChat: React.FC<AgentChatProps> = ({ plugin }) => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).catch(console.error);
+  };
+
   return (
     <div style={{
       display: "flex",
       flexDirection: "column",
       height: "100%",
       padding: "1rem",
-      gap: "1rem",
-      marginBottom: "1rem",
-    }}>
+      position: "relative",
+    }}
+    >
       <button
         onClick={clearChat}
         style={{
-          alignSelf: "flex-end",
+          position: "absolute",
+          top: "1rem",
+          right: "1rem",
+          zIndex: 1,
           padding: "0.25rem 0.75rem",
           borderRadius: "var(--radius-s)",
           backgroundColor: "var(--background-modifier-hover)",
@@ -59,36 +66,90 @@ export const AgentChat: React.FC<AgentChatProps> = ({ plugin }) => {
       >
         Clear chat
       </button>
+
       <div style={{
-        flex: "1",
+        flex: 1,
         overflowY: "auto",
         border: "1px solid var(--background-modifier-border)",
         borderRadius: "var(--radius-s)",
         padding: "0.5rem",
-        backgroundColor: "var(--background-secondary)"
-      }}>
+        backgroundColor: "var(--background-secondary)",
+        marginTop: "2.5rem",
+        marginBottom: "1rem",
+      }}
+      >
         {conversation.map((msg, i) => (
           <div key={i} style={{
-            textAlign: msg.sender === "User" ? "right" : "left",
-            backgroundColor: msg.sender === "User" ? "var(--background-modifier-hover)" : "var(--background-primary)",
+            alignSelf: msg.sender === "User" ? "flex-end" : "flex-start",
+            backgroundColor: msg.sender === "User" 
+              ? "var(--background-modifier-hover)" 
+              : "var(--background-primary)",
             color: "var(--text-normal)",
-            padding: "0.5rem",
+            padding: "0.75rem",
             borderRadius: "var(--radius-s)",
             margin: "0.5rem 0",
             maxWidth: "80%",
-            overflowX: "auto",
             whiteSpace: "pre-wrap",
-            wordWrap: "break-word", 
-            marginLeft: msg.sender === "User" ? "auto" : undefined,
+            wordWrap: "break-word",
+            position: "relative", 
             userSelect: "text",
           }}>
-            <strong style={{fontSize: "14px"}}>{msg.sender}:</strong>
-            <pre style={{fontSize: "12px"}}>{msg.text}</pre>
+            <strong style={{fontSize: "14px", opacity: 0.8}}>{msg.sender}:</strong>
+            {parseCodeSnippets(msg.text).map((frag, j) => (
+              frag.isCode ? (
+                <div key={j} style={{ position: "relative", marginTop: "0.5rem" }}>
+                  <button 
+                    onClick={() => copyToClipboard(frag.text)}
+                    style={{
+                      position: "absolute",
+                      top: "0.25rem",
+                      right: "0.25rem",
+                      fontSize: "0.75rem",
+                      padding: "0.1rem 0.3rem",
+                      cursor: "pointer",
+                      color: "var(--text-muted)",
+                      backgroundColor: "none",
+                    }}
+                  >
+                    <Clipboard size={16} />
+                  </button>
+                  <pre 
+                    style={{
+                      fontSize: "12px",
+                      backgroundColor: "var(--background-modifier-border)",
+                      padding: "0.5rem",
+                      borderRadius: "var(--radius-s)",
+                      overflowX: "auto",
+                      fontFamily: "var(--font-monospace)",
+                      margin: 0,
+                    }}
+                  >
+                    {frag.text}
+                  </pre>
+                </div>
+              ) : (
+                <pre 
+                  key={j} 
+                  style={{
+                    fontSize: "12px",
+                    marginTop: "0.25rem",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    minHeight: "1.5em"
+                  }}
+                >
+                  {frag.text}
+                </pre>
+              )
+            ))}
           </div>
         ))}
         <div ref={bottomRef}></div>
-      </div>
-      <AgentInput plugin={plugin} onSend={handleSend}/>
+      </div>    
+      <div style={{ marginBottom: "1rem", position: "relative" }}>
+        <Input plugin={plugin} onSend={handleSend}/>
+      </div>  
     </div>
   );
 };
