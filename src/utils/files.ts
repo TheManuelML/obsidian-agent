@@ -1,5 +1,4 @@
 import { App, TFile, TFolder, Vault } from "obsidian";
-import levenshtein from "js-levenshtein";
 
 // Returns a list of all folders in the vault and their paths
 // [{ name: "folder1", path: "path/to/folder1" }, ...]
@@ -59,7 +58,7 @@ export function getNextAvailableFolderName(base: string, app: App, parentPath: s
 }
 
 
-// Finds the closest file path to the target string using Levenshtein distance
+// Finds the closest file path to the target
 export function findClosestFile(fileName: string, app: App): TFile | null {
     const exactMatch = app.vault.getFileByPath(fileName);
     if (exactMatch) return exactMatch;
@@ -70,7 +69,7 @@ export function findClosestFile(fileName: string, app: App): TFile | null {
     return allFiles.find(file => file.path.toLowerCase().includes(lowerFileName)) || null; // return e.g: TFile or null if no close match found
 }
 
-// Finds the closest folder path to the target string using Levenshtein distance
+// Finds the closest folder path to the target
 export function findMatchingFolder(dirName: string, app: App): TFolder | null {
     const exactMatch = app.vault.getFolderByPath(dirName);
     if (exactMatch) return exactMatch;
@@ -83,14 +82,14 @@ export function findMatchingFolder(dirName: string, app: App): TFolder | null {
 
 
 // Helper function to build the tree in a JSON format
-export function buildTree(folder: TFolder): any {
+export function getFolderStructure(folder: TFolder): any {
     const children = folder.children.map(child => {
         if (child instanceof TFolder) {
             return {
                 type: 'folder',
                 name: child.name,
                 path: child.path,
-                children: buildTree(child)
+                children: getFolderStructure(child)
             };
         } else if (child instanceof TFile) {
             return {

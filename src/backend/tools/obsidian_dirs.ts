@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { getApp } from "../../plugin";
 import { sanitizePath } from '../../utils/sanitize';
-import { getNextAvailableFolderName, buildTree, findMatchingFolder } from '../../utils/files';
+import { getNextAvailableFolderName, findMatchingFolder, getFolderStructure } from '../../utils/files';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {
@@ -72,7 +72,7 @@ export const list_files = tool(async (input) => {
             type: 'folder',
             name: matchingFolder.name,
             path: matchingFolder.path,
-            children: buildTree(matchingFolder)
+            children: getFolderStructure(matchingFolder)
         };
 
         return {

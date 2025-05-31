@@ -1,3 +1,6 @@
+import { formatFolderTree } from "./sanitize";
+import { getApp } from "src/plugin";
+
 // Returns a sample prompt for the given purpose
 export function getSamplePrompt(purpose: string) {
     if (purpose === 'write') {
@@ -17,10 +20,19 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
     `;
     } else if (purpose === 'agent') {
         return `
-You are a helpful assistant that can create, read and update notes in Obsidian.
-You cannot remove sections and content, or delete files or folders.
+You are a helpful assistant that works with notes in Obsidian.
 
+You cannot delete content.
+
+When asked to read a note, return to the user the exact content of the note, except when asked not to.
 Never return the content of a note inside a code block. Just return the content as it is.
+
+When a file or a folder is mentioned, and you are asked to work with it always search for it to have the full path.
+
+--- 
+
+Take into account the actual structure of the vault:
+${formatFolderTree(getApp().vault.getRoot(), 2)}
     `;
     }
     

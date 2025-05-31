@@ -91,10 +91,12 @@ export function getApp(): App {
   return pluginInstance.app
 }
 
+// Function that returns the settings of the plugin
 export function setPlugin(p: ObsidianAgentPlugin) {
   pluginInstance = p;
 }
 
+// Function that returns the plugin instance
 export function getPlugin(): ObsidianAgentPlugin {
   if (!pluginInstance) {
     throw new Error("Plugin instance not set yet");

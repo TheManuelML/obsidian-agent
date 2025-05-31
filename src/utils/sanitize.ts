@@ -1,11 +1,11 @@
-import { TFolder } from "obsidian";
-import { buildTree } from "./files";
+import { TFolder } from 'obsidian';
+import { getFolderStructure } from './files';
 
 // Sanitizes the path
 export function sanitizePath(p: string): string {
     return p
-        .replace(/(\.\.\/|\/{2,})/g, '/')  // remove '..' and double slashes
-        .replace(/^\/+|\/+$/g, '');        // remove leading and trailing slashes
+        .replace(/(\.\.\/|\/{2,})/g, '/')
+        .replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
 }
 
 // Formats the tags in order to be used in the note
@@ -14,7 +14,6 @@ export function formatTags(tags: string[]): string {
 }
 
 // Detects if the content is a code block or inline code snippet
-// Returns: [{ text: string, isCode: boolean }, ...]
 export function parseCodeSnippets(content: string): { text: string, isCode: boolean }[] {
     const regex = /```([\s\S]*?)```/g;
     const result: { text: string, isCode: boolean }[] = [];
@@ -47,13 +46,21 @@ export function parseCodeSnippets(content: string): { text: string, isCode: bool
       });
     }
   
-    return result;
+    return result; // Returns: [{ text: string, isCode: boolean }, ...]
 }
 
 // Formats a JSON of folders to a tree
-export function formatTree(folder: TFolder): string {
-  // Get the JSON with the structure of the folder
-  const json = buildTree(folder);
-  
-  return ""
+export function formatFolderTree(folder: TFolder, depth = 0): string {
+  let result = '';
+  let tree = getFolderStructure(folder);
+
+  for (const node of tree) {
+      if (node.type === 'folder') {
+          const indent = '  '.repeat(depth); // 2 espacios por nivel
+          result += `${indent}- ${node.name}\n`;
+          result += formatFolderTree(node.children, depth + 1);
+      }
+  }
+
+  return result;
 }
