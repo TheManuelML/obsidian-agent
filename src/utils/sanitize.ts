@@ -50,17 +50,15 @@ export function parseCodeSnippets(content: string): { text: string, isCode: bool
 }
 
 // Formats a JSON of folders to a tree
-export function formatFolderTree(folder: TFolder, depth = 0): string {
+export function formatFolderTree(tree: any[], depth = 0): string {
   let result = '';
-  let tree = getFolderStructure(folder);
-
   for (const node of tree) {
+      const indent = '  '.repeat(depth);
       if (node.type === 'folder') {
-          const indent = '  '.repeat(depth); // 2 espacios por nivel
           result += `${indent}- ${node.name}\n`;
           result += formatFolderTree(node.children, depth + 1);
       }
   }
-
+  console.log(result);
   return result;
 }

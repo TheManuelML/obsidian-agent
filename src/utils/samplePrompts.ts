@@ -1,5 +1,6 @@
+import { getFolderStructure } from "./files";
 import { formatFolderTree } from "./sanitize";
-import { getApp } from "src/plugin";
+import { getRootFolder } from "src/plugin";
 
 // Returns a sample prompt for the given purpose
 export function getSamplePrompt(purpose: string) {
@@ -32,9 +33,9 @@ When a file or a folder is mentioned, and you are asked to work with it always s
 --- 
 
 Take into account the actual structure of the vault:
-${formatFolderTree(getApp().vault.getRoot(), 2)}
+${formatFolderTree(getFolderStructure(getRootFolder()))}
     `;
     }
     
-    return ''; // Default return value
+    return ''; // Default returnalue
 }

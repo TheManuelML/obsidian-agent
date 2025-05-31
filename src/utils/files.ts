@@ -82,8 +82,8 @@ export function findMatchingFolder(dirName: string, app: App): TFolder | null {
 
 
 // Helper function to build the tree in a JSON format
-export function getFolderStructure(folder: TFolder): any {
-    const children = folder.children.map(child => {
+export function getFolderStructure(folder: TFolder): any[] {
+    return folder.children.map(child => {
         if (child instanceof TFolder) {
             return {
                 type: 'folder',
@@ -98,6 +98,5 @@ export function getFolderStructure(folder: TFolder): any {
                 path: child.path
             };
         }
-    });
-    return children; // return e.g: [{ type: 'folder', name: 'subfolder', path: 'path/to/subfolder', children: [...] }, { type: 'file', name: 'file.md', path: 'path/to/file.md' }, ...]
+    }); // return e.g: [{ type: 'folder', name: 'subfolder', path: 'path/to/subfolder', children: [...] }, { type: 'file', name: 'file.md', path: 'path/to/file.md' }, ...]
 }
