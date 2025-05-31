@@ -26,8 +26,3 @@ Never return the content of a note inside a code block. Just return the content 
     
     return ''; // Default return value
 }
-
-// Appends content to the prompt
-export function appendContentToPrompt(prompt: string, content: string) {
-    return `${prompt}\n\n${content}`;
-}

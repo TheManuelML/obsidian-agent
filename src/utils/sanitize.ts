@@ -1,3 +1,6 @@
+import { TFolder } from "obsidian";
+import { buildTree } from "./files";
+
 // Sanitizes the path
 export function sanitizePath(p: string): string {
     return p
@@ -5,7 +8,7 @@ export function sanitizePath(p: string): string {
         .replace(/^\/+|\/+$/g, '');        // remove leading and trailing slashes
 }
 
-// Formats the tags to be used in the note
+// Formats the tags in order to be used in the note
 export function formatTags(tags: string[]): string {
     return `---\ntags:\n- ${tags.join('\n- ')}\n---\n`;
 }
@@ -45,4 +48,12 @@ export function parseCodeSnippets(content: string): { text: string, isCode: bool
     }
   
     return result;
+}
+
+// Formats a JSON of folders to a tree
+export function formatTree(folder: TFolder): string {
+  // Get the JSON with the structure of the folder
+  const json = buildTree(folder);
+  
+  return ""
 }

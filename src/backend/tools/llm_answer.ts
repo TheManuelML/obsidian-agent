@@ -1,7 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { appendContentToPrompt } from '../../utils/samplePrompts';
 import { getLLM } from "../agent";
 import { getPlugin } from "../../plugin";
 
@@ -16,9 +15,7 @@ export const llm_answer = tool(async (input) => {
     let prompt = 'Answer: ' + question;
 
     // If context is provided, use it to answer the question
-    if (context) {
-        prompt = appendContentToPrompt(prompt, `Take into acount the following context: ${context}`);
-    }
+    if (context) prompt += `Take into acount the following context: ${context}`;
 
     // Ask the LLM for the asnwer
     let response: any;

@@ -8,7 +8,7 @@ import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
 import { findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
 import { sanitizePath, formatTags } from '../../utils/sanitize';
-import { getSamplePrompt, appendContentToPrompt } from '../../utils/samplePrompts';
+import { getSamplePrompt } from '../../utils/samplePrompts';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -43,11 +43,10 @@ export const create_note = tool(async (input) => {
             const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
             const apiKey = plugin?.settings?.apiKey ?? '';
             
-            // System prompt
+            // Prompts
             let sysPrompt = getSamplePrompt('write');
-            if (context) {
-                sysPrompt = appendContentToPrompt(sysPrompt, `\nUse the following context to write the note: ${context}`);
-            }
+            if (context) sysPrompt += `\nUse the following context to write the note: ${context}`;
+
             let humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
             
             const response = await getLLM(model, apiKey).invoke([
@@ -171,13 +170,12 @@ export const edit_note = tool(async (input) => {
     let text = await app.vault.read(matchedFile);
     let newNoteContent = '';
 
-    // Configure the prompts
-    let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`;
+    // Prompts
     let sysPrompt = getSamplePrompt('write');
-    if (section) {
-        sysPrompt = appendContentToPrompt(sysPrompt, `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`);
-    }
+    if (section) sysPrompt += `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`;
 
+    let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`;
+    
     // Content generation
     try {
         if (newContent) {
