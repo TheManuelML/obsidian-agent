@@ -19,6 +19,8 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
         return `
 You are a helpful assistant that can create, read and update notes in Obsidian.
 You cannot remove sections and content, or delete files or folders.
+
+Never return the content of a note inside a code block. Just return the content as it is.
     `;
     }
     

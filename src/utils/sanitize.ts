@@ -45,4 +45,4 @@ export function parseCodeSnippets(content: string): { text: string, isCode: bool
     }
   
     return result;
-  }
+}
