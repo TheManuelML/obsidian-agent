@@ -1,5 +1,7 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatAnthropic } from '@langchain/anthropic';
 import { HumanMessage } from "@langchain/core/messages";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
@@ -13,28 +15,48 @@ import { llm_answer } from "./tools/llm_answer";
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt } from "../utils/samplePrompts";
 
-// Function to create a Google Generative AI instance
-export function getLLM(model: string, apiKey: string) {
-    return new ChatGoogleGenerativeAI({
-        model,
-        temperature: 1,
-        maxRetries: 2,
-        safetySettings: [
-            {category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE},
-            {category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE},
-            {category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE},
-            {category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE},
-            {category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE},
-        ],
-        apiKey,
-    });
+
+// Function to create an llm instance
+export function getLLM(provider: string,model: string, apiKey: string) {
+    if (provider === 'google') {
+        return new ChatGoogleGenerativeAI({
+            model,
+            temperature: 1,
+            maxRetries: 2,
+            safetySettings: [
+                {category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE},
+                {category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE},
+                {category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE},
+                {category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE},
+                {category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE},
+            ],
+            apiKey,
+        });
+    } else if (provider === 'openai') {
+        return new ChatOpenAI({
+            model,
+            temperature: 1,
+            maxRetries: 2,
+            apiKey,
+        });
+    } else if (provider === 'anthropic') {
+        return new ChatAnthropic({
+            model,
+            temperature: 1,
+            maxRetries: 2,
+            apiKey,
+        });
+    }
 }
 
 // Function to create the agent and store it in the plugin
 export function initializeAgent(plugin: ObsidianAgentPlugin) {
-    if (!plugin.agent || !plugin.memorySaver) {
-        const llm = getLLM(plugin.settings.model, plugin.settings.apiKey);
+    if (plugin.settings.model != plugin.modelName) {
+        const llm = getLLM(plugin.settings.provider, plugin.settings.model, plugin.settings.apiKey);
+        if (!llm) throw new Error("Failed to initialize LLM");
+        
         const memorySaver = new MemorySaver();
+        
         plugin.agent = createReactAgent({
             llm,
             tools: [
@@ -51,7 +73,12 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
             ],
             checkpointSaver: memorySaver,
         });
-        plugin.memorySaver = memorySaver;
+
+        // Recycle the memory saver, only create a new one if it doesn't exist
+        if (!plugin.memorySaver) plugin.memorySaver = new MemorySaver();
+
+        // Update the model name
+        plugin.modelName = plugin.settings.model;
     }
 }
 

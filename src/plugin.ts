@@ -12,6 +12,7 @@ export class ObsidianAgentPlugin extends Plugin {
 
   // Properties for the agent
   agent?: Runnable;
+  modelName?: string;
   memorySaver?: MemorySaver;
 
   // Method that loads the plugin
