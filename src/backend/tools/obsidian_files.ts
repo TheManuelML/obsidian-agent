@@ -42,7 +42,20 @@ export const create_note = tool(async (input) => {
     try {
         if (topic) {
             const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
-            const apiKey = plugin?.settings?.apiKey ?? '';
+            
+            // Choose the apiKey depending on the provider
+            let apiKey: string = '';
+            const provider = plugin.settings.provider;
+            if (provider === 'google') {
+                if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
+                apiKey = plugin.settings.googleApiKey;
+            } else if (provider === 'openai') {
+                if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
+                apiKey = plugin.settings.openaiApiKey;
+            } else if (provider === 'anthropic') {
+                if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
+                apiKey = plugin.settings.anthropicApiKey;
+            }
             
             // Prompts
             let sysPrompt = getSamplePrompt('write', plugin.settings.language);
@@ -59,7 +72,10 @@ export const create_note = tool(async (input) => {
                 humanPrompt = `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '');
             }
             
-            const response = await getLLM(model, apiKey).invoke([
+            const llm = getLLM(provider, model, apiKey);
+            if (!llm) throw new Error("Failed to initialize LLM");
+            
+            const response = await llm.invoke([
                 new SystemMessage(sysPrompt),
                 new HumanMessage(humanPrompt),
             ]);
@@ -199,9 +215,24 @@ export const edit_note = tool(async (input) => {
     try {
         if (newContent) {
             const model = plugin?.settings?.model ?? 'gemini-2.0-flash';
-            const apiKey = plugin?.settings?.apiKey ?? '';
+            // Choose the apiKey depending on the provider
+            let apiKey: string = '';
+            const provider = plugin.settings.provider;
+            if (provider === 'google') {
+                if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
+                apiKey = plugin.settings.googleApiKey;
+            } else if (provider === 'openai') {
+                if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
+                apiKey = plugin.settings.openaiApiKey;
+            } else if (provider === 'anthropic') {
+                if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
+                apiKey = plugin.settings.anthropicApiKey;
+            }
 
-            const response = await getLLM(model, apiKey).invoke([
+            const llm = getLLM(provider, model, apiKey);
+            if (!llm) throw new Error("Failed to initialize LLM");
+            
+            const response = await llm.invoke([
                 new SystemMessage(sysPrompt),
                 new HumanMessage(humanPrompt),
             ]);
