@@ -33,9 +33,6 @@ export function getLLM(model: string, apiKey: string) {
 // Function to create the agent and store it in the plugin
 export function initializeAgent(plugin: ObsidianAgentPlugin) {
     if (!plugin.agent || !plugin.memorySaver) {
-        console.log(plugin.memorySaver);
-        console.log(plugin.agent);
-
         const llm = getLLM(plugin.settings.model, plugin.settings.apiKey);
         const memorySaver = new MemorySaver();
         plugin.agent = createReactAgent({
@@ -65,9 +62,9 @@ export async function callAgent(
     threadId: string
 ): Promise<string> {
     initializeAgent(plugin);
-    
+
     // Get the system prompt
-    const sysPrompt = getSamplePrompt('agent');
+    const sysPrompt = getSamplePrompt('agent', plugin.settings.language);
     const userMessage = `${sysPrompt}\n\n${message}`;
 
     // Invoke the agent

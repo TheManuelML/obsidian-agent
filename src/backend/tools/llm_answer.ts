@@ -10,13 +10,22 @@ export const llm_answer = tool(async (input) => {
     const plugin = getPlugin();
     const { question, context } = input;
 
+    let language = plugin.settings.language || 'en';
+
     // Declare prompts
-    let sysPrompt = 'You are a helpful assistant'
+    let sysPrompt = 'You are a helpful assistant';
     let prompt = 'Answer: ' + question;
-
     // If context is provided, use it to answer the question
-    if (context) prompt += `Take into acount the following context: ${context}`;
+    if (context) prompt += ` Take into account the following context: ${context}`;
 
+    // If the language is set to Spanish, change the prompts accordingly
+    if (language === 'es') {
+        sysPrompt = 'Eres un asistente útil';
+        prompt = 'Responde: ' + question;
+        // If context is provided, use it to answer the question
+        if (context) prompt += ` Ten en cuenta el siguiente contexto: ${context}`;    
+    }
+    
     // Ask the LLM for the asnwer
     let response: any;
     try {

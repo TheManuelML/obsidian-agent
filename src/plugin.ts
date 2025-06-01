@@ -113,6 +113,5 @@ export function getRootFolder(): TFolder {
     throw new Error("Root is not a TFolder");
   }
 
-  console.log(root);
   return root;
 }

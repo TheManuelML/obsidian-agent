@@ -1,27 +1,36 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ObsidianAgentPlugin, getApp } from "../plugin";
+import { useState, useRef, useEffect } from "react";
+import { getApp, getPlugin } from "../plugin";
 import { callAgent } from "../backend/agent";
 import { Input } from "./Input";
 import { parseCodeSnippets } from "../utils/sanitize";
 import { Clipboard } from "lucide-react";
 import { TFile } from "obsidian";
 
-interface AgentChatProps {
-  plugin: ObsidianAgentPlugin;
-}
-
-export const Chat: React.FC<AgentChatProps> = ({ plugin }) => {
+export const Chat: any = () => {
   const app = getApp();
+  const plugin = getPlugin();
+  let language = plugin.settings.language || 'en';
   const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const handleSend = async (message: string, files?: TFile[] | null) => {
     let fullMessage = message;
+    
     if (files && files.length > 0) {
-      fullMessage += `\n\nTake into account the next files:`;
+      if (language === 'en') {
+        fullMessage += `\n\nTake into account the next files:`;
+      } else if (language === 'es') {
+        fullMessage += `\n\nToma en cuenta los siguientes archivos:`;
+      }
+
       for (const file of files) {
         const content = await app.vault.read(file)
-        fullMessage += `\n[File: ${file.path}]\n${content}`;
+        
+        if (language === 'en') {
+          fullMessage += `\n[File: ${file.path}]\n${content}`;
+        } else if (language === 'es') {
+          fullMessage += `\n[Archivo: ${file.path}]\n${content}`;
+        }
       }
     };
 

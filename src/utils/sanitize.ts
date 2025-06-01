@@ -56,6 +56,6 @@ export function formatFolderTree(tree: any[], depth = 0): string {
           result += formatFolderTree(node.children, depth + 1);
       }
   }
-  console.log(result);
+  
   return result;
 }

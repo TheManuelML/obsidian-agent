@@ -15,6 +15,7 @@ export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const plugin = getPlugin();
+    let language = plugin.settings.language || 'en';
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/' } = input; 
 
     // Find the closest folder
@@ -44,10 +45,19 @@ export const create_note = tool(async (input) => {
             const apiKey = plugin?.settings?.apiKey ?? '';
             
             // Prompts
-            let sysPrompt = getSamplePrompt('write');
-            if (context) sysPrompt += `\nUse the following context to write the note: ${context}`;
+            let sysPrompt = getSamplePrompt('write', plugin.settings.language);
+            if (context) {
+                sysPrompt += `\nUse the following context to write the note: ${context}`;
+                // Change the language of the prompt if needed
+                if (language === 'es') {
+                    sysPrompt += `\nUsa el siguiente contexto para escribir la nota: ${context}`;
+                }
+            }
 
             let humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
+            if (language === 'es') {
+                humanPrompt = `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '');
+            }
             
             const response = await getLLM(model, apiKey).invoke([
                 new SystemMessage(sysPrompt),
@@ -152,6 +162,7 @@ export const read_note = tool(async (input) => {
 export const edit_note = tool(async (input) => {
     const app = getApp();
     const plugin = getPlugin();
+    let language = plugin.settings.language || 'en';
     let { fileName, section, newContent } = input;
 
     // Find the closest file
@@ -171,10 +182,18 @@ export const edit_note = tool(async (input) => {
     let newNoteContent = '';
 
     // Prompts
-    let sysPrompt = getSamplePrompt('write');
-    if (section) sysPrompt += `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`;
+    let sysPrompt = getSamplePrompt('write', language);
+    if (section) {
+        sysPrompt += `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`;
+        if (language === 'es') {
+            sysPrompt += `\nBusca la sección: ${section}. El nuevo contenido debe escribirse SOLO en esa sección. Mantén el resto de la nota como está.`;
+        }
+    }
 
     let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`;
+    if (language === 'es') {
+        humanPrompt = `Por favor, actualiza el contenido de la siguiente nota: \n### NOTA ###\n${text}\n### FIN DE LA NOTA ###\nUsa este tema o contenido específico para actualizar la nota: ${newContent}.\nDEVUELVE LA NOTA COMPLETA CON EL CONTENIDO ACTUALIZADO.`;
+    }
     
     // Content generation
     try {
