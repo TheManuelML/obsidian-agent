@@ -1,21 +1,29 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ObsidianAgentPlugin } from "../plugin";
+import { ObsidianAgentPlugin, getApp } from "../plugin";
 import { callAgent } from "../backend/agent";
 import { Input } from "./Input";
 import { parseCodeSnippets } from "../utils/sanitize";
 import { Clipboard } from "lucide-react";
+import { TFile } from "obsidian";
 
 interface AgentChatProps {
   plugin: ObsidianAgentPlugin;
 }
 
 export const Chat: React.FC<AgentChatProps> = ({ plugin }) => {
+  const app = getApp();
   const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = async (message: string, folder?: string) => {
+  const handleSend = async (message: string, files?: TFile[] | null) => {
     let fullMessage = message;
-    if (folder) fullMessage += `\nActual directory path: ${folder}`;
+    if (files && files.length > 0) {
+      fullMessage += `\n\nTake into account the next files:`;
+      for (const file of files) {
+        const content = await app.vault.read(file)
+        fullMessage += `\n[File: ${file.path}]\n${content}`;
+      }
+    };
 
     try {
       const response = await callAgent(plugin, fullMessage, "1");
@@ -148,7 +156,7 @@ export const Chat: React.FC<AgentChatProps> = ({ plugin }) => {
         <div ref={bottomRef}></div>
       </div>    
       <div style={{ marginBottom: "1rem", position: "relative" }}>
-        <Input plugin={plugin} onSend={handleSend}/>
+        <Input onSend={handleSend}/>
       </div>  
     </div>
   );

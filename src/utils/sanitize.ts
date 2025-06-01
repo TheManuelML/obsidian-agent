@@ -1,6 +1,3 @@
-import { TFolder } from 'obsidian';
-import { getFolderStructure } from './files';
-
 // Sanitizes the path
 export function sanitizePath(p: string): string {
     return p
