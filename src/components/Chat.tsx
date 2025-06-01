@@ -42,7 +42,12 @@ export const Chat: any = () => {
         { sender: "Agent", text: response }
       ]);
     } catch (err) {
-      setConversation((prev) => [...prev, { sender: "Agent", text: "Error processing message." }]);
+      const errorMessage = err instanceof Error ? err.message : "Error processing message.";
+      setConversation((prev) => [
+        ...prev, 
+        { sender: "User", text: message },
+        { sender: "Agent", text: `❌ ERROR: ${errorMessage}` }
+      ]);
       console.error("Agent error:", err);
     }
   };
