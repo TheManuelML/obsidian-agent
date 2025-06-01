@@ -52,7 +52,21 @@ export function getLLM(provider: string,model: string, apiKey: string) {
 // Function to create the agent and store it in the plugin
 export function initializeAgent(plugin: ObsidianAgentPlugin) {
     if (plugin.settings.model != plugin.modelName) {
-        const llm = getLLM(plugin.settings.provider, plugin.settings.model, plugin.settings.apiKey);
+        // Choose the apiKey depending on the provider
+        let apiKey: string = '';
+        const provider = plugin.settings.provider;
+        if (provider === 'google') {
+            if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
+            apiKey = plugin.settings.googleApiKey;
+        } else if (provider === 'openai') {
+            if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
+            apiKey = plugin.settings.openaiApiKey;
+        } else if (provider === 'anthropic') {
+            if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
+            apiKey = plugin.settings.anthropicApiKey;
+        }
+
+        const llm = getLLM(provider, plugin.settings.model, apiKey);
         if (!llm) throw new Error("Failed to initialize LLM");
         
         const memorySaver = new MemorySaver();

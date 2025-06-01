@@ -6,7 +6,9 @@ export interface AgentSettings {
   language: string;
   provider: string;
   model: string;
-  apiKey: string;
+  googleApiKey: string;
+  openaiApiKey: string;
+  anthropicApiKey: string;
   rules: string;
 }
 
@@ -15,8 +17,10 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
   language: 'en',
   provider: 'google',
   model: 'gemini-2.0-flash',
-  apiKey: '',
-  rules: 'Always answer in english',
+  googleApiKey: '',
+  openaiApiKey: '',
+  anthropicApiKey: '',
+  rules: '',
 };
 
 // Model per provider
@@ -113,15 +117,43 @@ export class AgentSettingsTab extends PluginSettingTab {
         return dropdown;
       });
 
+    containerEl.createEl('h1', { text: 'API Keys Settings' });
+
     new Setting(containerEl)
-      .setName("API Key")
-      .setDesc("Enter your API key. REMEMBER to change the API key depending on the provider.")
+      .setName("Google API Key")
+      .setDesc("Enter your Google API key. Not required if you are not using Google as provider.")
+      .addText((text) =>
+        text
+          .setPlaceholder("Enter your API key.")
+  .setValue(this.plugin.settings.googleApiKey)
+          .onChange(async (value) => {
+            this.plugin.settings.googleApiKey = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("OpenAI API Key")
+      .setDesc("Enter your OpenAI API key. Not required if you are not using OpenAI as provider.")
       .addText((text) =>
         text
           .setPlaceholder("Enter your API key")
-  .setValue(this.plugin.settings.apiKey)
+  .setValue(this.plugin.settings.openaiApiKey)
           .onChange(async (value) => {
-            this.plugin.settings.apiKey = value;
+            this.plugin.settings.openaiApiKey = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Anthropic API Key")
+      .setDesc("Enter your Anthropic API key. Not required if you are not using Anthropic as provider.")
+      .addText((text) =>
+        text
+          .setPlaceholder("Enter your API key")
+  .setValue(this.plugin.settings.anthropicApiKey)
+          .onChange(async (value) => {
+            this.plugin.settings.anthropicApiKey = value;
             await this.plugin.saveSettings();
           })
       );
