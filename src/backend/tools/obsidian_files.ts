@@ -44,14 +44,24 @@ export const create_note = tool(async (input) => {
                 let apiKey: string = getApiKey(provider);
 
                 // Prompts
-                const sysPrompt = getSamplePrompt('write', language) + (context ? `\nUse the following context to write the note: ${context}` : '');
+                let sysPrompt = getSamplePrompt('write', language);
+                if (context) {
+                    if (language === 'es') {
+                        sysPrompt += `\nUsa el siguiente contexto para escribir la nota: ${context}.`
+                    } else if (language === 'en') {
+                        sysPrompt += `\nUse the following context to write the note: ${context}.`;
+                    }
+                }
+                
                 const humanPrompt = language == 'es' 
                     ? `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '')
                     : `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
                 
+                // Initialize LLM
                 const llm = getLLM(provider, model, apiKey);
                 if (!llm) throw new Error("Failed to initialize LLM");
 
+                // Invoke the LLM
                 const response = await llm.invoke([
                     new SystemMessage(sysPrompt),
                     new HumanMessage(humanPrompt),
