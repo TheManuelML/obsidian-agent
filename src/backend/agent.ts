@@ -5,16 +5,13 @@ import { ChatAnthropic } from '@langchain/anthropic';
 import { HumanMessage } from "@langchain/core/messages";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
-
 import { create_note, read_note, edit_note } from "./tools/obsidian_files";
 import { create_dir, list_files } from "./tools/obsidian_dirs";
 import { rename_note, rename_dir } from "./tools/obsidian_rename";
 import { search_note, search_dir } from "./tools/obsidian_search";
 import { llm_answer } from "./tools/llm_answer";
-
 import { ObsidianAgentPlugin } from "../plugin";
-import { getSamplePrompt } from "../utils/samplePrompts";
-
+import { getSamplePrompt, getApiKey } from "../utils/ai";
 
 // Function to create an llm instance
 export function getLLM(provider: string,model: string, apiKey: string) {
@@ -52,19 +49,10 @@ export function getLLM(provider: string,model: string, apiKey: string) {
 // Function to create the agent and store it in the plugin
 export function initializeAgent(plugin: ObsidianAgentPlugin) {
     if (plugin.settings.model != plugin.modelName) {
-        // Choose the apiKey depending on the provider
-        let apiKey: string = '';
         const provider = plugin.settings.provider;
-        if (provider === 'google') {
-            if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
-            apiKey = plugin.settings.googleApiKey;
-        } else if (provider === 'openai') {
-            if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
-            apiKey = plugin.settings.openaiApiKey;
-        } else if (provider === 'anthropic') {
-            if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
-            apiKey = plugin.settings.anthropicApiKey;
-        }
+        
+        // Choose the apiKey depending on the provider
+        let apiKey: string = getApiKey(provider);
 
         const llm = getLLM(provider, plugin.settings.model, apiKey);
         if (!llm) throw new Error("Failed to initialize LLM");

@@ -3,6 +3,7 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
 import { getLLM } from "../agent";
 import { getPlugin } from "../../plugin";
+import { getApiKey } from '../../utils/ai';
 
 // Tool to answer a request using an LLM
 export const llm_answer = tool(async (input) => {
@@ -10,7 +11,7 @@ export const llm_answer = tool(async (input) => {
     const plugin = getPlugin();
     const { question, context } = input;
 
-    let language = plugin.settings.language || 'en';
+    let language = plugin.settings.language;
 
     // Declare prompts
     let sysPrompt = 'You are a helpful assistant';
@@ -29,21 +30,12 @@ export const llm_answer = tool(async (input) => {
     // Ask the LLM for the asnwer
     let response: any;
     try {
-        const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
-        // Choose the apiKey depending on the provider
-        let apiKey: string = '';
         const provider = plugin.settings.provider;
-        if (provider === 'google') {
-            if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
-            apiKey = plugin.settings.googleApiKey;
-        } else if (provider === 'openai') {
-            if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
-            apiKey = plugin.settings.openaiApiKey;
-        } else if (provider === 'anthropic') {
-            if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
-            apiKey = plugin.settings.anthropicApiKey;
-        }
-
+        const model = plugin.settings.model;
+        
+        // Choose the apiKey depending on the provider
+        let apiKey: string = getApiKey(plugin.settings.provider);
+       
         const llm = getLLM(provider, model, apiKey);
         if (!llm) throw new Error("Failed to initialize LLM");
         

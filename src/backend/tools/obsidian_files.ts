@@ -1,6 +1,3 @@
-//TODO: Add option to link files in create_note and update_note
-//TODO: Add the option to empty a file in update note
-
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
@@ -8,15 +5,15 @@ import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
 import { findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
 import { sanitizePath, formatTags } from '../../utils/sanitize';
-import { getSamplePrompt } from '../../utils/samplePrompts';
+import { getSamplePrompt, getApiKey } from '../../utils/ai';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const plugin = getPlugin();
-    let language = plugin.settings.language || 'en';
-    let { topic, name = 'Generated note', tags = [], context, dir_path = '/' } = input; 
+    let language = plugin.settings.language;
+    let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
 
     // Find the closest folder
     const matchedFolder = findMatchingFolder(dir_path, app);
@@ -31,75 +28,58 @@ export const create_note = tool(async (input) => {
 
     // Sanitize the directory path
     dir_path = sanitizePath(matchedFolder.path);
-
     // Adding extension to name
     name = name + '.md';
     // Full path with the directory path and the name of the file
     let full_path = dir_path + '/' + name;
 
     // Content generation
-    let content: any = '';
-    try {
-        if (topic) {
-            const model = plugin?.settings?.model ?? 'gemini-1.5-flash';
+    if (!content) {
+        if (topic && useLLM) {
+            try {
+                const provider = plugin.settings.provider;
+                const model = plugin.settings.model;
             
-            // Choose the apiKey depending on the provider
-            let apiKey: string = '';
-            const provider = plugin.settings.provider;
-            if (provider === 'google') {
-                if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
-                apiKey = plugin.settings.googleApiKey;
-            } else if (provider === 'openai') {
-                if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
-                apiKey = plugin.settings.openaiApiKey;
-            } else if (provider === 'anthropic') {
-                if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
-                apiKey = plugin.settings.anthropicApiKey;
-            }
-            
-            // Prompts
-            let sysPrompt = getSamplePrompt('write', plugin.settings.language);
-            if (context) {
-                sysPrompt += `\nUse the following context to write the note: ${context}`;
-                // Change the language of the prompt if needed
-                if (language === 'es') {
-                    sysPrompt += `\nUsa el siguiente contexto para escribir la nota: ${context}`;
-                }
-            }
+                // Choose the apiKey depending on the provider
+                let apiKey: string = getApiKey(provider);
 
-            let humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
-            if (language === 'es') {
-                humanPrompt = `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '');
-            }
-            
-            const llm = getLLM(provider, model, apiKey);
-            if (!llm) throw new Error("Failed to initialize LLM");
-            
-            const response = await llm.invoke([
-                new SystemMessage(sysPrompt),
-                new HumanMessage(humanPrompt),
-            ]);
-            content = response.content;
+                // Prompts
+                const sysPrompt = getSamplePrompt('write', language) + (context ? `\nUse the following context to write the note: ${context}` : '');
+                const humanPrompt = language == 'es' 
+                    ? `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '')
+                    : `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
+                
+                const llm = getLLM(provider, model, apiKey);
+                if (!llm) throw new Error("Failed to initialize LLM");
 
+                const response = await llm.invoke([
+                    new SystemMessage(sysPrompt),
+                    new HumanMessage(humanPrompt),
+                ]);
+                content = response.content.toString();
+            
+            } catch (err) {
+                console.error('Error invoking LLM:', err);
+                return {
+                    success: false,
+                    error: err instanceof Error ? err.message : 'Unknown error'
+                };
+            }
         } else if (tags.length > 0) {
             content = formatTags(tags);
+        } else {
+            content = '';
         }
-    } catch (err) {
-        console.error('Error invoking LLM:', err);
-        return {
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error'
-        };
     }
 
     // Check if the note already exists
-    try {
-        if (app.vault.getAbstractFileByPath(full_path)) {
-            // Append a number to the file name if it already exists
-            name = getNextAvailableFileName(name, app, dir_path);
-            full_path = dir_path + '/' + name;
-        }
+    if (app.vault.getAbstractFileByPath(full_path)) {
+        // Append a number to the file name if it already exists
+        name = getNextAvailableFileName(name, app, dir_path);
+        full_path = dir_path + '/' + name;
+    }
 
+    try {
         // Write the note in Obsidian
         await app.vault.create(full_path, content);
     } catch (err) {
@@ -112,22 +92,25 @@ export const create_note = tool(async (input) => {
 
     return {
         success: true,
-        name: name,
-        tags: tags,
-        content: content,
+        usedLLM: !!topic && useLLM,
+        name,
+        tags,
+        content,
         fullPath: full_path,
         parentDir: dir_path
     };
 }, {
     // Tool schema and metadata
     name: 'create_note',
-    description: 'Write a note in Obsidian. No parameters are needed.',
+    description: 'Create a markdown note in Obsidian. Content can be generated with a topic or provided manually.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
         name: z.string().optional().describe('The name the user provided'),
         tags: z.array(z.string()).optional().describe('The tags the user wants to add to the note'),
         context: z.string().optional().describe('Context the user provided to write the note'),
         dir_path: z.string().optional().describe('The path of the directory where the note is going to be stored'),
+        content: z.string().optional().describe('Custom markdown content to use instead of generating'),
+        useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the content.')
     })
 })
 
@@ -214,20 +197,11 @@ export const edit_note = tool(async (input) => {
     // Content generation
     try {
         if (newContent) {
-            const model = plugin?.settings?.model ?? 'gemini-2.0-flash';
-            // Choose the apiKey depending on the provider
-            let apiKey: string = '';
             const provider = plugin.settings.provider;
-            if (provider === 'google') {
-                if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
-                apiKey = plugin.settings.googleApiKey;
-            } else if (provider === 'openai') {
-                if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
-                apiKey = plugin.settings.openaiApiKey;
-            } else if (provider === 'anthropic') {
-                if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
-                apiKey = plugin.settings.anthropicApiKey;
-            }
+            const model = plugin.settings.model;
+            
+            // Choose the apiKey depending on the provider
+            let apiKey: string = getApiKey(provider);
 
             const llm = getLLM(provider, model, apiKey);
             if (!llm) throw new Error("Failed to initialize LLM");
