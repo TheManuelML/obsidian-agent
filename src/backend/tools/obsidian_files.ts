@@ -112,7 +112,7 @@ export const create_note = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'create_note',
-    description: 'Create a markdown note in Obsidian. Content can be generated with a topic or provided manually.',
+    description: 'Create a note. Content can be generated with a topic or provided manually.',
     schema: z.object({
         topic: z.string().optional().describe('The topic of the note, what is going to be written about'),
         name: z.string().optional().describe('The name the user provided'),
