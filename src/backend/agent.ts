@@ -94,7 +94,8 @@ export async function callAgent(
 
     // Get the system prompt
     const sysPrompt = getSamplePrompt('agent', plugin.settings.language);
-    const userMessage = `${sysPrompt}\n\n${message}`;
+    let userMessage = `${sysPrompt}\n\n${message}`;
+    if (plugin.settings.rules) userMessage += `\n\nFollow this rules: ${plugin.settings.rules}`;
 
     // Invoke the agent
     const invokePromise = plugin.agent!.invoke(

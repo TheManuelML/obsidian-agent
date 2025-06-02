@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { SendHorizontal, AtSign, X } from "lucide-react";
+import { SendHorizontal, AtSign, X, CircleArrowRight } from "lucide-react";
 import { getApp } from "../plugin";
 import { TFile } from "obsidian";
 import { NotePickerModal } from "../layout/NotePickerModal";
@@ -176,7 +176,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                     justifyContent: "center",
                   }}
                 >
-                  <SendHorizontal size={18} style={{ 
+                  <CircleArrowRight size={20} style={{ 
                     stroke: message.trim() 
                       ? "var(--interactive-accent)" 
                       : "var(--text-muted)",
