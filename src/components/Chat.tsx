@@ -1,54 +1,87 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { getApp, getPlugin } from "../plugin";
 import { callAgent } from "../backend/agent";
 import { Input } from "./Input";
 import { parseCodeSnippets } from "../utils/sanitize";
-import { Clipboard } from "lucide-react";
+import { Clipboard, Bot, User } from "lucide-react";
 import { TFile } from "obsidian";
+import { processFiles } from "../utils/files";
+
+type Message = {
+  sender: React.ReactElement;
+  text: string;
+  type: 'user' | 'bot';
+};
 
 export const Chat: any = () => {
   const app = getApp();
   const plugin = getPlugin();
   let language = plugin.settings.language || 'en';
-  const [conversation, setConversation] = useState<{ sender: string, text: string }[]>([]);
+  const [conversation, setConversation] = useState<Message[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = async (message: string, files?: TFile[] | null) => {
+  const addImageToState = (image: string) => {
+    setSelectedImages((prev) => [...prev, image]);
+  };
+
+  const handleSend = async (message: string, notes?: TFile[] | null, files?: File[] | null) => {
+    // Add user message immediately
+    setConversation((prev) => [...prev, { sender: <User size={20}/>, text: message, type: 'user' }]);
+    setIsLoading(true);
+
     let fullMessage = message;
     
-    if (files && files.length > 0) {
-      if (language === 'en') {
-        fullMessage += `\n\nTake into account the next files:`;
-      } else if (language === 'es') {
-        fullMessage += `\n\nToma en cuenta los siguientes archivos:`;
-      }
+    // Read attached notes
+    if (notes && notes.length > 0) {
+      const lang = {
+        en: { file: "Note", filesIntro: "Take into account the next Obsidian notes:" },
+        es: { file: "Nota", filesIntro: "Toma en cuenta las siguientes notas de Obsidian:" },
+      }[language];
 
-      for (const file of files) {
-        const content = await app.vault.read(file)
-        
-        if (language === 'en') {
-          fullMessage += `\n[File: ${file.path}]\n${content}`;
-        } else if (language === 'es') {
-          fullMessage += `\n[Archivo: ${file.path}]\n${content}`;
+      if (!lang) throw new Error(`Unsupported language: ${language}`);
+      fullMessage += `\n\n${lang.filesIntro}`;
+
+      for (const note of notes) {
+        const content = await app.vault.read(note);
+        fullMessage += `\n[${lang.file}: ${note.name}]\n${content}`;
+      }
+    }
+
+    // Read attached files
+    if (files && files.length > 0) {
+      const lang = {
+        en: { file: "File", filesIntro: "Take into account the next attached files:" },
+        es: { file: "Archivo", filesIntro: "Toma en cuenta los siguientes archivos adjuntos:" },
+      }[language];
+
+      if (!lang) throw new Error(`Unsupported language: ${language}`);
+      fullMessage += `\n\n${lang.filesIntro}`;
+      const fileDataList = await processFiles(files);
+      
+      if (fileDataList[0].type.startsWith("image/")) {
+        // In the case the file is an image
+        addImageToState(fileDataList[0].content);
+      } else {
+        // In the case the file is plain text
+        for (const fileData of fileDataList) {
+          fullMessage += `\n###\n[${lang.file}: ${fileData.name}]\n${fileData.content}\n###`;
         }
       }
-    };
+    }
 
     try {
-      const response = await callAgent(plugin, fullMessage, "1");
-      setConversation((prev) => [
-        ...prev, 
-        { sender: "User", text: message }, 
-        { sender: "Agent", text: response }
-      ]);
+      const response = await callAgent(plugin, fullMessage, "1", selectedImages);
+      setConversation((prev) => [...prev, { sender: <Bot size={20}/>, text: response, type: 'bot' }]);
+    
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      setConversation((prev) => [
-        ...prev, 
-        { sender: "User", text: message },
-        { sender: "Agent", text: `❌ ERROR: ${errorMessage}` }
-      ]);
+      setConversation((prev) => [...prev, { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' }]);
       console.error("Agent error:", err);
+    
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,8 +135,8 @@ export const Chat: any = () => {
       >
         {conversation.map((msg, i) => (
           <div key={i} style={{
-            alignSelf: msg.sender === "User" ? "flex-end" : "flex-start",
-            backgroundColor: msg.sender === "User" 
+            alignSelf: msg.type === 'user' ? "flex-end" : "flex-start",
+            backgroundColor: msg.type === 'user' 
               ? "var(--background-modifier-hover)" 
               : "var(--background-primary)",
             color: "var(--text-normal)",
@@ -116,7 +149,7 @@ export const Chat: any = () => {
             position: "relative", 
             userSelect: "text",
           }}>
-            <strong style={{fontSize: "14px", opacity: 0.8}}>{msg.sender}:</strong>
+            <strong style={{fontSize: "14px", opacity: 0.8}}>{msg.sender}</strong>
             {parseCodeSnippets(msg.text).map((frag, j) => (
               frag.isCode ? (
                 <div key={j} style={{ position: "relative", marginTop: "0.5rem" }}>
@@ -137,7 +170,7 @@ export const Chat: any = () => {
                   </button>
                   <pre 
                     style={{
-                      fontSize: "12px",
+                      fontSize: "var(--font-ui-small)",
                       backgroundColor: "var(--background-modifier-border)",
                       padding: "0.5rem",
                       borderRadius: "var(--radius-s)",
@@ -153,7 +186,7 @@ export const Chat: any = () => {
                 <pre 
                   key={j} 
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--font-ui-small)",
                     marginTop: "0.25rem",
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
@@ -167,6 +200,32 @@ export const Chat: any = () => {
             ))}
           </div>
         ))}
+        {isLoading && (
+          <div style={{
+            alignSelf: "flex-start",
+            backgroundColor: "var(--background-primary)",
+            color: "var(--text-normal)",
+            padding: "0.75rem",
+            borderRadius: "var(--radius-s)",
+            margin: "0.5rem 0",
+            maxWidth: "80%",
+            position: "relative",
+          }}>
+            <Bot size={20}/>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginTop: "0.5rem"
+            }}>
+              <div className="typing-animation">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef}></div>
       </div>    
       <div style={{ marginBottom: "1rem", position: "relative" }}>
@@ -175,3 +234,44 @@ export const Chat: any = () => {
     </div>
   );
 };
+
+const styles = `
+.typing-animation {
+  display: flex;
+  gap: 0.3rem;
+  padding: 0.5rem;
+}
+
+.typing-animation span {
+  width: 8px;
+  height: 8px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: typing 1s infinite ease-in-out;
+}
+
+.typing-animation span:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.typing-animation span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.typing-animation span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);

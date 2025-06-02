@@ -1,30 +1,51 @@
 import React, { useState, useRef } from "react";
-import { SendHorizontal, AtSign, X, CircleArrowRight } from "lucide-react";
+import { AtSign, X, CircleArrowRight, Paperclip } from "lucide-react";
 import { getApp } from "../plugin";
 import { TFile } from "obsidian";
 import { NotePickerModal } from "../layout/NotePickerModal";
 
 interface AgentInputProps {
-  onSend: (message: string, files?: TFile[] | null) => void;
+  onSend: (message: string, notes?: TFile[] | null, files?: File[] | null) => void;
 }
 
 export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   const app = getApp();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   
   // Function to handle the message sending
   const handleSend = async () => {
     if (message.trim()) {
-      onSend(message.trim(), selectedNotes); // Call the parent function to handle the message
+      onSend(message.trim(), selectedNotes, selectedFiles); // Call the parent function to handle the message
       
       // Clear the input fields
       setMessage("");
+      setSelectedFiles([]);
 
       // Reset height
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
     }
+  };
+
+  // Function to handle file selection
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSelectedFiles(prev => [...prev, ...newFiles]);
+    }
+    // Reset the input value so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Function to remove a file from the selected files
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Function to open the NotePickerModal
@@ -96,7 +117,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
               maxHeight: "10rem",
             }}
           />
-          { /* Show selected notes below textarea */}
+          { /* Show selected notes and files below textarea */}
           <div style={{ marginTop: "0.25rem" }}>
             {selectedNotes && selectedNotes.length > 0 && selectedNotes.map((note) => (
               <div
@@ -128,9 +149,39 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                 </button>
               </div>
             ))}
+            {selectedFiles.map((file, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  backgroundColor: "var(--background-modifier-hover)",
+                  borderRadius: "var(--radius-s)",
+                  padding: "0rem 0.5rem",
+                  marginRight: "0.25rem",
+                  marginBottom: "0.25rem",
+                  fontSize: "var(--font-ui-small)",
+                }}
+              >
+                <span style={{ marginRight: "0.25rem" }}>{file.name}</span>
+                <button
+                  onClick={() => removeFile(index)}
+                  style={{
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-muted)",
+                    padding: 0,
+                  }}
+                >
+                  <X size={12}/>
+                </button>
+              </div>
+            ))}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.25rem", gap: "0.5rem" }}>
-            <div>
+            <div style={{ marginBottom: "0.4rem", marginLeft: "0.4rem" }}>
               <button 
                 onClick={openNotePicker}
                 style={{
@@ -147,11 +198,40 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                   cursor: "pointer",
                 }}
               >
-                <AtSign size={16} style={{ stroke: "var(--interactive-accent)" }}/> 
+                <AtSign size={16} style={{ stroke: "var(--text-muted)" }}/> 
                 <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
+              <div>
+                <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      backgroundColor: "transparent",
+                      boxShadow: "none",
+                      border: "none",
+                      borderRadius: "100%",
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 0,
+                      gap: "0.25rem",
+                      cursor: "pointer",
+                    }}
+                    title="Images/Plain text"
+                  >
+                    <Paperclip size={18} style={{ stroke: "var(--text-muted)" }}/> 
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    style={{ display: "none" }}
+                    accept=".jpg,.jpeg,.png,.txt,.md,.csv.json,.html,.xml"
+                    multiple
+                  />
+              </div>
               <button
                 style={{
                   backgroundColor: "transparent",

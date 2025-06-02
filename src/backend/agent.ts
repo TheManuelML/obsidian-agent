@@ -88,28 +88,52 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
 export async function callAgent(
     plugin: ObsidianAgentPlugin,
     message: string,
-    threadId: string
+    threadId: string,
+    images: string[] = []
 ): Promise<string> {
     initializeAgent(plugin);
 
     // Get the system prompt
+    const agent = plugin.agent;
+    if (!agent) throw new Error("Agent is not initialized");
+    
     const sysPrompt = getSamplePrompt('agent', plugin.settings.language);
     let userMessage = `${sysPrompt}\n\n${message}`;
     if (plugin.settings.rules) userMessage += `\n\nFollow this rules: ${plugin.settings.rules}`;
 
     // Invoke the agent
-    const invokePromise = plugin.agent!.invoke(
-        {messages: [new HumanMessage(userMessage)]},
-        {configurable: { thread_id: threadId }},
-    ) as Promise<{ messages: { content: string }[] }>;
+    let response: Promise<{ messages: { content: string }[] }>;
+    if (!images || images.length === 0) {
+        response = agent.invoke(
+            {messages: [new HumanMessage(userMessage)]},
+            {configurable: { thread_id: threadId }},
+        ) as Promise<{ messages: { content: string }[] }>;
+    } else {
+        const messageContent: Array<{ type: string; text?: string; image_url?: {url: string} }> = [];
 
+        // Add text message
+        messageContent.push({ type: "text", text: userMessage });
+
+        // Add images to the message
+        for (const base64 of images) {
+            messageContent.push({
+                type: "image_url",
+                image_url: { url: base64 },
+            });
+        }
+
+        response = agent.invoke(
+            {messages: [new HumanMessage({ content: messageContent })]},
+            {configurable: { thread_id: threadId }},
+        ) as Promise<{ messages: { content: string }[] }>;
+    }
     // Handle timeout
     const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Agent timeout")), 20000) // 20 seconds
     );
 
     // Wait for the agent to finish or timeout
-    const agentFinalState = await Promise.race([invokePromise, timeoutPromise]);
+    const agentFinalState = await Promise.race([response, timeoutPromise]);
 
     // Validate response
     if (agentFinalState.messages && agentFinalState.messages.length > 0) {
