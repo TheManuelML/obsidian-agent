@@ -1,4 +1,4 @@
-import { PluginSettingTab, App, Setting, DropdownComponent } from "obsidian";
+import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin } from "../plugin";
 
 // Interface for the settings of the plugin
@@ -10,6 +10,7 @@ export interface AgentSettings {
   openaiApiKey: string;
   anthropicApiKey: string;
   rules: string;
+  chatsFolder: string;
 }
 
 // Default settings for the plugin
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
   openaiApiKey: '',
   anthropicApiKey: '',
   rules: '',
+  chatsFolder: 'Chats',
 };
 
 // Model per provider
@@ -185,5 +187,24 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+      
+    containerEl.createEl('h1', { text: 'Chat History Settings' });
+
+    new Setting(containerEl)
+      .setName("Chat folder")
+      .setDesc("Select the folder where the chat history will be saved.")
+      .addDropdown((dropdown: DropdownComponent) => {
+        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
+        folders.forEach(folder => {
+          dropdown.addOption(folder.path, folder.name);
+        });
+        
+        dropdown
+          .setValue(this.plugin.settings.chatsFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.chatsFolder = value;
+            await this.plugin.saveSettings();
+          });
+      });
   }
 }

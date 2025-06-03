@@ -1,34 +1,235 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Clipboard, Bot, User } from "lucide-react";
-import { TFile } from "obsidian";
+import { useState, useRef, useEffect } from "react";
+import { Clipboard, Bot, User, Plus, Edit2, Trash2, X } from "lucide-react";
+import { TFile, TFolder } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
 import { Input } from "./Input";
 import { callAgent } from "../backend/agent";
 import { parseCodeSnippets } from "../utils/parsing";
 import { processAttachedFiles } from "../utils/attached_file_processing";
-
-type Message = {
-  sender: React.ReactElement;
-  text: string;
-  type: 'user' | 'bot';
-};
+import { exportMessage, importConversation } from "../utils/chat_history";
 
 export const Chat: any = () => {
   const app = getApp();
   const plugin = getPlugin();
   let language = plugin.settings.language || 'en';
+
   const [conversation, setConversation] = useState<Message[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [chatFile, setChatFile] = useState<TFile | null>(null);
+  const [chatFiles, setChatFiles] = useState<TFile[]>([]);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newChatName, setNewChatName] = useState("");
+  const [threadId, setThreadId] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Load available chat files
+  const loadChatFiles = async (): Promise<TFile[]> => {
+    const chatFolder = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    if (!chatFolder) return [];
+
+    const files = app.vault.getFiles().filter(file => 
+      file.path.startsWith(chatFolder.path) && file.extension === 'md'
+    );
+    setChatFiles(files);
+    return files;
+  };
+
+  const ensureActiveChat = async (): Promise<TFile | null> => {
+    if (chatFile) return chatFile;
+    
+    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+      if (!chatFolder) {
+        try {
+          chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+        } catch (err) {
+          console.error("Error creating chat folder:", err);
+          return null;
+        }
+      }
+
+      await loadChatFiles();
+
+      const existing = chatFiles.length > 0 ? chatFiles : await loadChatFiles();
+    if (existing.length > 0) {
+      // If there are existing chat files, use the most recent one
+      const mostRecentChat = existing.sort((a, b) => b.stat.mtime - a.stat.mtime)[0];
+      setChatFile(mostRecentChat);
+      setThreadId(mostRecentChat.basename);
+
+      // Import conversation
+      setConversation(await importConversation(app, mostRecentChat));
+      return mostRecentChat;
+    }
+
+    // If no chat files exist, create a new one
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const chatFileName = `chat-${timestamp}.md`;
+    const chatFilePath = `${chatFolder.path}/${chatFileName}`;
+
+    let newFile: TFile;
+    try {
+      newFile = await app.vault.create(chatFilePath, "");
+      setChatFile(newFile);
+      setThreadId(newFile.basename);
+      
+      await loadChatFiles();
+
+      setConversation([]);
+      return newFile;
+    } catch (err) {
+      console.error("Error creating chat file:", err);
+      return null;
+    }  
+  };
+
+  // Initialize chat file
+  useEffect(() => {
+    const initializeChat = async () => {
+      // Ensure active chat is set up
+      await ensureActiveChat();
+    };
+    initializeChat();
+  }, []);
+
+  // Monitor if current chat file still exists
+  useEffect(() => {
+    const checkChatFile = async () => {
+      if (!chatFile) return;
+
+      const fileExists = app.vault.getAbstractFileByPath(chatFile.path);
+      if (!fileExists) {
+        console.log("Current chat file no longer exists, updating state...");
+        const updatedChats = await loadChatFiles();
+        if (updatedChats.length > 0) {
+          setChatFile(updatedChats[0]);
+          setThreadId(updatedChats[0].basename);
+          setConversation(await importConversation(app, updatedChats[0]));
+        } else {
+          setChatFile(null);
+          setConversation([]);
+        }
+      }
+    };
+
+    // Check immediately and then every 2 seconds
+    checkChatFile();
+    const interval = setInterval(checkChatFile, 2000);
+
+    return () => clearInterval(interval);
+  }, [chatFile]);
+
+  const handleChatSelect = async (filePath: string) => {
+    try {
+      const file = app.vault.getAbstractFileByPath(filePath) as TFile;
+      if (!file) {
+        console.error("Selected chat file no longer exists");
+        const updatedChats = await loadChatFiles();
+        if (updatedChats.length > 0) {
+          setChatFile(updatedChats[0]);
+          setThreadId(updatedChats[0].basename);
+          setConversation(await importConversation(app, updatedChats[0]));
+        }
+        return;
+      }
+
+      setChatFile(file);
+      setThreadId(file.basename);
+      setConversation(await importConversation(app, file));
+    } catch (err) {
+      console.error("Error selecting chat:", err);
+      const updatedChats = await loadChatFiles();
+      if (updatedChats.length > 0) {
+        setChatFile(updatedChats[0]);
+        setThreadId(updatedChats[0].basename);
+        setConversation(await importConversation(app, updatedChats[0]));
+      }
+    }
+  };
+
+  const handleCreateChat = async () => {
+    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    if (!chatFolder) {
+      try {
+        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+      } catch (err) {
+        console.error("Error creating chat folder:", err);
+        return;
+      }
+    }
+
+    // Create a new chat file with a timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const chatFileName = `chat-${timestamp}.md`;
+    const chatFilePath = `${chatFolder.path}/${chatFileName}`;
+
+    try {
+      const file = await app.vault.create(chatFilePath, "");
+      setChatFile(file);
+      setThreadId(file.basename);
+
+      await loadChatFiles();
+      setConversation([]);
+    } catch (err) {
+      console.error("Error creating chat file:", err);
+    }
+  };
+
+  const handleRenameChat = async () => {
+    if (!chatFile || !newChatName.trim()) return;
+
+    const newPath = `${plugin.settings.chatsFolder}/${newChatName}.md`;
+    try {
+      await app.fileManager.renameFile(chatFile, newPath);
+      await loadChatFiles();
+      setIsRenaming(false);
+      setNewChatName("");
+
+      const rename = app.vault.getAbstractFileByPath(newPath) as TFile;
+      if (rename) {
+        setChatFile(rename);
+        // Keep the same thread_id when renaming
+      }
+    } catch (err) {
+      console.error("Error renaming chat file:", err);
+    }
+  };
 
   const addImageToState = (image: string) => {
     setSelectedImages((prev) => [...prev, image]);
   };
 
   const handleSend = async (message: string, notes?: TFile[] | null, files?: File[] | null) => {
+    // Ensure we have a chat file before proceeding
+    const activeChatFile = await ensureActiveChat();
+    if (!activeChatFile) {
+      console.error("No active chat file available.");
+      return;
+    }
+
+    // Verify the chat file still exists
+    const fileExists = app.vault.getAbstractFileByPath(activeChatFile.path);
+    if (!fileExists) {
+      console.error("Chat file was deleted, creating a new one...");
+      const newChat = await ensureActiveChat();
+      if (!newChat) {
+        console.error("Failed to create new chat file.");
+        return;
+      }
+    }
+    
     // Add user message immediately
-    setConversation((prev) => [...prev, { sender: <User size={20}/>, text: message, type: 'user' }]);
+    const userMessage = { sender: <User size={20}/>, text: message, type: 'user' as const };
+    setConversation((prev) => [...prev, userMessage]);
+    
+    // Save the message in the chat file
+    try {
+      await exportMessage(app, userMessage, activeChatFile);
+    } catch (err) {
+      console.error("Error saving user message:", err);
+      return;
+    }
+
     setIsLoading(true);
 
     let fullMessage = message;
@@ -72,20 +273,83 @@ export const Chat: any = () => {
     }
 
     try {
-      const response = await callAgent(plugin, fullMessage, "1", selectedImages);
-      setConversation((prev) => [...prev, { sender: <Bot size={20}/>, text: response, type: 'bot' }]);
+      const response = await callAgent(plugin, fullMessage, threadId, selectedImages);
+      const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const };
+      setConversation((prev) => [...prev, botMessage]);
+
+      // Verify chat file still exists before saving bot message
+      const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
+      if (currentChatFile) {
+        await exportMessage(app, botMessage, currentChatFile as TFile);
+      } else {
+        console.error("Chat file was deleted while waiting for response");
+      }
     
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      setConversation((prev) => [...prev, { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' }]);
-      console.error("Agent error:", err);
+      const errorBotMessage = { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' as const };
+      setConversation((prev) => [...prev, errorBotMessage]);
+
+      // Verify chat file still exists before saving error message
+      const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
+      if (currentChatFile) {
+        await exportMessage(app, errorBotMessage, currentChatFile as TFile);
+      } else {
+        console.error("Chat file was deleted while processing error");
+      }
     
     } finally {
       setIsLoading(false);
     }
   };
 
-  const clearChat = () => setConversation([]);
+  const handleDeleteChat = async () => {
+    if (!chatFile || chatFiles.length <= 1) return;
+    
+    try {
+      // Get current chat files before deletion
+      const currentChats = await loadChatFiles();
+      if (currentChats.length <= 1) return;
+
+      // Verify the file still exists before trying to delete it
+      const fileToDelete = app.vault.getAbstractFileByPath(chatFile.path);
+      if (!fileToDelete) {
+        console.error("Chat file no longer exists");
+        const updatedChats = await loadChatFiles();
+        if (updatedChats.length > 0) {
+          setChatFile(updatedChats[0]);
+          setThreadId(updatedChats[0].basename);
+          setConversation(await importConversation(app, updatedChats[0]));
+        }
+        return;
+      }
+
+      await app.vault.delete(chatFile);
+      
+      // Get updated chat files after deletion
+      const updatedChats = await loadChatFiles();
+      if (updatedChats.length > 0) {
+        // Find the next available chat (not the one we just deleted)
+        const nextChat = updatedChats.find(chat => chat.path !== chatFile.path) || updatedChats[0];
+        setChatFile(nextChat);
+        setThreadId(nextChat.basename);
+        setConversation(await importConversation(app, nextChat));
+      }
+    } catch (err) {
+      console.error("Error deleting chat:", err);
+      const updatedChats = await loadChatFiles();
+      if (updatedChats.length > 0) {
+        setChatFile(updatedChats[0]);
+        setThreadId(updatedChats[0].basename);
+        setConversation(await importConversation(app, updatedChats[0]));
+      }
+    }
+  };
+
+  const cancelRename = () => {
+    setIsRenaming(false);
+    setNewChatName("");
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,25 +366,122 @@ export const Chat: any = () => {
       height: "100%",
       padding: "1rem",
       position: "relative",
-    }}
-    >
-      <button
-        onClick={clearChat}
-        style={{
-          position: "absolute",
-          top: "1rem",
-          right: "1rem",
-          zIndex: 1,
-          padding: "0.25rem 0.75rem",
-          borderRadius: "var(--radius-s)",
-          backgroundColor: "var(--background-modifier-hover)",
-          border: "none",
-          color: "var(--text-muted)",
-          cursor: "pointer"
-        }}
-      >
-        Clear chat
-      </button>
+    }}>
+      <div style={{
+        display: "flex",
+        gap: "0.5rem",
+        marginBottom: "1rem",
+        alignItems: "center"
+      }}>
+        <select
+          value={chatFile?.path || ""}
+          onChange={(e) => handleChatSelect(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "0.5rem",
+            borderRadius: "var(--radius-s)",
+            backgroundColor: "var(--background-primary)",
+            border: "1px solid var(--background-modifier-border)",
+            color: "var(--text-normal)"
+          }}
+        >
+          {chatFiles.map(file => (
+            <option key={file.path} value={file.path}>
+              {file.basename}
+            </option>
+          ))}
+        </select>
+
+        {isRenaming ? (
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <input
+              type="text"
+              value={newChatName}
+              onChange={(e) => setNewChatName(e.target.value)}
+              placeholder="New chat name"
+              style={{
+                padding: "0.5rem",
+                borderRadius: "var(--radius-s)",
+                backgroundColor: "var(--background-primary)",
+                border: "1px solid var(--background-modifier-border)",
+                color: "var(--text-normal)"
+              }}
+            />
+            <button
+              onClick={handleRenameChat}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "var(--radius-s)",
+                backgroundColor: "var(--background-modifier-hover)",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer"
+              }}
+            >
+              Save
+            </button>
+            <button
+              onClick={cancelRename}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "var(--radius-s)",
+                backgroundColor: "var(--background-modifier-hover)",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer"
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => setIsRenaming(true)}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "var(--radius-s)",
+                backgroundColor: "var(--background-modifier-hover)",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer"
+              }}
+            >
+              <Edit2 size={16} />
+            </button>
+
+            <button
+              onClick={handleDeleteChat}
+              disabled={chatFiles.length <= 1}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "var(--radius-s)",
+                backgroundColor: "var(--background-modifier-hover)",
+                border: "none",
+                color: chatFiles.length <= 1 ? "var(--text-faint)" : "var(--text-muted)",
+                cursor: chatFiles.length <= 1 ? "not-allowed" : "pointer",
+                opacity: chatFiles.length <= 1 ? 0.5 : 1
+              }}
+            >
+              <Trash2 size={16} />
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={handleCreateChat}
+          style={{
+            padding: "0.5rem",
+            borderRadius: "var(--radius-s)",
+            backgroundColor: "var(--interactive-accent)",
+            border: "none",
+            color: "var(--text-muted)",
+            cursor: "pointer"
+          }}
+        >
+          <Plus size={16} style={{ stroke: "var(--text-normal)" }}/>
+        </button>
+      </div>
 
       <div style={{
         flex: 1,
@@ -129,10 +490,8 @@ export const Chat: any = () => {
         borderRadius: "var(--radius-s)",
         padding: "0.5rem",
         backgroundColor: "var(--background-secondary)",
-        marginTop: "2.5rem",
         marginBottom: "1rem",
-      }}
-      >
+      }}>
         {conversation.map((msg, i) => (
           <div key={i} style={{
             alignSelf: msg.type === 'user' ? "flex-end" : "flex-start",
