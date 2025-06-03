@@ -1,8 +1,8 @@
-import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
 import { MemorySaver } from '@langchain/langgraph';
+import { Runnable } from '@langchain/core/runnables';
+import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
 import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatView";
 import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
-import { Runnable } from '@langchain/core/runnables';
 
 let pluginInstance: ObsidianAgentPlugin;
 

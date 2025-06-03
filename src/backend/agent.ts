@@ -11,7 +11,7 @@ import { rename_note, rename_dir } from "./tools/obsidian_rename";
 import { search_note, search_dir } from "./tools/obsidian_search";
 import { llm_answer } from "./tools/llm_answer";
 import { ObsidianAgentPlugin } from "../plugin";
-import { getSamplePrompt, getApiKey } from "../utils/ai";
+import { getSamplePrompt, getApiKey } from "../utils/llm";
 
 // Function to create an llm instance
 export function getLLM(provider: string,model: string, apiKey: string) {

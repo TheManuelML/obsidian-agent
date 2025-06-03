@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { getApp } from "../../plugin";
-import { findClosestFile, findMatchingFolder } from "../../utils/files";
+import { findClosestFile, findMatchingFolder } from "../../utils/searching";
 
 // Tool to search for a note in Obsidian
 export const search_note = tool(async (input) => {

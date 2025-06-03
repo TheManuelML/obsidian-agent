@@ -1,8 +1,10 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { getApp } from "../../plugin";
-import { sanitizePath } from '../../utils/sanitize';
-import { getNextAvailableFolderName, findMatchingFolder, getFolderStructure } from '../../utils/files';
+import { sanitizePath } from '../../utils/formating';
+import { getNextAvailableFolderName } from '../../utils/rename';
+import { findMatchingFolder } from '../../utils/searching'
+import { getFolderStructure } from '../../utils/vault_structure';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {
@@ -94,5 +96,3 @@ export const list_files = tool(async (input) => {
         dir_path: z.string().optional().describe('The path of the directory to list files from'),
     })
 })
-
-

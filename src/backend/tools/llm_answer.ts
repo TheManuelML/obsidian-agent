@@ -1,9 +1,9 @@
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { getLLM } from "../agent";
 import { getPlugin } from "../../plugin";
-import { getApiKey } from '../../utils/ai';
+import { getLLM } from "../agent";
+import { getApiKey } from '../../utils/llm';
 
 // Tool to answer a request using an LLM
 export const llm_answer = tool(async (input) => {

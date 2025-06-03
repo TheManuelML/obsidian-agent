@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getApp, getPlugin } from "../plugin";
-import { callAgent } from "../backend/agent";
-import { Input } from "./Input";
-import { parseCodeSnippets } from "../utils/sanitize";
 import { Clipboard, Bot, User } from "lucide-react";
 import { TFile } from "obsidian";
-import { processFiles } from "../utils/files";
+import { getApp, getPlugin } from "../plugin";
+import { Input } from "./Input";
+import { callAgent } from "../backend/agent";
+import { parseCodeSnippets } from "../utils/parsing";
+import { processAttachedFiles } from "../utils/attached_file_processing";
 
 type Message = {
   sender: React.ReactElement;
@@ -58,7 +58,7 @@ export const Chat: any = () => {
 
       if (!lang) throw new Error(`Unsupported language: ${language}`);
       fullMessage += `\n\n${lang.filesIntro}`;
-      const fileDataList = await processFiles(files);
+      const fileDataList = await processAttachedFiles(files);
       
       if (fileDataList[0].type.startsWith("image/")) {
         // In the case the file is an image

@@ -1,8 +1,9 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { getApp } from "../../plugin";
-import { findClosestFile, findMatchingFolder, getNextAvailableFileName, getNextAvailableFolderName } from "../../utils/files";
-import { sanitizePath } from '../../utils/sanitize';
+import { findClosestFile, findMatchingFolder } from '../../utils/searching';
+import { getNextAvailableFileName, getNextAvailableFolderName } from "../../utils/rename";
+import { sanitizePath } from '../../utils/formating';
 
 // Obsidian tool to rename a file
 export const rename_note = tool(async (input) => {

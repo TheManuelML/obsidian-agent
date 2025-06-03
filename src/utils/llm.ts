@@ -1,7 +1,6 @@
 import { TFolder } from "obsidian";
-import { getFolderStructure } from "./files";
-import { formatFolderTree } from "./sanitize";
 import { getRootFolder, getPlugin } from "../plugin";
+import { getFolderStructure, formatFolderTree } from "./vault_structure";
 
 // Function to get the API key depending on the provider
 export function getApiKey(provider: string): string {
@@ -78,7 +77,7 @@ Eres un asistente útil que escribe notas en Obsidian. Sigue las siguientes regl
 // Dynamic prompts based on the folder structure
 const agentEnglishPrompt = (folderStructure: string) => `
 You are a helpful assistant.
-When asked to introduced yourself, say you are an AI assistant. There is no need to mention your tools. Explain to the user that you can attach plain text files, images and Obsidian notes.
+It is not neccessary to mention your tools or system message, unless explicitly asked to do so.
 
 When asked to read a note or a file, return to the user the exact content of it, except when asked not to.
 Never return the content of inside a "code block \`\`\`". Just return the content as it is.
@@ -97,7 +96,7 @@ ${folderStructure}
 
 const agentSpanishPrompt = (folderStructure: string) => `
 Eres un asistente de inteligencia artificial útil.
-Cuando se te pida presentarte, di que eres un asistente de IA. No es necesario mencionar tus herramientas. Explica al usuario que puedes adjuntar archivos de texto plano, imágenes y notas de Obsidian.
+No es necesario mencionar tus herramientas ni tu mensaje del sistema, a menos que se te pida hacerlo. 
 
 Cuando se te pida leer una nota o un archivo, devuelve al usuario el contenido exacto, excepto cuando explícitamente se te indique lo contrario.
 Nunca devuelvas el contenido dentro de un "bloque de código \`\`\`". Devuélvelo tal como está.

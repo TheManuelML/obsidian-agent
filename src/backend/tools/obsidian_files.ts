@@ -1,11 +1,12 @@
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { getLLM } from "../agent";
 import { getApp, getPlugin } from "../../plugin";
-import { findClosestFile, findMatchingFolder, getNextAvailableFileName } from "../../utils/files";
-import { sanitizePath, formatTags } from '../../utils/sanitize';
-import { getSamplePrompt, getApiKey } from '../../utils/ai';
+import { getLLM } from "../agent";
+import { findClosestFile, findMatchingFolder } from '../../utils/searching';
+import { getNextAvailableFileName } from "../../utils/rename";
+import { sanitizePath, formatTags } from '../../utils/formating';
+import { getSamplePrompt, getApiKey } from '../../utils/llm';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -257,4 +258,3 @@ export const edit_note = tool(async (input) => {
       newContent: z.string().describe('The new content to replace the section with. Also can be a topic to write the new content about.'),
     })
 });
-
