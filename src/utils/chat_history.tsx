@@ -8,7 +8,7 @@ export const exportMessage = async (app: App, message: Message, chatFile: TFile)
   if (!chat) chat = "";
 
   // Add the new message
-  chat += `\n**${message.type.toUpperCase()}**: ${message.text}`;
+  chat += `\n**${message.type.toUpperCase()}** - *${message.timestamp}*:\n${message.text}`;
   
   // Rewrite the chat file with the new message
   app.vault.modify(chatFile, chat);
@@ -20,16 +20,20 @@ export const importConversation = async (app: App, chatFile: TFile): Promise<Mes
   if (!chat) return [];
 
   const messages: Message[] = [];
-  const lines = chat.split('\n');
-  for (const line of lines) {
-    const match = line.match(/^\*\*(user|bot)\*\*:\s([\s\S]*)$/i);
-    ;
-    if (match) {
-      const type = match[1].toLowerCase() as 'user' | 'bot';
-      const text = match[2];
-      const sender = type === 'user' ? <User size={20} /> : <Bot size={20} />;
-      messages.push({ sender, text, type });
-    }
+
+  const messageBlocks = [
+    ...chat.matchAll(
+      /\*\*(user|bot)\*\* - \*(.*?)\*:\s*\n([\s\S]*?)(?=\n\*\*(?:user|bot)\*\* - \*|\n*$)/gi
+    )
+  ];
+
+  for (const match of messageBlocks) {
+    const type = match[1].toLowerCase() as 'user' | 'bot';
+    const timestamp = match[2].trim();
+    const text = match[3].trim();
+    const sender = type === 'user' ? <User size={20} /> : <Bot size={20} />;
+    
+    messages.push({ sender, text, type, timestamp });
   }  
 
   return messages;

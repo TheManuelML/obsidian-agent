@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, cloneElement, isValidElement } from "react";
 import { Clipboard, Bot, User, Plus, Edit2, Trash2, X } from "lucide-react";
 import { TFile, TFolder } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
@@ -7,6 +7,7 @@ import { callAgent } from "../backend/agent";
 import { parseCodeSnippets } from "../utils/parsing";
 import { processAttachedFiles } from "../utils/attached_file_processing";
 import { exportMessage, importConversation } from "../utils/chat_history";
+import { marked } from 'marked';
 
 export const Chat: any = () => {
   const app = getApp();
@@ -217,9 +218,12 @@ export const Chat: any = () => {
         return;
       }
     }
+
+    // Get current time for the message timestamp
+    const time = new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString();
     
     // Add user message immediately
-    const userMessage = { sender: <User size={20}/>, text: message, type: 'user' as const };
+    const userMessage = { sender: <User size={20}/>, text: message, type: 'user' as const, timestamp: time };
     setConversation((prev) => [...prev, userMessage]);
     
     // Save the message in the chat file
@@ -274,7 +278,7 @@ export const Chat: any = () => {
 
     try {
       const response = await callAgent(plugin, fullMessage, threadId, selectedImages);
-      const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const };
+      const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const, timestamp: time };
       setConversation((prev) => [...prev, botMessage]);
 
       // Verify chat file still exists before saving bot message
@@ -287,7 +291,7 @@ export const Chat: any = () => {
     
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      const errorBotMessage = { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' as const };
+      const errorBotMessage = { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' as const, timestamp: time };
       setConversation((prev) => [...prev, errorBotMessage]);
 
       // Verify chat file still exists before saving error message
@@ -486,29 +490,39 @@ export const Chat: any = () => {
       <div style={{
         flex: 1,
         overflowY: "auto",
-        border: "1px solid var(--background-modifier-border)",
+        border: "none",
         borderRadius: "var(--radius-s)",
-        padding: "0.5rem",
+        padding: "0",
         backgroundColor: "var(--background-secondary)",
         marginBottom: "1rem",
       }}>
         {conversation.map((msg, i) => (
           <div key={i} style={{
-            alignSelf: msg.type === 'user' ? "flex-end" : "flex-start",
-            backgroundColor: msg.type === 'user' 
-              ? "var(--background-modifier-hover)" 
-              : "var(--background-primary)",
-            color: "var(--text-normal)",
-            padding: "0.75rem",
-            borderRadius: "var(--radius-s)",
+            backgroundColor: "transparent",
+            padding: "0",
             margin: "0.5rem 0",
             maxWidth: "80%",
             whiteSpace: "pre-wrap",
             wordWrap: "break-word",
             position: "relative", 
             userSelect: "text",
+            borderBottom: "1px solid var(--background-modifier-border)",
           }}>
-            <strong style={{fontSize: "14px", opacity: 0.8}}>{msg.sender}</strong>
+            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem" }}>
+              <div style={{ 
+                opacity: msg.type === 'user' 
+                  ? "0.8" 
+                  : "1.0",
+                color: msg.type === 'user'
+                  ? "var(--interactive-accent)"
+                  : "var(--interactive-accent-hover)",
+                }}>
+                {cloneElement(msg.sender as React.ReactElement<any>, { size: "28" })}
+              </div>
+              <span style={{ opacity: '0.8', color: 'var(--interactive-accent)', fontSize: "var(--font-ui-smaller)" }}>
+                {msg.timestamp.toString()}
+              </span>
+            </div>
             {parseCodeSnippets(msg.text).map((frag, j) => (
               frag.isCode ? (
                 <div key={j} style={{ position: "relative", marginTop: "0.5rem" }}>
@@ -522,7 +536,9 @@ export const Chat: any = () => {
                       padding: "0.1rem 0.3rem",
                       cursor: "pointer",
                       color: "var(--text-muted)",
-                      backgroundColor: "none",
+                      backgroundColor: "transparent",
+                      border: "none",
+                      boxShadow: "none",
                     }}
                   >
                     <Clipboard size={16} />
@@ -534,7 +550,6 @@ export const Chat: any = () => {
                       padding: "0.5rem",
                       borderRadius: "var(--radius-s)",
                       overflowX: "auto",
-                      fontFamily: "var(--font-monospace)",
                       margin: 0,
                     }}
                   >
@@ -542,19 +557,22 @@ export const Chat: any = () => {
                   </pre>
                 </div>
               ) : (
-                <pre 
+                <div 
                   key={j} 
                   style={{
                     fontSize: "var(--font-ui-small)",
+                    lineHeight: "1.5",
                     marginTop: "0.25rem",
-                    whiteSpace: "pre-wrap",
+                    whiteSpace: "normal",
                     wordBreak: "break-word",
                     overflowWrap: "break-word",
-                    minHeight: "1.5em"
+                    opacity: "0.9",
+                    color: msg.type === 'user' 
+                      ? "var(--text-muted)" 
+                      : "var(--text-normal)"
                   }}
-                >
-                  {frag.text}
-                </pre>
+                  dangerouslySetInnerHTML={{ __html: marked(frag.text, { breaks: true })}}
+                />
               )
             ))}
           </div>
@@ -562,15 +580,12 @@ export const Chat: any = () => {
         {isLoading && (
           <div style={{
             alignSelf: "flex-start",
-            backgroundColor: "var(--background-primary)",
+            backgroundColor: "transparent",
             color: "var(--text-normal)",
-            padding: "0.75rem",
             borderRadius: "var(--radius-s)",
-            margin: "0.5rem 0",
-            maxWidth: "80%",
             position: "relative",
           }}>
-            <Bot size={20}/>
+            <Bot size={28} style={{ stroke: "var(--interactive-accent-hover)" }}/>
             <div style={{
               display: "flex",
               alignItems: "center",
