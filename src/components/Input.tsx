@@ -6,18 +6,18 @@ import { NotePickerModal } from "../layout/NotePickerModal";
 import { allModels } from "../layout/SettingsTab";
 
 interface AgentInputProps {
-  onSend: (message: string, notes?: TFile[] | null, files?: File[] | null) => void;
+  onSend: (message: string, notes?: TFile[] | null, images?: File[] | null) => void;
 }
 
 export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   const app = getApp();
   const plugin = getPlugin();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+
   // Function to handle model change
   const handleModelChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedModel = allModels.find(m => m.model === event.target.value);
@@ -31,33 +31,33 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   // Function to handle the message sending
   const handleSend = async () => {
     if (message.trim()) {
-      onSend(message.trim(), selectedNotes, selectedFiles); // Call the parent function to handle the message
-      
+      onSend(message.trim(), selectedNotes, selectedImages); // Call the parent function to handle the message
+
       // Clear the input fields
       setMessage("");
-      setSelectedFiles([]);
+      setSelectedImages([]);
 
       // Reset height
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
     }
   };
 
-  // Function to handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setSelectedFiles(prev => [...prev, ...newFiles]);
+  // Function to handle image selection
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const images = event.target.files;
+    if (images) {
+      const newImages = Array.from(images);
+      setSelectedImages(prev => [...prev, ...newImages]);
     }
-    // Reset the input value so the same file can be selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    // Reset the input value so the same image can be selected again
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
     }
   };
 
-  // Function to remove a file from the selected files
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  // Function to remove a image from the selected images
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   // Function to open the NotePickerModal
@@ -65,7 +65,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
     new NotePickerModal(app, (note: TFile) => {
       setselectedNotes((prev) => {
         if (prev) {
-          // Avoid adding duplicate files
+          // Avoid adding duplicate notes
           if (prev.find((f) => f.path === note.path)) {
             return prev;
           }
@@ -85,7 +85,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
 
   return (
     <div style={{ width: "100%" }}>
-      <div 
+      <div
         style={{
           display: "flex",
           alignItems: "flex-end",
@@ -129,9 +129,17 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
               maxHeight: "10rem",
             }}
           />
-          { /* Show selected notes and files below textarea */}
-          <div style={{ marginTop: "0.25rem" }}>
-            {selectedNotes && selectedNotes.length > 0 && selectedNotes.map((note) => (
+          { /* Show selected notes below textarea */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "0.25rem",
+              marginTop: "0.25rem",
+            }}
+          >
+            {selectedNotes?.map((note) => (
               <div
                 key={note.path}
                 style={{
@@ -140,9 +148,8 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                   backgroundColor: "var(--background-modifier-hover)",
                   borderRadius: "var(--radius-s)",
                   padding: "0rem 0.5rem",
-                  marginRight: "0.25rem",
-                  marginBottom: "0.25rem",
                   fontSize: "var(--font-ui-small)",
+                  height: "1.5rem",
                 }}
               >
                 <span style={{ marginRight: "0.25rem" }}>{note.name.slice(0, -3)}</span>
@@ -157,44 +164,61 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                     padding: 0,
                   }}
                 >
-                  <X size={12}/>
+                  <X size={12} />
                 </button>
               </div>
             ))}
-            {selectedFiles.map((file, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  backgroundColor: "var(--background-modifier-hover)",
-                  borderRadius: "var(--radius-s)",
-                  padding: "0rem 0.5rem",
-                  marginRight: "0.25rem",
-                  marginBottom: "0.25rem",
-                  fontSize: "var(--font-ui-small)",
-                }}
-              >
-                <span style={{ marginRight: "0.25rem" }}>{file.name}</span>
-                <button
-                  onClick={() => removeFile(index)}
+            {/* Show selected images below textarea */}
+            {selectedImages.map((img, index) => {
+              const isImage = img.type.startsWith("image/");
+              const previewUrl = isImage ? URL.createObjectURL(img) : null;
+
+              return (
+                <div
+                  key={index}
                   style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-muted)",
-                    padding: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    backgroundColor: "var(--background-modifier-hover)",
+                    borderRadius: "var(--radius-s)",
+                    padding: "0rem 0.5rem",
+                    fontSize: "var(--font-ui-small)",
+                    height: "1.5rem",
                   }}
                 >
-                  <X size={12}/>
-                </button>
-              </div>
-            ))}
+                  <img
+                    src={previewUrl!}
+                    alt={img.name}
+                    style={{
+                      width: "1rem",
+                      height: "1rem",
+                      objectFit: "cover",
+                      borderRadius: "2px",
+                      marginRight: "0.25rem",
+                    }}
+                  />
+                  <span>Image</span>
+                  <button
+                    onClick={() => removeImage(index)}
+                    style={{
+                      backgroundColor: "transparent",
+                      boxShadow: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--text-muted)",
+                      padding: 0,
+                      marginLeft: "0.25rem",
+                    }}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.25rem", gap: "0.5rem" }}>
             <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
-              <button 
+              <button
                 onClick={openNotePicker}
                 style={{
                   backgroundColor: "transparent",
@@ -210,60 +234,60 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                   cursor: "pointer",
                 }}
               >
-                <AtSign size={16} style={{ stroke: "var(--text-muted)" }}/> 
+                <AtSign size={16} style={{ stroke: "var(--text-muted)" }} />
                 <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
               </button>
             </div>
             <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
               <select
-                  onChange={handleModelChange}
-                  style={{
-                    backgroundColor: "var(--dropdown-background)",
-                    border: "1px solid var(--dropdown-background)",
-                    borderRadius: "var(--radius-s)",
-                    padding: "0.25rem 0.5rem",
-                    fontSize: "var(--font-ui-small)",
-                    color: "var(--text-normal)",
-                    cursor: "pointer",
-                  }}
-                  defaultValue={plugin.settings.model || "gemini-2.0-flash"}
-                >
-                  {allModels.map(({ model }) => (
-                    <option key={model} value={model}>
-                      {model}
-                    </option>
-                  ))}
-                </select>
+                onChange={handleModelChange}
+                style={{
+                  backgroundColor: "var(--dropdown-background)",
+                  border: "1px solid var(--dropdown-background)",
+                  borderRadius: "var(--radius-s)",
+                  padding: "0.25rem 0.5rem",
+                  fontSize: "var(--font-ui-small)",
+                  color: "var(--text-normal)",
+                  cursor: "pointer",
+                }}
+                defaultValue={plugin.settings.model || "gemini-2.0-flash"}
+              >
+                {allModels.map(({ model }) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
               <div>
-                <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      backgroundColor: "transparent",
-                      boxShadow: "none",
-                      border: "none",
-                      borderRadius: "100%",
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 0,
-                      gap: "0.25rem",
-                      cursor: "pointer",
-                    }}
-                    title="Images/Plain text"
-                  >
-                    <Image size={18} style={{ stroke: "var(--text-muted)" }}/> 
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    style={{ display: "none" }}
-                    accept=".jpg,.jpeg,.png"
-                    multiple
-                  />
+                <button
+                  onClick={() => imageInputRef.current?.click()}
+                  style={{
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    border: "none",
+                    borderRadius: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                    gap: "0.25rem",
+                    cursor: "pointer",
+                  }}
+                  title="Images/Plain text"
+                >
+                  <Image size={18} style={{ stroke: "var(--text-muted)" }} />
+                </button>
+                <input
+                  type="file"
+                  ref={imageInputRef}
+                  onChange={handleImageSelect}
+                  style={{ display: "none" }}
+                  accept=".jpg,.jpeg,.png"
+                  multiple
+                />
               </div>
               <button
                 style={{
@@ -282,28 +306,28 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                 disabled={!message.trim()}
                 title="Send message"
               >
-                <div 
-                  style={{ 
-                    display: "flex", 
-                    alignItems: "center", 
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <CircleArrowRight size={22} style={{ 
-                    stroke: message.trim() 
-                      ? "var(--interactive-accent-hover)" 
+                  <CircleArrowRight size={22} style={{
+                    stroke: message.trim()
+                      ? "var(--interactive-accent-hover)"
                       : "var(--text-muted)",
-                    transform: message.trim() 
-                      ? "scale(1.1)" 
+                    transform: message.trim()
+                      ? "scale(1.1)"
                       : "scale(1)",
                     transition: "color 0.5s ease",
 
-                  }}/>
+                  }} />
                 </div>
               </button>
             </div>
           </div>
-        </div>  
+        </div>
       </div>
     </div>
   );
