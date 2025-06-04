@@ -20,4 +20,4 @@ export const formatMessagesForDisplay = (messages: Message[]): string => {
     return messages.map(message => {
       return `**${message.type.toUpperCase()}** - *${message.timestamp}*:\n${message.text}`;
     }).join('\n\n');
-  }
+}

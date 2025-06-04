@@ -1,5 +1,5 @@
-// Extract content form attached files to adapt them to the Agent
-export async function processAttachedFiles(files: File[]): Promise<Array<{ name: string; type: string; content: string }>> {
+// Extract content form attached images to adapt them to the Agent
+export async function processAttachedImages(images: File[]): Promise<Array<{ name: string; type: string; content: string }>> {
     const results: Array<{ name: string; type: string; content: string }> = [];
   
     const processFile = (file: File): Promise<{ name: string; type: string; content: string }> => {
@@ -22,7 +22,7 @@ export async function processAttachedFiles(files: File[]): Promise<Array<{ name:
       });
     };
   
-    for (const file of files) {
+    for (const file of images) {
       try {
         const result = await processFile(file);
         results.push(result);

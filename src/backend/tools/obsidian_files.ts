@@ -47,11 +47,9 @@ export const create_note = tool(async (input) => {
                 // Prompts
                 let sysPrompt = getSamplePrompt('write', language);
                 if (context) {
-                    if (language === 'es') {
-                        sysPrompt += `\nUsa el siguiente contexto para escribir la nota: ${context}.`
-                    } else if (language === 'en') {
-                        sysPrompt += `\nUse the following context to write the note: ${context}.`;
-                    }
+                    sysPrompt = language == 'es'
+                        ? `${sysPrompt}\nUsa el siguiente contexto para escribir la nota: ${context}.`
+                        : `${sysPrompt}\nUse the following context to write the note: ${context}.`;
                 }
                 
                 const humanPrompt = language == 'es' 
@@ -173,7 +171,7 @@ export const edit_note = tool(async (input) => {
     const app = getApp();
     const plugin = getPlugin();
     let language = plugin.settings.language || 'en';
-    let { fileName, section, newContent } = input;
+    let { fileName, newContent } = input;
 
     // Find the closest file
     const matchedFile = findClosestFile(fileName, app);
@@ -189,21 +187,13 @@ export const edit_note = tool(async (input) => {
 
     // Read the file
     let text = await app.vault.read(matchedFile);
-    let newNoteContent = '';
+    let newNoteContent: string = '';
 
     // Prompts
     let sysPrompt = getSamplePrompt('write', language);
-    if (section) {
-        sysPrompt += `\nSearch for the section: ${section}. The new content should be written ONLY on that section. Keep the rest of the note as it is.`;
-        if (language === 'es') {
-            sysPrompt += `\nBusca la sección: ${section}. El nuevo contenido debe escribirse SOLO en esa sección. Mantén el resto de la nota como está.`;
-        }
-    }
-
-    let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`;
-    if (language === 'es') {
-        humanPrompt = `Por favor, actualiza el contenido de la siguiente nota: \n### NOTA ###\n${text}\n### FIN DE LA NOTA ###\nUsa este tema o contenido específico para actualizar la nota: ${newContent}.\nDEVUELVE LA NOTA COMPLETA CON EL CONTENIDO ACTUALIZADO.`;
-    }
+    let humanPrompt = language == 'es' 
+        ? `Por favor, actualiza el contenido de la siguiente nota: \n### NOTA ###\n${text}\n### FIN DE LA NOTA ###\nUsa este tema o contenido específico para actualizar la nota: ${newContent}.\nDEVUELVE LA NOTA COMPLETA CON EL CONTENIDO ACTUALIZADO.`
+        : `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`
     
     // Content generation
     try {
@@ -251,10 +241,9 @@ export const edit_note = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'update_note',
-    description: 'Replaces the content of a note. Can be used to update a specific section or the whole note.',
+    description: 'Replaces or add content to a note. Can be used to update a specific section or the whole note.',
     schema: z.object({
       fileName: z.string().describe('The name or path of the note to update'),
-      section: z.string().optional().describe('The specific section to update. Can be a header, paragraph, topic to be searched on the note.'),
-      newContent: z.string().describe('The new content to replace the section with. Also can be a topic to write the new content about.'),
+      newContent: z.string().describe('The changes to apply to the note, or the new content to write'),
     })
 });

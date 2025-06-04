@@ -3,16 +3,15 @@ import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
 import { HumanMessage } from "@langchain/core/messages";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { create_note, read_note, edit_note } from "./tools/obsidian_files";
 import { create_dir, list_files } from "./tools/obsidian_dirs";
 import { rename_note, rename_dir } from "./tools/obsidian_rename";
 import { search_note, search_dir } from "./tools/obsidian_search";
-import { llm_answer } from "./tools/llm_answer";
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt, getApiKey } from "../utils/llm";
-import { formatMessagesForDisplay } from "src/utils/formating";
+import { formatMessagesForDisplay } from "../utils/formating";
 
 // Function to create an llm instance
 export function getLLM(provider: string, model: string, apiKey: string) {
@@ -58,6 +57,9 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
         const llm = getLLM(provider, plugin.settings.model, apiKey);
         if (!llm) throw new Error("Failed to initialize LLM");
         
+        // MemorySaver works in the RAM. Each time agent is initialized, we create a new instance of MemorySaver.
+        // Use settings: amountOfMessagesInMemory
+        // This allows the agent to read N numbers of messages in the chat history just after a restart.
         const memorySaver = new MemorySaver();
         
         plugin.agent = createReactAgent({
@@ -72,7 +74,6 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
                 search_dir,
                 rename_dir,
                 rename_note,
-                llm_answer,
             ],
             checkpointSaver: memorySaver,
         });
@@ -94,45 +95,34 @@ export async function callAgent(
     lastMessages: Message[] = []
 ): Promise<string> {
     initializeAgent(plugin);
-
-    // Get the system prompt
     const agent = plugin.agent;
     if (!agent) throw new Error("Agent is not initialized");
     
     let sysPrompt = getSamplePrompt('agent', plugin.settings.language);
-    
     // Change the system prompt
     if (plugin.settings.rules) sysPrompt += `\n###\nFollow this rules: ${plugin.settings.rules}\n###\n`;
     if (lastMessages.length > 0) sysPrompt += `\n###\nRemember the last ${plugin.settings.amountOfMessagesInMemory} messages:\n${formatMessagesForDisplay(lastMessages)}\n###\n`;
     
-    let userMessage = `System Prompt:\n###\n${sysPrompt}\n###\n\nUser Prompt:\n${message}`;
+    // Add the system prompt and user message to the message content
+    const messageContent: Array<{ type: string, text?: string, image_url?: { url: string } }> = [];
+    messageContent.push({ type: "text", text: `System Prompt:\n###\n${sysPrompt}\n###\n\nUser Prompt:\n${message}` });
+
+    // Add images to the message
+    if (images && images.length > 0) {
+        for (const base64 of images) {
+            messageContent.push({ type: "image_url", image_url: { url: base64 } });
+        }
+    }
 
     // Invoke the agent
     let response: Promise<{ messages: { content: string }[] }>;
-    if (!images || images.length === 0) {
-        response = agent.invoke(
-            {messages: [new HumanMessage(userMessage)]},
-            {configurable: { thread_id: threadId }},
-        ) as Promise<{ messages: { content: string }[] }>;
-    } else {
-        const messageContent: Array<{ type: string; text?: string; image_url?: {url: string} }> = [];
+    response = agent.invoke(
+        // WE CANOT USE SystemMessage here, because VertexAI and GoogleGenerativeAI do not support it
+        // Issue: https://github.com/langchain-ai/langgraph/issues/628
+        {messages: [new HumanMessage({ content: messageContent })]},
+        {configurable: { thread_id: threadId }},
+    ) as Promise<{ messages: { content: string }[] }>;
 
-        // Add text message
-        messageContent.push({ type: "text", text: userMessage });
-
-        // Add images to the message
-        for (const base64 of images) {
-            messageContent.push({
-                type: "image_url",
-                image_url: { url: base64 },
-            });
-        }
-
-        response = agent.invoke(
-            {messages: [new HumanMessage({ content: messageContent })]},
-            {configurable: { thread_id: threadId }},
-        ) as Promise<{ messages: { content: string }[] }>;
-    }
     // Handle timeout
     const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Agent timeout")), 20000) // 20 seconds

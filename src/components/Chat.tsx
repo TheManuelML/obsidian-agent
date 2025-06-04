@@ -7,16 +7,14 @@ import { Input } from "./Input";
 import { callAgent } from "../backend/agent";
 import { formatTagsForChat } from "../utils/formating";
 import { parseCodeSnippets } from "../utils/parsing";
-import { processAttachedFiles } from "../utils/handleAttachments";
+import { processAttachedImages } from "../utils/processImages";
 import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../utils/chatHistory";
 
 export const Chat: any = () => {
   const app = getApp();
   const plugin = getPlugin();
-  let language = plugin.settings.language || 'en';
-
+  
   const [conversation, setConversation] = useState<Message[]>([]);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [chatFile, setChatFile] = useState<TFile | null>(null);
   const [chatFiles, setChatFiles] = useState<TFile[]>([]);
@@ -233,7 +231,7 @@ export const Chat: any = () => {
     
     // Read attached files
     if (files && files.length > 0) {
-      const fileDataList = await processAttachedFiles(files);
+      const fileDataList = await processAttachedImages(files);
       
       // Only process images
       for (const fileData of fileDataList) {
@@ -279,7 +277,6 @@ export const Chat: any = () => {
     
     } finally {
       setIsLoading(false);
-      setSelectedImages([]); // Clear selected images after sending
     }
   };
 
