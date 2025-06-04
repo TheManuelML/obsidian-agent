@@ -11,6 +11,7 @@ export interface AgentSettings {
   anthropicApiKey: string;
   rules: string;
   chatsFolder: string;
+  amountOfMessagesInMemory: number;
 }
 
 // Default settings for the plugin
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
   anthropicApiKey: '',
   rules: '',
   chatsFolder: 'Chats',
+  amountOfMessagesInMemory: 3
 };
 
 // Available models and their providers
@@ -78,6 +80,22 @@ export class AgentSettingsTab extends PluginSettingTab {
 
         return dropdown;
       });
+
+    new Setting(containerEl)
+      .setName("Number of messages in memory")
+      .setDesc("Specifies how many past interactions to include in the agent's memory at the start of each new conversation. Note: Including more messages increases context size and token usage.")
+      .addText((text) =>
+        text
+          .setPlaceholder("Enter the number of messages")
+          .setValue(this.plugin.settings.amountOfMessagesInMemory.toString())
+          .onChange(async (value) => {
+            const num = parseInt(value, 10);
+            if (!isNaN(num)) {
+              this.plugin.settings.amountOfMessagesInMemory = num;
+              await this.plugin.saveSettings();
+            }
+          })
+      );
 
     containerEl.createEl('h1', { text: 'API Keys Settings' });
 

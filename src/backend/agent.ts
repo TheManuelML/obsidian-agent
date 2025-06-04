@@ -12,9 +12,10 @@ import { search_note, search_dir } from "./tools/obsidian_search";
 import { llm_answer } from "./tools/llm_answer";
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt, getApiKey } from "../utils/llm";
+import { formatMessagesForDisplay } from "src/utils/formating";
 
 // Function to create an llm instance
-export function getLLM(provider: string,model: string, apiKey: string) {
+export function getLLM(provider: string, model: string, apiKey: string) {
     if (provider === 'google') {
         return new ChatGoogleGenerativeAI({
             model,
@@ -89,7 +90,8 @@ export async function callAgent(
     plugin: ObsidianAgentPlugin,
     message: string,
     threadId: string,
-    images: string[] = []
+    images: string[] = [],
+    lastMessages: Message[] = []
 ): Promise<string> {
     initializeAgent(plugin);
 
@@ -97,9 +99,14 @@ export async function callAgent(
     const agent = plugin.agent;
     if (!agent) throw new Error("Agent is not initialized");
     
-    const sysPrompt = getSamplePrompt('agent', plugin.settings.language);
-    let userMessage = `${sysPrompt}\n\n${message}`;
-    if (plugin.settings.rules) userMessage += `\n\nFollow this rules: ${plugin.settings.rules}`;
+    let sysPrompt = getSamplePrompt('agent', plugin.settings.language);
+    
+    // Change the system prompt
+    if (plugin.settings.rules) sysPrompt += `\n###\nFollow this rules: ${plugin.settings.rules}\n###\n`;
+    if (lastMessages.length > 0) sysPrompt += `\n###\nRemember the last ${plugin.settings.amountOfMessagesInMemory} messages:\n${formatMessagesForDisplay(lastMessages)}\n###\n`;
+    
+    let userMessage = `System Prompt:\n###\n${sysPrompt}\n###\n\nUser Prompt:\n${message}`;
+    console.log(userMessage);
 
     // Invoke the agent
     let response: Promise<{ messages: { content: string }[] }>;

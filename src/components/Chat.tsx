@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, cloneElement } from "react";
 import { Clipboard, Bot, User, Plus, Edit2, Trash2, X } from "lucide-react";
+import { marked } from 'marked';
 import { TFile, TFolder } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
 import { Input } from "./Input";
 import { callAgent } from "../backend/agent";
+import { formatTagsForChat } from "../utils/formating";
 import { parseCodeSnippets } from "../utils/parsing";
 import { processAttachedFiles } from "../utils/handleAttachments";
-import { exportMessage, importConversation } from "../utils/chatHistory";
-import { marked } from 'marked';
+import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../utils/chatHistory";
 
 export const Chat: any = () => {
   const app = getApp();
@@ -21,8 +22,8 @@ export const Chat: any = () => {
   const [chatFiles, setChatFiles] = useState<TFile[]>([]);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newChatName, setNewChatName] = useState("");
-  const [threadId, setThreadId] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hasSentFirst = useRef(false);
 
   // Load available chat files
   const loadChatFiles = async (): Promise<TFile[]> => {
@@ -56,8 +57,7 @@ export const Chat: any = () => {
       // If there are existing chat files, use the most recent one
       const mostRecentChat = existing.sort((a, b) => b.stat.mtime - a.stat.mtime)[0];
       setChatFile(mostRecentChat);
-      setThreadId(mostRecentChat.basename);
-
+      
       // Import conversation
       setConversation(await importConversation(app, mostRecentChat));
       return mostRecentChat;
@@ -69,10 +69,13 @@ export const Chat: any = () => {
     const chatFilePath = `${chatFolder.path}/${chatFileName}`;
 
     let newFile: TFile;
+    const tags = formatTagsForChat(
+      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
+      chatFileName.replace('.md', '')
+    );
     try {
-      newFile = await app.vault.create(chatFilePath, "");
+      newFile = await app.vault.create(chatFilePath, tags);
       setChatFile(newFile);
-      setThreadId(newFile.basename);
       
       await loadChatFiles();
 
@@ -104,7 +107,6 @@ export const Chat: any = () => {
         const updatedChats = await loadChatFiles();
         if (updatedChats.length > 0) {
           setChatFile(updatedChats[0]);
-          setThreadId(updatedChats[0].basename);
           setConversation(await importConversation(app, updatedChats[0]));
         } else {
           setChatFile(null);
@@ -128,21 +130,18 @@ export const Chat: any = () => {
         const updatedChats = await loadChatFiles();
         if (updatedChats.length > 0) {
           setChatFile(updatedChats[0]);
-          setThreadId(updatedChats[0].basename);
           setConversation(await importConversation(app, updatedChats[0]));
         }
         return;
       }
 
       setChatFile(file);
-      setThreadId(file.basename);
       setConversation(await importConversation(app, file));
     } catch (err) {
       console.error("Error selecting chat:", err);
       const updatedChats = await loadChatFiles();
       if (updatedChats.length > 0) {
         setChatFile(updatedChats[0]);
-        setThreadId(updatedChats[0].basename);
         setConversation(await importConversation(app, updatedChats[0]));
       }
     }
@@ -164,10 +163,13 @@ export const Chat: any = () => {
     const chatFileName = `chat-${timestamp}.md`;
     const chatFilePath = `${chatFolder.path}/${chatFileName}`;
 
+    const tags = formatTagsForChat(
+      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
+      chatFileName.replace('.md', '')
+    );
     try {
-      const file = await app.vault.create(chatFilePath, "");
+      const file = await app.vault.create(chatFilePath, tags);
       setChatFile(file);
-      setThreadId(file.basename);
 
       await loadChatFiles();
       setConversation([]);
@@ -187,10 +189,7 @@ export const Chat: any = () => {
       setNewChatName("");
 
       const rename = app.vault.getAbstractFileByPath(newPath) as TFile;
-      if (rename) {
-        setChatFile(rename);
-        // Keep the same thread_id when renaming
-      }
+      if (rename) setChatFile(rename);
     } catch (err) {
       console.error("Error renaming chat file:", err);
     }
@@ -203,10 +202,7 @@ export const Chat: any = () => {
   const handleSend = async (message: string, notes?: TFile[] | null, files?: File[] | null) => {
     // Ensure we have a chat file before proceeding
     const activeChatFile = await ensureActiveChat();
-    if (!activeChatFile) {
-      console.error("No active chat file available.");
-      return;
-    }
+    if (!activeChatFile) return;
 
     // Verify the chat file still exists
     const fileExists = app.vault.getAbstractFileByPath(activeChatFile.path);
@@ -276,8 +272,15 @@ export const Chat: any = () => {
       }
     }
 
+    const threadId = await getThreadId(app, activeChatFile);
+    // Just append the last messags of the chat if it is the first time sending a message after a restart
+    let lastMessages: Message[] = [];
+    if (!hasSentFirst.current) {
+      lastMessages = await getLastNMessages(app, activeChatFile, plugin.settings.amountOfMessagesInMemory * 2);
+      hasSentFirst.current = true;
+    }
     try {
-      const response = await callAgent(plugin, fullMessage, threadId, selectedImages);
+      const response = await callAgent(plugin, fullMessage, threadId, selectedImages, lastMessages);
       const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const, timestamp: time };
       setConversation((prev) => [...prev, botMessage]);
 
@@ -322,7 +325,6 @@ export const Chat: any = () => {
         const updatedChats = await loadChatFiles();
         if (updatedChats.length > 0) {
           setChatFile(updatedChats[0]);
-          setThreadId(updatedChats[0].basename);
           setConversation(await importConversation(app, updatedChats[0]));
         }
         return;
@@ -336,7 +338,6 @@ export const Chat: any = () => {
         // Find the next available chat (not the one we just deleted)
         const nextChat = updatedChats.find(chat => chat.path !== chatFile.path) || updatedChats[0];
         setChatFile(nextChat);
-        setThreadId(nextChat.basename);
         setConversation(await importConversation(app, nextChat));
       }
     } catch (err) {
@@ -344,7 +345,6 @@ export const Chat: any = () => {
       const updatedChats = await loadChatFiles();
       if (updatedChats.length > 0) {
         setChatFile(updatedChats[0]);
-        setThreadId(updatedChats[0].basename);
         setConversation(await importConversation(app, updatedChats[0]));
       }
     }

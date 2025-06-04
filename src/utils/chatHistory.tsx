@@ -38,3 +38,16 @@ export const importConversation = async (app: App, chatFile: TFile): Promise<Mes
 
   return messages;
 };
+
+// Function to get the thread_id of the chat
+export const getThreadId = async (app: App, chatFile: TFile): Promise<string> => {
+  const content = await app.vault.read(chatFile);
+  const match = content.match(/thread_id:\s*(chat-[\w:-]+)/);
+  return match ? match[1] : '';
+};
+
+// Get the last n messages from a chat file
+export const getLastNMessages = async (app: App, chatFile: TFile, n: number): Promise<Message[]> => {
+  const messages = await importConversation(app, chatFile);
+  return messages.slice(-n);
+};
