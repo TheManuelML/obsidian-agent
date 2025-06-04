@@ -1,5 +1,4 @@
 import { App, TFile, TFolder } from "obsidian";
-import { getFiles } from "./files";
 
 // Finds the closest file path to the target
 export function findClosestFile(fileName: string, app: App): TFile | null {
@@ -7,7 +6,7 @@ export function findClosestFile(fileName: string, app: App): TFile | null {
     if (exactMatch) return exactMatch;
     
     // Only if it does not finds an exact match it tries fuzzy match
-    const allFiles = getFiles(app);
+    const allFiles = app.vault.getFiles();
     const lowerFileName = fileName.toLowerCase();
     return allFiles.find(file => file.path.toLowerCase().includes(lowerFileName)) || null; // return e.g: TFile or null if no close match found
 }

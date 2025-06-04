@@ -1,6 +1,6 @@
 import { TFolder } from "obsidian";
 import { getRootFolder, getPlugin } from "../plugin";
-import { getFolderStructure, formatFolderTree } from "./vault_structure";
+import { getFolderStructure, formatFolderTree } from "./vaultStructure";
 
 // Function to get the API key depending on the provider
 export function getApiKey(provider: string): string {

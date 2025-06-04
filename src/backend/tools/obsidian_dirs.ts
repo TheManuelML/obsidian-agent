@@ -4,7 +4,7 @@ import { getApp } from "../../plugin";
 import { sanitizePath } from '../../utils/formating';
 import { getNextAvailableFolderName } from '../../utils/rename';
 import { findMatchingFolder } from '../../utils/searching'
-import { getFolderStructure } from '../../utils/vault_structure';
+import { getFolderStructure } from '../../utils/vaultStructure';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {

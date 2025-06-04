@@ -5,8 +5,8 @@ import { getApp, getPlugin } from "../plugin";
 import { Input } from "./Input";
 import { callAgent } from "../backend/agent";
 import { parseCodeSnippets } from "../utils/parsing";
-import { processAttachedFiles } from "../utils/attached_file_processing";
-import { exportMessage, importConversation } from "../utils/chat_history";
+import { processAttachedFiles } from "../utils/handleAttachments";
+import { exportMessage, importConversation } from "../utils/chatHistory";
 import { marked } from 'marked';
 
 export const Chat: any = () => {
