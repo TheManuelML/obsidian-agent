@@ -6,19 +6,7 @@ export async function processAttachedFiles(files: File[]): Promise<Array<{ name:
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
   
-        if (file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
-          reader.readAsText(file);
-          reader.onload = () => {
-            if (!reader.result) {
-              reject(new Error('Failed to read file'));
-              return;
-            }
-            resolve({ name: file.name, type: file.type, content: reader.result as string });
-          };
-          reader.onerror = () => reject(new Error(`Error reading text file: ${file.name}`));
-        }
-  
-        else if (file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/")) {
           reader.readAsDataURL(file);  // base64
           reader.onload = () => {
             if (!reader.result) {

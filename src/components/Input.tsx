@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { AtSign, X, CircleArrowRight, Paperclip } from "lucide-react";
+import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
 import { NotePickerModal } from "../layout/NotePickerModal";
@@ -254,14 +254,14 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                     }}
                     title="Images/Plain text"
                   >
-                    <Paperclip size={18} style={{ stroke: "var(--text-muted)" }}/> 
+                    <Image size={18} style={{ stroke: "var(--text-muted)" }}/> 
                   </button>
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     style={{ display: "none" }}
-                    accept=".jpg,.jpeg,.png,.txt,.md,.csv.json,.html,.xml"
+                    accept=".jpg,.jpeg,.png"
                     multiple
                   />
               </div>
@@ -289,11 +289,15 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                     justifyContent: "center",
                   }}
                 >
-                  <CircleArrowRight size={20} style={{ 
+                  <CircleArrowRight size={22} style={{ 
                     stroke: message.trim() 
-                      ? "var(--interactive-accent)" 
+                      ? "var(--interactive-accent-hover)" 
                       : "var(--text-muted)",
+                    transform: message.trim() 
+                      ? "scale(1.1)" 
+                      : "scale(1)",
                     transition: "color 0.5s ease",
+
                   }}/>
                 </div>
               </button>
