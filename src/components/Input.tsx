@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
 import { AtSign, X, CircleArrowRight, Paperclip } from "lucide-react";
-import { getApp } from "../plugin";
 import { TFile } from "obsidian";
+import { getApp, getPlugin } from "../plugin";
 import { NotePickerModal } from "../layout/NotePickerModal";
+import { allModels } from "../layout/SettingsTab";
 
 interface AgentInputProps {
   onSend: (message: string, notes?: TFile[] | null, files?: File[] | null) => void;
@@ -10,12 +11,23 @@ interface AgentInputProps {
 
 export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   const app = getApp();
+  const plugin = getPlugin();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   
+  // Function to handle model change
+  const handleModelChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedModel = allModels.find(m => m.model === event.target.value);
+    if (selectedModel && plugin) {
+      plugin.settings.model = selectedModel.model;
+      plugin.settings.provider = selectedModel.provider;
+      await plugin.saveSettings();
+    }
+  };
+
   // Function to handle the message sending
   const handleSend = async () => {
     if (message.trim()) {
@@ -78,7 +90,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
           display: "flex",
           alignItems: "flex-end",
           backgroundColor: "var(--background-secondary)",
-          border: "1px solid var(--background-modifier-border)",
+          border: "1px solid var(--background-secondary-alt)",
           borderRadius: "var(--radius-s)",
           gap: "0.5rem",
           padding: "0.5rem",
@@ -181,7 +193,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
             ))}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.25rem", gap: "0.5rem" }}>
-            <div style={{ marginBottom: "0.4rem", marginLeft: "0.4rem" }}>
+            <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
               <button 
                 onClick={openNotePicker}
                 style={{
@@ -201,6 +213,27 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
                 <AtSign size={16} style={{ stroke: "var(--text-muted)" }}/> 
                 <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
               </button>
+            </div>
+            <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
+              <select
+                  onChange={handleModelChange}
+                  style={{
+                    backgroundColor: "var(--dropdown-background)",
+                    border: "1px solid var(--dropdown-background)",
+                    borderRadius: "var(--radius-s)",
+                    padding: "0.25rem 0.5rem",
+                    fontSize: "var(--font-ui-small)",
+                    color: "var(--text-normal)",
+                    cursor: "pointer",
+                  }}
+                  defaultValue={plugin.settings.model || "gemini-2.0-flash"}
+                >
+                  {allModels.map(({ model }) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
               <div>

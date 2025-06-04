@@ -25,24 +25,17 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
   chatsFolder: 'Chats',
 };
 
-// Model per provider
-const modelsByProvider: Record<string, string[]> = {
-  google: [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-2.0-flash",
-  ],
-  openai: [
-    "gpt-4.1",
-    "gpt-4o",
-    "gpt-4o-mini",
-  ],
-  anthropic: [
-    "claude-3-5-sonnet",
-    "claude-4-sonnet",
-  ],
-};
-let modelDropdown: DropdownComponent;
+// Available models and their providers
+export const allModels = [
+  { provider: "google", model: "gemini-1.5-flash" },
+  { provider: "google", model: "gemini-1.5-pro" },
+  { provider: "google", model: "gemini-2.0-flash" },
+  { provider: "openai", model: "gpt-4.1" },
+  { provider: "openai", model: "gpt-4o" },
+  { provider: "openai", model: "gpt-4o-mini" },
+  { provider: "anthropic", model: "claude-3-5-sonnet" },
+  { provider: "anthropic", model: "claude-4-sonnet" }
+];
 
 // Settings tab class
 export class AgentSettingsTab extends PluginSettingTab {
@@ -61,61 +54,28 @@ export class AgentSettingsTab extends PluginSettingTab {
     containerEl.createEl('h1', { text: 'Language Model Settings' });
 
     new Setting(containerEl)
-      .setName("Provider")
-      .setDesc("Select the language model provider.")
+      .setName("Model")
+      .setDesc("Select the language model to use.")
       .addDropdown((dropdown: DropdownComponent) => {
+
+        // Add all models to dropdown
+        allModels.forEach(({ model }) => {
+          dropdown.addOption(model, model);
+        });
+
+        // Set current model
         dropdown
-          .addOption("google", "Google") 
-          .addOption("openai", "OpenAI")
-          .addOption("anthropic", "Anthropic")
-  .setValue(this.plugin.settings.provider)
+          .setValue(this.plugin.settings.model)
           .onChange(async (value) => {
-            this.plugin.settings.provider = value;
-            await this.plugin.saveSettings();
-
-            // Update the model dropdown
-            const models = modelsByProvider[value] || [];
-            modelDropdown.selectEl.innerHTML = ""; // Clean options
-
-            for (const model of models) {
-              modelDropdown.addOption(model, model);
-            }
-
-            if (!models.includes(this.plugin.settings.model)) {
-              this.plugin.settings.model = models[0];
-              modelDropdown.setValue(models[0]);
+            // Find the provider for the selected model
+            const selectedModel = allModels.find(m => m.model === value);
+            if (selectedModel) {
+              this.plugin.settings.model = value;
+              this.plugin.settings.provider = selectedModel.provider;
               await this.plugin.saveSettings();
             }
           });
-        return dropdown;
-      });
 
-    new Setting(containerEl)
-      .setName("Model name")
-      .setDesc("Select the language model to use.")
-      .addDropdown((dropdown: DropdownComponent) => {
-        modelDropdown = dropdown;
- 
-        const provider = this.plugin.settings.provider;
-        const models = modelsByProvider[provider] || [];
-      
-        for (const model of models) {
-          dropdown.addOption(model, model);
-        }
-      
-        let currentModel = this.plugin.settings.model;
-        if (!models.includes(currentModel)) {
-          currentModel = models[0];
-          this.plugin.settings.model = currentModel;
-        }
-      
-        dropdown
-          .setValue(currentModel)
-          .onChange(async (value) => {
-            this.plugin.settings.model = value;
-            await this.plugin.saveSettings();
-          });
-      
         return dropdown;
       });
 

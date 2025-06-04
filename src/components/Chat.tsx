@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, cloneElement, isValidElement } from "react";
+import React, { useState, useRef, useEffect, cloneElement } from "react";
 import { Clipboard, Bot, User, Plus, Edit2, Trash2, X } from "lucide-react";
 import { TFile, TFolder } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
@@ -501,12 +501,12 @@ export const Chat: any = () => {
             backgroundColor: "transparent",
             padding: "0",
             margin: "0.5rem 0",
-            maxWidth: "80%",
+            maxWidth: "100%",
             whiteSpace: "pre-wrap",
             wordWrap: "break-word",
             position: "relative", 
             userSelect: "text",
-            borderBottom: "1px solid var(--background-modifier-border)",
+            borderBottom: "1px solid var(--background-secondary-alt)",
           }}>
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem" }}>
               <div style={{ 
@@ -519,7 +519,12 @@ export const Chat: any = () => {
                 }}>
                 {cloneElement(msg.sender as React.ReactElement<any>, { size: "28" })}
               </div>
-              <span style={{ opacity: '0.8', color: 'var(--interactive-accent)', fontSize: "var(--font-ui-smaller)" }}>
+              <span style={{ 
+                opacity: '0.8', 
+                color: msg.type === 'user' ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
+                fontSize: "var(--font-ui-smaller)",
+                fontWeight: "semibold",
+              }}>
                 {msg.timestamp.toString()}
               </span>
             </div>
