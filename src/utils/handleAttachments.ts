@@ -4,23 +4,21 @@ export async function processAttachedFiles(files: File[]): Promise<Array<{ name:
   
     const processFile = (file: File): Promise<{ name: string; type: string; content: string }> => {
       return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) {
+          reject(new Error(`File is not an image: ${file.name}`));
+          return;
+        }
+
         const reader = new FileReader();
-  
-        if (file.type.startsWith("image/")) {
-          reader.readAsDataURL(file);  // base64
-          reader.onload = () => {
-            if (!reader.result) {
-              reject(new Error('Failed to read image file'));
-              return;
-            }
-            resolve({ name: file.name, type: file.type, content: reader.result as string });
-          };
-          reader.onerror = () => reject(new Error(`Error reading image file: ${file.name}`));
-        }
-  
-        else {
-          resolve({ name: file.name, type: file.type, content: "[Unsupported file type]" });
-        }
+        reader.readAsDataURL(file);  // base64
+        reader.onload = () => {
+          if (!reader.result) {
+            reject(new Error('Failed to read image file'));
+            return;
+          }
+          resolve({ name: file.name, type: file.type, content: reader.result as string });
+        };
+        reader.onerror = () => reject(new Error(`Error reading image file: ${file.name}`));
       });
     };
   
@@ -30,11 +28,6 @@ export async function processAttachedFiles(files: File[]): Promise<Array<{ name:
         results.push(result);
       } catch (e) {
         console.error(`Error processing file ${file.name}:`, e);
-        results.push({ 
-          name: file.name, 
-          type: file.type, 
-          content: `[Error: ${e instanceof Error ? e.message : 'Unknown error'}]` 
-        });
       }
     }
   

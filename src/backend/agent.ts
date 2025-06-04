@@ -106,7 +106,6 @@ export async function callAgent(
     if (lastMessages.length > 0) sysPrompt += `\n###\nRemember the last ${plugin.settings.amountOfMessagesInMemory} messages:\n${formatMessagesForDisplay(lastMessages)}\n###\n`;
     
     let userMessage = `System Prompt:\n###\n${sysPrompt}\n###\n\nUser Prompt:\n${message}`;
-    console.log(userMessage);
 
     // Invoke the agent
     let response: Promise<{ messages: { content: string }[] }>;

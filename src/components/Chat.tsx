@@ -195,10 +195,6 @@ export const Chat: any = () => {
     }
   };
 
-  const addImageToState = (image: string) => {
-    setSelectedImages((prev) => [...prev, image]);
-  };
-
   const handleSend = async (message: string, notes?: TFile[] | null, files?: File[] | null) => {
     // Ensure we have a chat file before proceeding
     const activeChatFile = await ensureActiveChat();
@@ -233,46 +229,22 @@ export const Chat: any = () => {
     setIsLoading(true);
 
     let fullMessage = message;
+    let imagesToSend: string[] = [];
     
-    // Read attached notes
-    if (notes && notes.length > 0) {
-      const lang = {
-        en: { file: "Note", filesIntro: "Take into account the next Obsidian notes:" },
-        es: { file: "Nota", filesIntro: "Toma en cuenta las siguientes notas de Obsidian:" },
-      }[language];
-
-      if (!lang) throw new Error(`Unsupported language: ${language}`);
-      fullMessage += `\n\n${lang.filesIntro}`;
-
-      for (const note of notes) {
-        const content = await app.vault.read(note);
-        fullMessage += `\n[${lang.file}: ${note.name}]\n${content}`;
-      }
-    }
-
     // Read attached files
     if (files && files.length > 0) {
-      const lang = {
-        en: { file: "File", filesIntro: "Take into account the next attached files:" },
-        es: { file: "Archivo", filesIntro: "Toma en cuenta los siguientes archivos adjuntos:" },
-      }[language];
-
-      if (!lang) throw new Error(`Unsupported language: ${language}`);
-      fullMessage += `\n\n${lang.filesIntro}`;
       const fileDataList = await processAttachedFiles(files);
       
-      if (fileDataList[0].type.startsWith("image/")) {
-        // In the case the file is an image
-        addImageToState(fileDataList[0].content);
-      } else {
-        // In the case the file is plain text
-        for (const fileData of fileDataList) {
-          fullMessage += `\n###\n[${lang.file}: ${fileData.name}]\n${fileData.content}\n###`;
+      // Only process images
+      for (const fileData of fileDataList) {
+        if (fileData.type.startsWith("image/")) {
+          imagesToSend.push(fileData.content);
         }
       }
     }
 
     const threadId = await getThreadId(app, activeChatFile);
+    
     // Just append the last messags of the chat if it is the first time sending a message after a restart
     let lastMessages: Message[] = [];
     if (!hasSentFirst.current) {
@@ -280,7 +252,7 @@ export const Chat: any = () => {
       hasSentFirst.current = true;
     }
     try {
-      const response = await callAgent(plugin, fullMessage, threadId, selectedImages, lastMessages);
+      const response = await callAgent(plugin, fullMessage, threadId, imagesToSend, lastMessages);
       const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const, timestamp: time };
       setConversation((prev) => [...prev, botMessage]);
 
@@ -307,6 +279,7 @@ export const Chat: any = () => {
     
     } finally {
       setIsLoading(false);
+      setSelectedImages([]); // Clear selected images after sending
     }
   };
 
