@@ -7,8 +7,8 @@ import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { create_note, read_note, edit_note } from "./tools/obsidian_files";
 import { create_dir, list_files } from "./tools/obsidian_dirs";
-import { rename_note, rename_dir } from "./tools/obsidian_rename";
-import { search_note, search_dir } from "./tools/obsidian_search";
+import { rename } from "./tools/obsidian_rename";
+import { search } from "./tools/obsidian_search";
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt, getApiKey } from "../utils/llm";
 import { formatMessagesForDisplay } from "../utils/formating";
@@ -70,10 +70,8 @@ export function initializeAgent(plugin: ObsidianAgentPlugin) {
                 edit_note,
                 create_dir,
                 list_files,
-                search_note,
-                search_dir,
-                rename_dir,
-                rename_note,
+                search,
+                rename,
             ],
             checkpointSaver: memorySaver,
         });

@@ -1,7 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { getApp } from "../../plugin";
-import { sanitizePath } from '../../utils/formating';
 import { getNextAvailableFolderName } from '../../utils/rename';
 import { findMatchingFolder } from '../../utils/searching'
 import { getFolderStructure } from '../../utils/vaultStructure';
@@ -13,7 +12,7 @@ export const create_dir = tool(async (input) => {
     let { name = 'New Directory', dir_path = '/' } = input; 
 
     // Sanitize the path
-    dir_path = sanitizePath(dir_path);
+    dir_path = dir_path.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
     
     // Create the directory
     try {
@@ -64,11 +63,8 @@ export const list_files = tool(async (input) => {
             error: 'Directory not found'
         };
     }
-
-    // Sanitize the path
-    dir_path = sanitizePath(dir_path);
-
     
+    // Get the folder structure in a tree form
     try {
         const tree = {
             type: 'folder',

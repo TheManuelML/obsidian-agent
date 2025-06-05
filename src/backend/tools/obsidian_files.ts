@@ -5,7 +5,7 @@ import { getApp, getPlugin } from "../../plugin";
 import { getLLM } from "../agent";
 import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName } from "../../utils/rename";
-import { sanitizePath, formatTags } from '../../utils/formating';
+import { formatTags } from '../../utils/formating';
 import { getSamplePrompt, getApiKey } from '../../utils/llm';
 
 // Obsidian tool to write notes
@@ -28,7 +28,7 @@ export const create_note = tool(async (input) => {
     }
 
     // Sanitize the directory path
-    dir_path = sanitizePath(matchedFolder.path);
+    dir_path = matchedFolder.path;
     // Adding extension to name
     name = name + '.md';
     // Full path with the directory path and the name of the file
