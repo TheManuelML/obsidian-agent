@@ -193,7 +193,7 @@ export const Chat: any = () => {
     }
   };
 
-  const handleSend = async (message: string, notes?: TFile[] | null, files?: File[] | null) => {
+  const handleSend = async (message: string, notes?: TFile[] | null, images?: File[] | null) => {
     // Ensure we have a chat file before proceeding
     const activeChatFile = await ensureActiveChat();
     if (!activeChatFile) return;
@@ -229,18 +229,34 @@ export const Chat: any = () => {
     let fullMessage = message;
     let imagesToSend: string[] = [];
     
-    // Read attached files
-    if (files && files.length > 0) {
-      const fileDataList = await processAttachedImages(files);
+    // Read attached images
+    if (images && images.length > 0) {
+      const imageDataList = await processAttachedImages(images);
       
       // Only process images
-      for (const fileData of fileDataList) {
-        if (fileData.type.startsWith("image/")) {
-          imagesToSend.push(fileData.content);
+      for (const imageData of imageDataList) {
+        if (imageData.type.startsWith("image/")) {
+          imagesToSend.push(imageData.content);
         }
       }
     }
 
+    // Add the path of the attached files
+    if (notes && notes.length > 0) {
+      let language = plugin.settings.language;
+      
+      let noteSection = language == "es"
+        ? fullMessage += "\nToma en cuenta los siguientes archivos:"
+        : fullMessage += "\nTake into account the following files:"
+
+      for (const note of notes) {
+        noteSection += `\n- ${note.path}`     
+      } 
+      
+      fullMessage += noteSection;
+    }
+    
+    // Get the thread_id from the files tags
     const threadId = await getThreadId(app, activeChatFile);
     
     // Just append the last messags of the chat if it is the first time sending a message after a restart
