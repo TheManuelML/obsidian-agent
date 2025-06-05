@@ -31,6 +31,7 @@
 		"@langchain/google-genai": "^0.2.5",
 		"@langchain/langgraph": "^0.2.67",
 		"@langchain/openai": "^0.5.7",
+		"html-react-parser": "^5.2.5",
 		"js-levenshtein": "^1.1.6",
 		"lucide-react": "^0.503.0",
 		"marked": "^15.0.12",

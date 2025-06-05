@@ -1,12 +1,68 @@
 import React, { cloneElement } from "react";
-import { Clipboard, Bot } from "lucide-react";
-import { marked } from 'marked';
-import { parseCodeSnippets } from "../utils/parsing";
+import { Clipboard, Bot, SquareArrowOutUpRight } from "lucide-react";
+import parse from "html-react-parser";
+import { marked } from "marked";
+import { TFile } from "obsidian";
+import { getApp } from "../plugin";
+import { parseCodeSnippets, parseLinkToNote } from "../utils/parsing";
 import { MessageListProps, Message } from "../types";
 
 export const MessageList: React.FC<MessageListProps> = ({ conversation, isLoading, bottomRef }) => {
+    const app = getApp();
+    const vaultName = encodeURIComponent(app.vault.getName())
+
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text).catch(console.error);
+    };
+
+    const openNote = (path: string) => {
+        const file = app.vault.getAbstractFileByPath(path);
+        if (file instanceof TFile) {
+            app.workspace.getLeaf().openFile(file);
+        }
+    };
+
+    const renderText = (text: string): React.ReactNode[] => {
+        const linkFragments = parseLinkToNote(text); // [{ text: string, isLink: boolean }]
+    
+        return linkFragments.map((frag, idx) => {
+            if (frag.isLink) {
+                const path = frag.text;
+                const encodedPath = encodeURIComponent(path);
+                const obsidianUrl = `obsidian://open?vault=${vaultName}&file=${encodedPath}`;
+    
+                return (
+                    <a
+                        key={`link-${idx}`}
+                        href={obsidianUrl}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            color: 'var(--interactive-accent-hover)',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            padding: '0.1rem 0.25rem',
+                            borderRadius: 'var(--radius-s)',
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        <span>{path}</span>
+                        <SquareArrowOutUpRight size={14} />
+                    </a>
+                );      
+            } else {
+                // Procesamos Markdown del fragmento y lo convertimos a JSX
+                const html = marked.parse(frag.text, { async: false, breaks: true });
+    
+                // Convertimos el HTML en elementos React seguros
+                return (
+                    <React.Fragment key={`text-${idx}`}>
+                        {parse(html)}
+                    </React.Fragment>
+                );
+            }
+        });
     };
 
     return (
@@ -99,8 +155,9 @@ export const MessageList: React.FC<MessageListProps> = ({ conversation, isLoadin
                                         ? "var(--text-muted)" 
                                         : "var(--text-normal)"
                                 }}
-                                dangerouslySetInnerHTML={{ __html: marked(frag.text, { breaks: true })}}
-                            />
+                            >
+                                {renderText(frag.text)}
+                            </div>
                         )
                     ))}
                 </div>
