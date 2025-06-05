@@ -5,7 +5,7 @@
 	"minAppVersion": "0.15.0",
 	"description": "Lend your Obsidian vault to an AI agent. It can read, write, and search your notes.",
 	"author": "Manuel Magaña López",
-	"authorUrl": "www.linkedin.com/in/manuel-magaña-lópez-546b1425b",
+	"authorUrl": "https://github.com/TheManuelML",
 	"fundingUrl": "",
 	"isDesktopOnly": true
 }

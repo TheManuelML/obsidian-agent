@@ -1,16 +1,17 @@
-import React, { useState, useRef, useEffect, cloneElement } from "react";
-import { Clipboard, Bot, User, Plus, Edit2, Trash2, X } from "lucide-react";
-import { marked } from 'marked';
+import { useState, useRef, useEffect } from "react";
+import { Bot, User } from "lucide-react";
 import { TFile, TFolder } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
 import { Input } from "./Input";
 import { callAgent } from "../backend/agent";
+import { ChatForm } from "./ChatForm";
+import { MessageList } from "./MessageList";
 import { formatTagsForChat } from "../utils/formating";
-import { parseCodeSnippets } from "../utils/parsing";
 import { processAttachedImages } from "../utils/processImages";
 import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../utils/chatHistory";
+import { Message } from "../types/index";
 
-export const Chat: any = () => {
+export const Chat: React.FC = () => {
   const app = getApp();
   const plugin = getPlugin();
   
@@ -18,10 +19,39 @@ export const Chat: any = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [chatFile, setChatFile] = useState<TFile | null>(null);
   const [chatFiles, setChatFiles] = useState<TFile[]>([]);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [newChatName, setNewChatName] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasSentFirst = useRef(false);
+
+  // Create a new chat file
+  const handleCreateChat = async () => {
+    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    if (!chatFolder) {
+      try {
+        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+      } catch (err) {
+        console.error("Error creating chat folder:", err);
+        return;
+      }
+    }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const chatFileName = `chat-${timestamp}.md`;
+    const chatFilePath = `${chatFolder.path}/${chatFileName}`;
+
+    const tags = formatTagsForChat(
+      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
+      chatFileName.replace('.md', '')
+    );
+
+    try {
+      const newFile = await app.vault.create(chatFilePath, tags);
+      setChatFile(newFile);
+      await loadChatFiles();
+      setConversation([]);
+    } catch (err) {
+      console.error("Error creating chat file:", err);
+    }
+  };
 
   // Load available chat files
   const loadChatFiles = async (): Promise<TFile[]> => {
@@ -35,22 +65,23 @@ export const Chat: any = () => {
     return files;
   };
 
+  // Ensure that there is always an active chat file
   const ensureActiveChat = async (): Promise<TFile | null> => {
     if (chatFile) return chatFile;
     
     let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
-      if (!chatFolder) {
-        try {
-          chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
-        } catch (err) {
-          console.error("Error creating chat folder:", err);
-          return null;
-        }
+    if (!chatFolder) {
+      try {
+        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+      } catch (err) {
+        console.error("Error creating chat folder:", err);
+        return null;
       }
+    }
 
-      await loadChatFiles();
+    await loadChatFiles();
 
-      const existing = chatFiles.length > 0 ? chatFiles : await loadChatFiles();
+    const existing = chatFiles.length > 0 ? chatFiles : await loadChatFiles();
     if (existing.length > 0) {
       // If there are existing chat files, use the most recent one
       const mostRecentChat = existing.sort((a, b) => b.stat.mtime - a.stat.mtime)[0];
@@ -120,78 +151,10 @@ export const Chat: any = () => {
     return () => clearInterval(interval);
   }, [chatFile]);
 
-  const handleChatSelect = async (filePath: string) => {
-    try {
-      const file = app.vault.getAbstractFileByPath(filePath) as TFile;
-      if (!file) {
-        console.error("Selected chat file no longer exists");
-        const updatedChats = await loadChatFiles();
-        if (updatedChats.length > 0) {
-          setChatFile(updatedChats[0]);
-          setConversation(await importConversation(app, updatedChats[0]));
-        }
-        return;
-      }
-
-      setChatFile(file);
-      setConversation(await importConversation(app, file));
-    } catch (err) {
-      console.error("Error selecting chat:", err);
-      const updatedChats = await loadChatFiles();
-      if (updatedChats.length > 0) {
-        setChatFile(updatedChats[0]);
-        setConversation(await importConversation(app, updatedChats[0]));
-      }
-    }
-  };
-
-  const handleCreateChat = async () => {
-    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
-    if (!chatFolder) {
-      try {
-        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
-      } catch (err) {
-        console.error("Error creating chat folder:", err);
-        return;
-      }
-    }
-
-    // Create a new chat file with a timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const chatFileName = `chat-${timestamp}.md`;
-    const chatFilePath = `${chatFolder.path}/${chatFileName}`;
-
-    const tags = formatTagsForChat(
-      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
-      chatFileName.replace('.md', '')
-    );
-    try {
-      const file = await app.vault.create(chatFilePath, tags);
-      setChatFile(file);
-
-      await loadChatFiles();
-      setConversation([]);
-    } catch (err) {
-      console.error("Error creating chat file:", err);
-    }
-  };
-
-  const handleRenameChat = async () => {
-    if (!chatFile || !newChatName.trim()) return;
-
-    const newPath = `${plugin.settings.chatsFolder}/${newChatName}.md`;
-    try {
-      await app.fileManager.renameFile(chatFile, newPath);
-      await loadChatFiles();
-      setIsRenaming(false);
-      setNewChatName("");
-
-      const rename = app.vault.getAbstractFileByPath(newPath) as TFile;
-      if (rename) setChatFile(rename);
-    } catch (err) {
-      console.error("Error renaming chat file:", err);
-    }
-  };
+  // Manage the scroll in the component
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation]);
 
   const handleSend = async (message: string, notes?: TFile[] | null, images?: File[] | null) => {
     // Ensure we have a chat file before proceeding
@@ -296,59 +259,6 @@ export const Chat: any = () => {
     }
   };
 
-  const handleDeleteChat = async () => {
-    if (!chatFile || chatFiles.length <= 1) return;
-    
-    try {
-      // Get current chat files before deletion
-      const currentChats = await loadChatFiles();
-      if (currentChats.length <= 1) return;
-
-      // Verify the file still exists before trying to delete it
-      const fileToDelete = app.vault.getAbstractFileByPath(chatFile.path);
-      if (!fileToDelete) {
-        console.error("Chat file no longer exists");
-        const updatedChats = await loadChatFiles();
-        if (updatedChats.length > 0) {
-          setChatFile(updatedChats[0]);
-          setConversation(await importConversation(app, updatedChats[0]));
-        }
-        return;
-      }
-
-      await app.vault.delete(chatFile);
-      
-      // Get updated chat files after deletion
-      const updatedChats = await loadChatFiles();
-      if (updatedChats.length > 0) {
-        // Find the next available chat (not the one we just deleted)
-        const nextChat = updatedChats.find(chat => chat.path !== chatFile.path) || updatedChats[0];
-        setChatFile(nextChat);
-        setConversation(await importConversation(app, nextChat));
-      }
-    } catch (err) {
-      console.error("Error deleting chat:", err);
-      const updatedChats = await loadChatFiles();
-      if (updatedChats.length > 0) {
-        setChatFile(updatedChats[0]);
-        setConversation(await importConversation(app, updatedChats[0]));
-      }
-    }
-  };
-
-  const cancelRename = () => {
-    setIsRenaming(false);
-    setNewChatName("");
-  };
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [conversation]);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).catch(console.error);
-  };
-
   return (
     <div style={{
       display: "flex",
@@ -357,242 +267,19 @@ export const Chat: any = () => {
       padding: "1rem",
       position: "relative",
     }}>
-      <div style={{
-        display: "flex",
-        gap: "0.5rem",
-        marginBottom: "1rem",
-        alignItems: "center"
-      }}>
-        <select
-          value={chatFile?.path || ""}
-          onChange={(e) => handleChatSelect(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "0.5rem",
-            borderRadius: "var(--radius-s)",
-            backgroundColor: "var(--background-primary)",
-            border: "1px solid var(--background-modifier-border)",
-            color: "var(--text-normal)"
-          }}
-        >
-          {chatFiles.map(file => (
-            <option key={file.path} value={file.path}>
-              {file.basename}
-            </option>
-          ))}
-        </select>
-
-        {isRenaming ? (
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input
-              type="text"
-              value={newChatName}
-              onChange={(e) => setNewChatName(e.target.value)}
-              placeholder="New chat name"
-              style={{
-                padding: "0.5rem",
-                borderRadius: "var(--radius-s)",
-                backgroundColor: "var(--background-primary)",
-                border: "1px solid var(--background-modifier-border)",
-                color: "var(--text-normal)"
-              }}
-            />
-            <button
-              onClick={handleRenameChat}
-              style={{
-                padding: "0.5rem",
-                borderRadius: "var(--radius-s)",
-                backgroundColor: "var(--background-modifier-hover)",
-                border: "none",
-                color: "var(--text-muted)",
-                cursor: "pointer"
-              }}
-            >
-              Save
-            </button>
-            <button
-              onClick={cancelRename}
-              style={{
-                padding: "0.5rem",
-                borderRadius: "var(--radius-s)",
-                backgroundColor: "var(--background-modifier-hover)",
-                border: "none",
-                color: "var(--text-muted)",
-                cursor: "pointer"
-              }}
-            >
-              <X size={16} />
-            </button>
-          </div>
-        ) : (
-          <>
-            <button
-              onClick={() => setIsRenaming(true)}
-              style={{
-                padding: "0.5rem",
-                borderRadius: "var(--radius-s)",
-                backgroundColor: "var(--background-modifier-hover)",
-                border: "none",
-                color: "var(--text-muted)",
-                cursor: "pointer"
-              }}
-            >
-              <Edit2 size={16} />
-            </button>
-
-            <button
-              onClick={handleDeleteChat}
-              disabled={chatFiles.length <= 1}
-              style={{
-                padding: "0.5rem",
-                borderRadius: "var(--radius-s)",
-                backgroundColor: "var(--background-modifier-hover)",
-                border: "none",
-                color: chatFiles.length <= 1 ? "var(--text-faint)" : "var(--text-muted)",
-                cursor: chatFiles.length <= 1 ? "not-allowed" : "pointer",
-                opacity: chatFiles.length <= 1 ? 0.5 : 1
-              }}
-            >
-              <Trash2 size={16} />
-            </button>
-          </>
-        )}
-
-        <button
-          onClick={handleCreateChat}
-          style={{
-            padding: "0.5rem",
-            borderRadius: "var(--radius-s)",
-            backgroundColor: "var(--interactive-accent)",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer"
-          }}
-        >
-          <Plus size={16} style={{ stroke: "var(--text-normal)" }}/>
-        </button>
-      </div>
-
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        border: "none",
-        borderRadius: "var(--radius-s)",
-        padding: "0",
-        backgroundColor: "var(--background-secondary)",
-        marginBottom: "1rem",
-      }}>
-        {conversation.map((msg, i) => (
-          <div key={i} style={{
-            backgroundColor: "transparent",
-            padding: "0",
-            margin: "0.5rem 0",
-            maxWidth: "100%",
-            whiteSpace: "pre-wrap",
-            wordWrap: "break-word",
-            position: "relative", 
-            userSelect: "text",
-            borderBottom: "1px solid var(--background-secondary-alt)",
-          }}>
-            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ 
-                opacity: msg.type === 'user' 
-                  ? "0.8" 
-                  : "1.0",
-                color: msg.type === 'user'
-                  ? "var(--interactive-accent)"
-                  : "var(--interactive-accent-hover)",
-                }}>
-                {cloneElement(msg.sender as React.ReactElement<any>, { size: "28" })}
-              </div>
-              <span style={{ 
-                opacity: '0.8', 
-                color: msg.type === 'user' ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
-                fontSize: "var(--font-ui-smaller)",
-                fontWeight: "semibold",
-              }}>
-                {msg.timestamp.toString()}
-              </span>
-            </div>
-            {parseCodeSnippets(msg.text).map((frag, j) => (
-              frag.isCode ? (
-                <div key={j} style={{ position: "relative", marginTop: "0.5rem" }}>
-                  <button 
-                    onClick={() => copyToClipboard(frag.text)}
-                    style={{
-                      position: "absolute",
-                      top: "0.25rem",
-                      right: "0.25rem",
-                      fontSize: "0.75rem",
-                      padding: "0.1rem 0.3rem",
-                      cursor: "pointer",
-                      color: "var(--text-muted)",
-                      backgroundColor: "transparent",
-                      border: "none",
-                      boxShadow: "none",
-                    }}
-                  >
-                    <Clipboard size={16} />
-                  </button>
-                  <pre 
-                    style={{
-                      fontSize: "var(--font-ui-small)",
-                      backgroundColor: "var(--background-modifier-border)",
-                      padding: "0.5rem",
-                      borderRadius: "var(--radius-s)",
-                      overflowX: "auto",
-                      margin: 0,
-                    }}
-                  >
-                    {frag.text}
-                  </pre>
-                </div>
-              ) : (
-                <div 
-                  key={j} 
-                  style={{
-                    fontSize: "var(--font-ui-small)",
-                    lineHeight: "1.5",
-                    marginTop: "0.25rem",
-                    whiteSpace: "normal",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    opacity: "0.9",
-                    color: msg.type === 'user' 
-                      ? "var(--text-muted)" 
-                      : "var(--text-normal)"
-                  }}
-                  dangerouslySetInnerHTML={{ __html: marked(frag.text, { breaks: true })}}
-                />
-              )
-            ))}
-          </div>
-        ))}
-        {isLoading && (
-          <div style={{
-            alignSelf: "flex-start",
-            backgroundColor: "transparent",
-            color: "var(--text-normal)",
-            borderRadius: "var(--radius-s)",
-            position: "relative",
-          }}>
-            <Bot size={28} style={{ stroke: "var(--interactive-accent-hover)" }}/>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              marginTop: "0.5rem"
-            }}>
-              <div className="typing-animation">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef}></div>
-      </div>    
+      <ChatForm 
+        chatFile={chatFile}
+        chatFiles={chatFiles}
+        setChatFile={setChatFile}
+        setConversation={setConversation}
+        loadChatFiles={loadChatFiles}
+        handleCreateChat={handleCreateChat}
+      />
+      <MessageList 
+        conversation={conversation}
+        isLoading={isLoading}
+        bottomRef={bottomRef}
+      />
       <div style={{ marginBottom: "1rem", position: "relative" }}>
         <Input onSend={handleSend}/>
       </div>  

@@ -4,10 +4,7 @@ import { TFile } from "obsidian";
 import { getApp, getPlugin } from "../plugin";
 import { NotePickerModal } from "../layout/NotePickerModal";
 import { allModels } from "../layout/SettingsTab";
-
-interface AgentInputProps {
-  onSend: (message: string, notes?: TFile[] | null, images?: File[] | null) => void;
-}
+import { AgentInputProps } from "../types/index";
 
 export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   const app = getApp();
@@ -36,6 +33,7 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
       // Clear the input fields
       setMessage("");
       setSelectedImages([]);
+      setselectedNotes(null); // Clear selected notes after sending
 
       // Reset height
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
@@ -64,23 +62,27 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
   const openNotePicker = () => {
     new NotePickerModal(app, (note: TFile) => {
       setselectedNotes((prev) => {
-        if (prev) {
-          // Avoid adding duplicate notes
-          if (prev.find((f) => f.path === note.path)) {
-            return prev;
-          }
-          return [...prev, note];
-        }
-        return [note];
+        // If no previous notes, create new array with the note
+        if (!prev) return [note];
+        
+        // Check if note already exists
+        const noteExists = prev.some((existingNote) => existingNote.path === note.path);
+        if (noteExists) return prev;
+        
+        // Add new note to existing array
+        return [...prev, note];
       });
     }).open();
   }
 
   // Function to remove a note from the selected notes
   const removeNote = (toRemove: TFile) => {
-    setselectedNotes((prev) =>
-      prev ? prev.filter((f) => f.path !== toRemove.path) : null
-    );
+    setselectedNotes((prev) => {
+      if (!prev) return null;
+      
+      const filteredNotes = prev.filter((note) => note.path !== toRemove.path);
+      return filteredNotes.length > 0 ? filteredNotes : null;
+    });
   };
 
   return (
