@@ -1,7 +1,6 @@
 import { TFile } from "obsidian";
 import { ReactElement, RefObject } from "react";
 
-// Types / Structures //
 export interface Message {
     sender: ReactElement;
     text: string;
@@ -9,8 +8,7 @@ export interface Message {
     timestamp: string;
 }
 
-// Interfaces //
-export interface AgentInputProps {
+export interface ChatInputProps {
     onSend: (message: string, notes?: TFile[] | null, images?: File[] | null) => void;
 }
 
@@ -23,7 +21,7 @@ export interface ChatFormProps {
     handleCreateChat: () => void;
 }
 
-export interface MessageListProps {
+export interface ChatMessagesProps {
     conversation: Message[];
     isLoading: boolean;
     bottomRef: RefObject<HTMLDivElement | null>;

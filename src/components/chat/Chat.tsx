@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, User } from "lucide-react";
 import { TFile, TFolder } from "obsidian";
-import { getApp, getPlugin } from "../plugin";
-import { Input } from "./Input";
-import { callAgent } from "../backend/agent";
+import { getApp, getPlugin } from "../../plugin";
+import { ChatInput } from "./Input";
+import { callAgent } from "../../backend/agent";
 import { ChatForm } from "./ChatForm";
-import { MessageList } from "./MessageList";
-import { formatTagsForChat } from "../utils/formating";
-import { processAttachedImages } from "../utils/processImages";
-import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../utils/chatHistory";
-import { Message } from "../types/index";
+import { ChatMessages } from "./ChatMessages";
+import { formatTagsForChat } from "../../utils/formating";
+import { processAttachedImages } from "../../utils/processImages";
+import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../../utils/chatHistory";
+import { Message } from "../../types/index";
 
 export const Chat: React.FC = () => {
   const app = getApp();
@@ -275,13 +275,13 @@ export const Chat: React.FC = () => {
         loadChatFiles={loadChatFiles}
         handleCreateChat={handleCreateChat}
       />
-      <MessageList 
+      <ChatMessages 
         conversation={conversation}
         isLoading={isLoading}
         bottomRef={bottomRef}
       />
       <div style={{ marginBottom: "1rem", position: "relative" }}>
-        <Input onSend={handleSend}/>
+        <ChatInput onSend={handleSend}/>
       </div>  
     </div>
   );

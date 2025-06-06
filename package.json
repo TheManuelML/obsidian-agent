@@ -36,6 +36,7 @@
 		"lucide-react": "^0.503.0",
 		"marked": "^15.0.12",
 		"react": "^19.1.0",
-		"react-dom": "^19.1.0"
+		"react-dom": "^19.1.0",
+		"react-markdown": "^10.1.0"
 	}
 }

@@ -1,8 +1,9 @@
 import { MemorySaver } from '@langchain/langgraph';
 import { Runnable } from '@langchain/core/runnables';
 import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
-import { AgentChatView, VIEW_TYPE_AGENT } from "./layout/ChatView";
-import { AgentSettings, AgentSettingsTab, DEFAULT_SETTINGS } from "./layout/SettingsTab";
+import { ChatView, VIEW_TYPE_AGENT } from "./components/chat/View";
+import { AgentSettings, AgentSettingsTab } from "./settings/SettingsTab";
+import { DEFAULT_SETTINGS } from "./settings/defaults";
 
 let pluginInstance: ObsidianAgentPlugin;
 
@@ -25,7 +26,7 @@ export class ObsidianAgentPlugin extends Plugin {
     this.addSettingTab(new AgentSettingsTab(this.app, this));
 
     // Add agent chat view
-    this.registerView(VIEW_TYPE_AGENT, (leaf) => new AgentChatView(leaf, this)); 
+    this.registerView(VIEW_TYPE_AGENT, (leaf) => new ChatView(leaf, this)); 
     this.app.workspace.onLayoutReady(async () => {
       await this.ensureAgentViewExists();
     });

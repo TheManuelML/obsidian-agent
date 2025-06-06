@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
 import { TFile } from "obsidian";
-import { getApp, getPlugin } from "../plugin";
-import { NotePickerModal } from "../layout/NotePickerModal";
-import { allModels } from "../layout/SettingsTab";
-import { AgentInputProps } from "../types/index";
+import { getApp, getPlugin } from "../../plugin";
+import { ContextNoteModal } from "../modal/ContextNoteModal";
+import { allModels } from "../../settings/providers";
+import { ChatInputProps } from "../../types/index";
 
-export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const app = getApp();
   const plugin = getPlugin();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -58,9 +58,9 @@ export const Input: React.FC<AgentInputProps> = ({ onSend }) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Function to open the NotePickerModal
+  // Function to open the ContextNoteModal
   const openNotePicker = () => {
-    new NotePickerModal(app, (note: TFile) => {
+    new ContextNoteModal(app, (note: TFile) => {
       setselectedNotes((prev) => {
         // If no previous notes, create new array with the note
         if (!prev) return [note];

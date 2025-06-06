@@ -56,7 +56,6 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
         - ...
         ---
     - Just respond with the content of the note.
-    - DO NOT write the markdown inside a code snippet.
 `;
 
 const writeSpanishPrompt = `
@@ -71,7 +70,6 @@ Eres un asistente útil que escribe notas en Obsidian. Sigue las siguientes regl
         - ...
         ---
     - Responde solo con el contenido de la nota.
-    - NO escribas el markdown dentro de un bloque de código.
 `;
 
 // Dynamic prompts based on the folder structure

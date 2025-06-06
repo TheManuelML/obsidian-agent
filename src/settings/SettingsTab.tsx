@@ -1,5 +1,6 @@
 import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin } from "../plugin";
+import { allModels } from "./providers";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
@@ -14,30 +15,7 @@ export interface AgentSettings {
   amountOfMessagesInMemory: number;
 }
 
-// Default settings for the plugin
-export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
-  language: 'en',
-  provider: 'google',
-  model: 'gemini-2.0-flash',
-  googleApiKey: '',
-  openaiApiKey: '',
-  anthropicApiKey: '',
-  rules: '',
-  chatsFolder: 'Chats',
-  amountOfMessagesInMemory: 3
-};
 
-// Available models and their providers
-export const allModels = [
-  { provider: "google", model: "gemini-1.5-flash" },
-  { provider: "google", model: "gemini-1.5-pro" },
-  { provider: "google", model: "gemini-2.0-flash" },
-  { provider: "openai", model: "gpt-4.1" },
-  { provider: "openai", model: "gpt-4o" },
-  { provider: "openai", model: "gpt-4o-mini" },
-  { provider: "anthropic", model: "claude-3-5-sonnet" },
-  { provider: "anthropic", model: "claude-4-sonnet" }
-];
 
 // Settings tab class
 export class AgentSettingsTab extends PluginSettingTab {

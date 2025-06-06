@@ -1,29 +1,47 @@
 import React, { cloneElement } from "react";
 import { Clipboard, Bot, SquareArrowOutUpRight } from "lucide-react";
-import parse from "html-react-parser";
+import parse, { HTMLReactParserOptions, Element } from "html-react-parser";
 import { marked } from "marked";
-import { TFile } from "obsidian";
-import { getApp } from "../plugin";
-import { parseCodeSnippets, parseLinkToNote } from "../utils/parsing";
-import { MessageListProps, Message } from "../types";
+import { getApp } from "../../plugin";
+import { parseCodeSnippets, parseLinkToNote } from "../../utils/parsing";
+import { ChatMessagesProps, Message } from "../../types";
 
-export const MessageList: React.FC<MessageListProps> = ({ conversation, isLoading, bottomRef }) => {
+// Custom components for special tags
+const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (
+    <span className={`custom-tag ${tag}`}>{children}</span>
+);
+
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ conversation, isLoading, bottomRef }) => {
     const app = getApp();
     const vaultName = encodeURIComponent(app.vault.getName())
 
+    // Copy in the clipboard a code block
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text).catch(console.error);
     };
 
-    const openNote = (path: string) => {
-        const file = app.vault.getAbstractFileByPath(path);
-        if (file instanceof TFile) {
-            app.workspace.getLeaf().openFile(file);
+    // Options for html-react-parser
+    const options: HTMLReactParserOptions = {
+        replace: (domNode) => {
+            if (domNode instanceof Element && domNode.attribs) {
+                // Handle custom tags
+                const customTags = ['target', 'decoy1', 'decoy2', 'ip_address', 'file', 'script_name'];
+                if (customTags.includes(domNode.name)) {
+                    return (
+                        <CustomTag tag={domNode.name}>
+                            {domNode.children.map((child, index) => 
+                                parse(child.toString(), options)
+                            )}
+                        </CustomTag>
+                    );
+                }
+            }
         }
     };
 
+    // Render the text to markdown
     const renderText = (text: string): React.ReactNode[] => {
-        const linkFragments = parseLinkToNote(text); // [{ text: string, isLink: boolean }]
+        const linkFragments = parseLinkToNote(text);
     
         return linkFragments.map((frag, idx) => {
             if (frag.isLink) {
@@ -55,10 +73,10 @@ export const MessageList: React.FC<MessageListProps> = ({ conversation, isLoadin
                 // Procesamos Markdown del fragmento y lo convertimos a JSX
                 const html = marked.parse(frag.text, { async: false, breaks: true });
     
-                // Convertimos el HTML en elementos React seguros
+                // Convertimos el HTML en elementos React seguros con las opciones personalizadas
                 return (
                     <React.Fragment key={`text-${idx}`}>
-                        {parse(html)}
+                        {parse(html, options)}
                     </React.Fragment>
                 );
             }
