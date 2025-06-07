@@ -88,7 +88,7 @@ export const Chat: React.FC = () => {
       setChatFile(mostRecentChat);
       
       // Import conversation
-      setConversation(await importConversation(app, mostRecentChat));
+      setConversation(await importConversation(mostRecentChat));
       return mostRecentChat;
     }
 
@@ -136,7 +136,7 @@ export const Chat: React.FC = () => {
         const updatedChats = await loadChatFiles();
         if (updatedChats.length > 0) {
           setChatFile(updatedChats[0]);
-          setConversation(await importConversation(app, updatedChats[0]));
+          setConversation(await importConversation(updatedChats[0]));
         } else {
           setChatFile(null);
           setConversation([]);
@@ -181,7 +181,7 @@ export const Chat: React.FC = () => {
     
     // Save the message in the chat file
     try {
-      await exportMessage(app, userMessage, activeChatFile);
+      await exportMessage(userMessage, activeChatFile);
     } catch (err) {
       console.error("Error saving user message:", err);
       return;
@@ -206,12 +206,9 @@ export const Chat: React.FC = () => {
 
     // Add the path of the attached files
     if (notes && notes.length > 0) {
-      let language = plugin.settings.language;
-      
-      let noteSection = language == "es"
-        ? fullMessage += "\nToma en cuenta los siguientes archivos:"
-        : fullMessage += "\nTake into account the following files:"
+      fullMessage += "\nTake into account the following files:"
 
+      let noteSection = "";      
       for (const note of notes) {
         noteSection += `\n- ${note.path}`     
       } 
@@ -220,12 +217,12 @@ export const Chat: React.FC = () => {
     }
     
     // Get the thread_id from the files tags
-    const threadId = await getThreadId(app, activeChatFile);
+    const threadId = await getThreadId(activeChatFile);
     
     // Just append the last messags of the chat if it is the first time sending a message after a restart
     let lastMessages: Message[] = [];
     if (!hasSentFirst.current) {
-      lastMessages = await getLastNMessages(app, activeChatFile, plugin.settings.amountOfMessagesInMemory * 2);
+      lastMessages = await getLastNMessages(activeChatFile, plugin.settings.amountOfMessagesInMemory * 2);
       hasSentFirst.current = true;
     }
     try {
@@ -236,7 +233,7 @@ export const Chat: React.FC = () => {
       // Verify chat file still exists before saving bot message
       const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
       if (currentChatFile) {
-        await exportMessage(app, botMessage, currentChatFile as TFile);
+        await exportMessage(botMessage, currentChatFile as TFile);
       } else {
         console.error("Chat file was deleted while waiting for response");
       }
@@ -249,7 +246,7 @@ export const Chat: React.FC = () => {
       // Verify chat file still exists before saving error message
       const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
       if (currentChatFile) {
-        await exportMessage(app, errorBotMessage, currentChatFile as TFile);
+        await exportMessage(errorBotMessage, currentChatFile as TFile);
       } else {
         console.error("Chat file was deleted while processing error");
       }

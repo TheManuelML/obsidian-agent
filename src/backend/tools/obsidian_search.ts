@@ -1,17 +1,15 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { getApp } from "../../plugin";
 import { findClosestFile, findMatchingFolder } from "../../utils/searching";
 
 // Tool to search notes and folders
 export const search = tool(async (input) => {
-    // Declare app and input
-    const app = getApp();
+    // Declare input
     let { name, isNote } = input;
 
     if (isNote) {
         // Search for the note
-        const matchedFile = findClosestFile(name, app);
+        const matchedFile = findClosestFile(name);
         if (!matchedFile) {
             console.error(`Could not find any note with the name or similar to "${name}".`);
             return {
@@ -29,7 +27,7 @@ export const search = tool(async (input) => {
         };
     } else {
         // Search for the directory
-        const matchedFolder = findMatchingFolder(name, app);
+        const matchedFolder = findMatchingFolder(name);
         if (!matchedFolder) {
             console.error(`Could not find any directory with the name or similar to "${name}".`);
             return {

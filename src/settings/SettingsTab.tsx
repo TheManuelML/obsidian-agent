@@ -4,7 +4,6 @@ import { allModels } from "./providers";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
-  language: string;
   provider: string;
   model: string;
   googleApiKey: string;
@@ -117,20 +116,6 @@ export class AgentSettingsTab extends PluginSettingTab {
       );
 
     containerEl.createEl('h1', { text: 'Agent Settings' });
-      
-    new Setting(containerEl)
-      .setName('Agent language')
-      .setDesc('Select the language for the agent system prompts.')
-      .addDropdown((dropdown: DropdownComponent) =>
-        dropdown
-          .addOption('en', 'English')
-          .addOption('es', 'Spanish')
-  .setValue(this.plugin.settings.language)
-          .onChange(async (value) => {
-            this.plugin.settings.language = value;
-            await this.plugin.saveSettings();
-          })
-      );
 
     new Setting(containerEl)
       .setName("Agent rules")

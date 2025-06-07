@@ -12,6 +12,7 @@ import { search } from "./tools/obsidian_search";
 import { ObsidianAgentPlugin } from "../plugin";
 import { getSamplePrompt, getApiKey } from "../utils/llm";
 import { formatMessagesForDisplay } from "../utils/formating";
+import { Message } from "src/types";
 
 // Function to create an llm instance
 export function getLLM(provider: string, model: string, apiKey: string) {
@@ -96,7 +97,7 @@ export async function callAgent(
     const agent = plugin.agent;
     if (!agent) throw new Error("Agent is not initialized");
     
-    let sysPrompt = getSamplePrompt('agent', plugin.settings.language);
+    let sysPrompt = getSamplePrompt('agent');
     // Change the system prompt
     if (plugin.settings.rules) sysPrompt += `\n###\nFollow this rules: ${plugin.settings.rules}\n###\n`;
     if (lastMessages.length > 0) sysPrompt += `\n###\nRemember the last ${plugin.settings.amountOfMessagesInMemory} messages:\n${formatMessagesForDisplay(lastMessages)}\n###\n`;

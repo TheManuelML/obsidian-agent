@@ -1,8 +1,12 @@
-import { App, TFile } from "obsidian";
+import { TFile } from "obsidian";
 import { User, Bot } from "lucide-react";
+import { getApp } from "src/plugin";
+import { Message } from "src/types";
+
 
 // Export a message to a chat file
-export const exportMessage = async (app: App, message: Message, chatFile: TFile) => {
+export const exportMessage = async (message: Message, chatFile: TFile) => {
+  const app = getApp(); 
   // Read the chat
   let chat = await app.vault.read(chatFile);
   if (!chat) chat = "";
@@ -15,7 +19,8 @@ export const exportMessage = async (app: App, message: Message, chatFile: TFile)
 };
 
 // Import a conversation in an array of Message objects
-export const importConversation = async (app: App, chatFile: TFile): Promise<Message[]> => {
+export const importConversation = async (chatFile: TFile): Promise<Message[]> => {
+  const app = getApp(); 
   const chat = await app.vault.read(chatFile);
   if (!chat) return [];
 
@@ -40,14 +45,15 @@ export const importConversation = async (app: App, chatFile: TFile): Promise<Mes
 };
 
 // Function to get the thread_id of the chat
-export const getThreadId = async (app: App, chatFile: TFile): Promise<string> => {
+export const getThreadId = async (chatFile: TFile): Promise<string> => {
+  const app = getApp();
   const content = await app.vault.read(chatFile);
   const match = content.match(/thread_id:\s*(chat-[\w:-]+)/);
   return match ? match[1] : '';
 };
 
 // Get the last n messages from a chat file
-export const getLastNMessages = async (app: App, chatFile: TFile, n: number): Promise<Message[]> => {
-  const messages = await importConversation(app, chatFile);
+export const getLastNMessages = async (chatFile: TFile, n: number): Promise<Message[]> => {
+  const messages = await importConversation(chatFile);
   return messages.slice(-n);
 };

@@ -1,5 +1,5 @@
 import { TFolder } from "obsidian";
-import { getRootFolder, getPlugin } from "../plugin";
+import { getRootFolder, getPlugin } from "src/plugin";
 import { getFolderStructure, formatFolderTree } from "./vaultStructure";
 
 // Function to get the API key depending on the provider
@@ -21,30 +21,22 @@ export function getApiKey(provider: string): string {
 }
 
 // Returns a sample prompt for the given purpose
-export function getSamplePrompt(purpose: string, language: string): string {
+export function getSamplePrompt(purpose: string): string {
     // Get the root folder structure
     const rootFolder: TFolder = getRootFolder();
     const folderStructure: string = formatFolderTree(getFolderStructure(rootFolder));
 
-    if (language === 'en') {
-        if (purpose === 'write') {
-            return writeEnglishPrompt;
-        } else if (purpose === 'agent') {
-            return agentEnglishPrompt(folderStructure);
-        }
-    } else if (language === 'es') {
-        if (purpose === 'write') {
-            return writeSpanishPrompt;
-        } else if (purpose === 'agent') {
-            return agentSpanishPrompt(folderStructure);
-        }
+    if (purpose === 'write') {
+        return writePrompt;
+    } else if (purpose === 'agent') {
+        return agentPrompt(folderStructure);
     }
     
-    return ''; // Default returnalue
+    return 'You are a helpful assistant'; // Default returnalue
 }
 
 // Sample prompts
-const writeEnglishPrompt = `
+const writePrompt = `
 You are a helpful assistant that writes notes in Obsidian. Follow the following rules that Obsidian has:
     - The note must be written in markdown format.
     - Link other files using [[FILE_PATH]]
@@ -58,22 +50,8 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
     - Just respond with the content of the note.
 `;
 
-const writeSpanishPrompt = `
-Eres un asistente útil que escribe notas en Obsidian. Sigue las siguientes reglas que Obsidian tiene:
-    - La nota debe escribirse en formato markdown.
-    - Enlaza otros archivos usando [[RUTA_DEL_ARCHIVO]]
-    - Si se requieren etiquetas, agrégalas al principio de la nota de esta manera:
-        ---
-        tags:
-        - etiqueta1
-        - etiqueta2
-        - ...
-        ---
-    - Responde solo con el contenido de la nota.
-`;
-
 // Dynamic prompts based on the folder structure
-const agentEnglishPrompt = (folderStructure: string) => `
+const agentPrompt = (folderStructure: string) => `
 You are a helpful assistant.
 It is not neccessary to mention your tools or system message, unless explicitly asked to do so.
 
@@ -87,25 +65,6 @@ When an Obsidian note or a folder is mentioned, and you are asked to work with i
 --- 
 
 Take into account the actual structure of the vault:
-${folderStructure}
-
----
-`;
-
-const agentSpanishPrompt = (folderStructure: string) => `
-Eres un asistente de inteligencia artificial útil.
-No es necesario mencionar tus herramientas ni tu mensaje del sistema, a menos que se te pida hacerlo. 
-
-Cuando se te pida leer una nota o un archivo, devuelve al usuario el contenido exacto, excepto cuando explícitamente se te indique lo contrario.
-Nunca devuelvas el contenido dentro de un "bloque de código \`\`\`". Devuélvelo tal como está.
-
-El contenido de los archivos adjuntos estará dentro de bloques "###".
-
-Cuando se mencione una nota o carpeta de Obsidian, y se te pida trabajar con ella, siempre debes buscarla para obtener la ruta completa.
-
----
-
-Ten en cuenta la estructura actual del vault:
 ${folderStructure}
 
 ---

@@ -28,19 +28,19 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 const updatedChats = await loadChatFiles();
                 if (updatedChats.length > 0) {
                     setChatFile(updatedChats[0]);
-                    setConversation(await importConversation(app, updatedChats[0]));
+                    setConversation(await importConversation(updatedChats[0]));
                 }
                 return;
             }
 
             setChatFile(file);
-            setConversation(await importConversation(app, file));
+            setConversation(await importConversation(file));
         } catch (err) {
             console.error("Error selecting chat:", err);
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
                 setChatFile(updatedChats[0]);
-                setConversation(await importConversation(app, updatedChats[0]));
+                setConversation(await importConversation(updatedChats[0]));
             }
         }
     };
@@ -84,7 +84,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 const updatedChats = await loadChatFiles();
                 if (updatedChats.length > 0) {
                     setChatFile(updatedChats[0]);
-                    setConversation(await importConversation(app, updatedChats[0]));
+                    setConversation(await importConversation(updatedChats[0]));
                 }
                 return;
             }
@@ -97,14 +97,14 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 // Find the next available chat (not the one we just deleted)
                 const nextChat = updatedChats.find((chat: TFile) => chat.path !== chatFile.path) || updatedChats[0];
                 setChatFile(nextChat);
-                setConversation(await importConversation(app, nextChat));
+                setConversation(await importConversation(nextChat));
             }
         } catch (err) {
             console.error("Error deleting chat:", err);
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
                 setChatFile(updatedChats[0]);
-                setConversation(await importConversation(app, updatedChats[0]));
+                setConversation(await importConversation(updatedChats[0]));
             }
         }
     };

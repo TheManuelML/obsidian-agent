@@ -11,7 +11,7 @@ export const rename = tool(async (input) => {
 
     if (isNote) {
         // Find the matching file path
-        const matchedFile = findClosestFile(path, app);
+        const matchedFile = findClosestFile(path);
         // Check if the file exists
         if (!matchedFile) {
             console.error(`Could not find any note with the name or similar to "${path}".`);
@@ -24,7 +24,7 @@ export const rename = tool(async (input) => {
         // Check if the new name already exists
         if (app.vault.getAbstractFileByPath(newName)) {
             if (!matchedFile.parent) throw new Error('File has no parent directory') 
-            newName = getNextAvailableFileName(newName, app, matchedFile.parent.path);
+            newName = getNextAvailableFileName(newName, matchedFile.parent.path);
         }
 
         // Rename the file
@@ -44,7 +44,7 @@ export const rename = tool(async (input) => {
         }
     } else {
         // Find the matching folder if the path is not absolute
-        const matchingFolder = findMatchingFolder(path, app);
+        const matchingFolder = findMatchingFolder(path);
         // Check if the directory exists
         if (!matchingFolder) {
             console.error('Directory not found:', path);
@@ -62,7 +62,7 @@ export const rename = tool(async (input) => {
 
         // Get a new folder name if the name you choos already exists
         if (app.vault.getFolderByPath(matchingFolder.path)) {
-            newName = getNextAvailableFolderName(newName, app, parentDir);
+            newName = getNextAvailableFolderName(newName, parentDir);
             newPath = parentDir ? `${parentDir}/${newName}` : newName;
         }
 

@@ -1,3 +1,5 @@
+import { Message } from "src/types";
+
 // Formats the tags in order to be used in the note
 export function formatTags(tags: string[]): string {
     return `---\ntags:\n- ${tags.join('\n- ')}\n---\n`;

@@ -19,7 +19,7 @@ export const create_dir = tool(async (input) => {
         // Check if the directory already exists
         if (app.vault.getAbstractFileByPath(dir_path + '/' + name)) {
             // Append a number to the name if it already exists
-            name = getNextAvailableFolderName(name, app, dir_path);
+            name = getNextAvailableFolderName(name, dir_path);
         }
 
         await app.vault.createFolder(dir_path + '/' + name);  
@@ -49,11 +49,10 @@ export const create_dir = tool(async (input) => {
 // List a tree of files and directories in a directory
 export const list_files = tool(async (input) => {
     // Declaring the app and inputs
-    const app = getApp();
     let { dir_path = '/' } = input;
 
     // Find the matching folder if the path is not absolute    
-    const matchingFolder = findMatchingFolder(dir_path, app);
+    const matchingFolder = findMatchingFolder(dir_path);
     
     // Check if the directory exists
     if (!matchingFolder) {

@@ -13,11 +13,10 @@ export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const plugin = getPlugin();
-    let language = plugin.settings.language;
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
 
     // Find the closest folder
-    const matchedFolder = findMatchingFolder(dir_path, app);
+    const matchedFolder = findMatchingFolder(dir_path);
     // Check if the folder exists
     if (!matchedFolder) {
         console.error(`Could not find any folder with the path "${dir_path}"`);
@@ -45,16 +44,10 @@ export const create_note = tool(async (input) => {
                 let apiKey: string = getApiKey(provider);
 
                 // Prompts
-                let sysPrompt = getSamplePrompt('write', language);
-                if (context) {
-                    sysPrompt = language == 'es'
-                        ? `${sysPrompt}\nUsa el siguiente contexto para escribir la nota: ${context}.`
-                        : `${sysPrompt}\nUse the following context to write the note: ${context}.`;
-                }
+                let sysPrompt = getSamplePrompt('write');
+                if (context) sysPrompt = `${sysPrompt}\nUse the following context to write the note: ${context}.`;
                 
-                const humanPrompt = language == 'es' 
-                    ? `Por favor, escribe una nota en markdown sobre ${topic}.` + (tags.length > 0 ? ` Añade las siguientes etiquetas: ${tags.join(', ')}.` : '')
-                    : `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
+                const humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
                 
                 // Initialize LLM
                 const llm = getLLM(provider, model, apiKey);
@@ -84,7 +77,7 @@ export const create_note = tool(async (input) => {
     // Check if the note already exists
     if (app.vault.getAbstractFileByPath(full_path)) {
         // Append a number to the file name if it already exists
-        name = getNextAvailableFileName(name, app, dir_path);
+        name = getNextAvailableFileName(name, dir_path);
         full_path = dir_path + '/' + name;
     }
 
@@ -130,7 +123,7 @@ export const read_note = tool(async (input) => {
     const { fileName } = input;
 
     // Find the closest file
-    const matchedFile = findClosestFile(fileName, app);
+    const matchedFile = findClosestFile(fileName);
     
     // Check if the file exists
     if (!matchedFile) {
@@ -170,11 +163,10 @@ export const read_note = tool(async (input) => {
 export const edit_note = tool(async (input) => {
     const app = getApp();
     const plugin = getPlugin();
-    let language = plugin.settings.language || 'en';
     let { fileName, newContent } = input;
 
     // Find the closest file
-    const matchedFile = findClosestFile(fileName, app);
+    const matchedFile = findClosestFile(fileName);
     
     // Check if the file exists
     if (!matchedFile) {
@@ -190,10 +182,8 @@ export const edit_note = tool(async (input) => {
     let newNoteContent: string = '';
 
     // Prompts
-    let sysPrompt = getSamplePrompt('write', language);
-    let humanPrompt = language == 'es' 
-        ? `Por favor, actualiza el contenido de la siguiente nota: \n### NOTA ###\n${text}\n### FIN DE LA NOTA ###\nUsa este tema o contenido específico para actualizar la nota: ${newContent}.\nDEVUELVE LA NOTA COMPLETA CON EL CONTENIDO ACTUALIZADO.`
-        : `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`
+    let sysPrompt = getSamplePrompt('write');
+    let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`
     
     // Content generation
     try {

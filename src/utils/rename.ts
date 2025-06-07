@@ -1,7 +1,9 @@
-import { App } from "obsidian";
+import { getApp } from "src/plugin";
 
 // Append a number to a name if the file or the folder already exists
-export function getNextAvailableFileName(base: string, app: App, parentPath: string): string {
+export function getNextAvailableFileName(base: string, parentPath: string): string {
+    const app = getApp();
+    
     let i = 1;
     let newName = base;
     let fullPath = parentPath ? `${parentPath}/${newName}` : newName;
@@ -18,7 +20,9 @@ export function getNextAvailableFileName(base: string, app: App, parentPath: str
 }
 
 // Append a number to a folder name if the folder already exists
-export function getNextAvailableFolderName(base: string, app: App, parentPath: string): string {
+export function getNextAvailableFolderName(base: string, parentPath: string): string {
+    const app = getApp();
+    
     let i = 1;
     let newName = base;
     let fullPath = parentPath ? `${parentPath}/${newName}` : newName;

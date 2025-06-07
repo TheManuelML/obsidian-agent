@@ -1,7 +1,9 @@
-import { App, TFile, TFolder } from "obsidian";
+import { TFile, TFolder } from "obsidian";
+import { getApp } from "src/plugin";
 
 // Finds the closest file path to the target
-export function findClosestFile(fileName: string, app: App): TFile | null {
+export function findClosestFile(fileName: string): TFile | null {
+    const app = getApp();
     const exactMatch = app.vault.getFileByPath(fileName);
     if (exactMatch) return exactMatch;
     
@@ -12,7 +14,8 @@ export function findClosestFile(fileName: string, app: App): TFile | null {
 }
 
 // Finds the closest folder path to the target
-export function findMatchingFolder(dirName: string, app: App): TFolder | null {
+export function findMatchingFolder(dirName: string): TFolder | null {
+    const app = getApp();
     const exactMatch = app.vault.getFolderByPath(dirName);
     if (exactMatch) return exactMatch;
 
