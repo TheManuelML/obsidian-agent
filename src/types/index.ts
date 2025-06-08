@@ -1,19 +1,13 @@
 import { TFile } from "obsidian";
-import { ReactElement, RefObject } from "react";
+import { RefObject } from "react";
 
-// Models related interfaces
-export interface Model {
-    provider: string,
-    name: string,
-    readImage: boolean,
-    webSearch: boolean,
-    embedding: boolean,
-    streaming: boolean,
+export enum MessageSender {    
+    USER = 'user',
+    BOT = 'bot'
 }
 
-// Chat related interfaces
 export interface Message {
-    sender: 'user' | 'bot';
+    sender: MessageSender.USER | MessageSender.BOT;
     content: string;
     timestamp: string;
 }

@@ -4,7 +4,7 @@ import parse, { HTMLReactParserOptions, Element } from "html-react-parser";
 import { marked } from "marked";
 import { getApp } from "../../plugin";
 import { parseCodeSnippets, parseLinkToNote } from "../../utils/parsing";
-import { ChatMessagesProps, Message } from "../../types";
+import { ChatMessagesProps, Message, MessageSender } from "../../types";
 
 // Custom components for special tags
 const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (
@@ -107,18 +107,18 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ conversation, isLoad
                 }}>
                     <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem" }}>
                         <div style={{ 
-                            opacity: msg.sender === 'user' 
+                            opacity: msg.sender === MessageSender.USER
                                 ? "0.8" 
                                 : "1.0",
-                            color: msg.sender === 'user'
+                            color: msg.sender === MessageSender.USER
                                 ? "var(--interactive-accent)"
                                 : "var(--interactive-accent-hover)",
                         }}>
-                            {cloneElement(msg.sender === 'user' ? <User/> : <Bot/>, { size: "28" })}
+                            {cloneElement(msg.sender === MessageSender.USER ? <User/> : <Bot/>, { size: "28" })}
                         </div>
                         <span style={{ 
                             opacity: '0.8', 
-                            color: msg.sender === 'user' ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
+                            color: msg.sender === MessageSender.USER ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
                             fontSize: "var(--font-ui-smaller)",
                             fontWeight: "semibold",
                         }}>
@@ -169,7 +169,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ conversation, isLoad
                                     wordBreak: "break-word",
                                     overflowWrap: "break-word",
                                     opacity: "0.9",
-                                    color: msg.sender === 'user' 
+                                    color: msg.sender === MessageSender.USER
                                         ? "var(--text-muted)" 
                                         : "var(--text-normal)"
                                 }}

@@ -1,18 +1,21 @@
 import React, { useState, useRef } from "react";
 import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
 import { TFile } from "obsidian";
-import { getApp, getPlugin } from "../../plugin";
+import { getApp, getPlugin, getSettings } from "../../plugin";
 import { AddContextModal } from "../modal/AddContextModal";
 import { ChooseModelModal } from "../modal/ChooseModelModal";
-import { Model, ChatInputProps } from "../../types/index";
+import { ChatInputProps } from "../../types/index";
+import { Model } from "src/settings/models";
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const app = getApp();
   const plugin = getPlugin();
+  const settings = getSettings();
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
-  let [selectedModel, setSelectedModel] = useState(plugin.settings.model)
+  let [selectedModel, setSelectedModel] = useState(settings.model)
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -70,7 +73,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const openModelPicker = () => {
     new ChooseModelModal(app, (model: Model) => {
       // Set the selected model in the settings
-      plugin.settings.model = model.name;
+      settings.model = model.name;
       setSelectedModel(model.name);
       return;
     }).open();

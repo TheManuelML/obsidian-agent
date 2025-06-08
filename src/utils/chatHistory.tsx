@@ -1,7 +1,6 @@
 import { TFile } from "obsidian";
-import { User, Bot } from "lucide-react";
 import { getApp } from "src/plugin";
-import { Message } from "src/types";
+import { Message, MessageSender } from "src/types";
 
 
 // Export a message to a chat file
@@ -33,7 +32,7 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
   ];
 
   for (const match of messageBlocks) {
-    const sender = match[1].toLowerCase() as 'user' | 'bot';
+    const sender = match[1].toLowerCase() === 'user' ? MessageSender.USER : MessageSender.BOT;
     const timestamp = match[2].trim();
     const content = match[3].trim();
     

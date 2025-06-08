@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, User } from "lucide-react";
 import { TFile, TFolder } from "obsidian";
-import { getApp, getPlugin } from "../../plugin";
+import { getApp, getPlugin, getSettings } from "../../plugin";
 import { ChatInput } from "./Input";
 import { callAgent } from "../../backend/agent";
 import { ChatForm } from "./ChatForm";
@@ -9,11 +8,12 @@ import { ChatMessages } from "./ChatMessages";
 import { formatTagsForChat } from "../../utils/formating";
 import { processAttachedImages } from "../../utils/processImages";
 import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../../utils/chatHistory";
-import { Message } from "../../types/index";
+import { Message, MessageSender } from "../../types/index";
 
 export const Chat: React.FC = () => {
   const app = getApp();
   const plugin = getPlugin();
+  const settings = getSettings();
   
   const [conversation, setConversation] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,10 +24,10 @@ export const Chat: React.FC = () => {
 
   // Create a new chat file
   const handleCreateChat = async () => {
-    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    let chatFolder: TFolder | null = app.vault.getFolderByPath(settings.chatsFolder);
     if (!chatFolder) {
       try {
-        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+        chatFolder = await app.vault.createFolder(settings.chatsFolder);
       } catch (err) {
         console.error("Error creating chat folder:", err);
         return;
@@ -55,7 +55,7 @@ export const Chat: React.FC = () => {
 
   // Load available chat files
   const loadChatFiles = async (): Promise<TFile[]> => {
-    const chatFolder = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    const chatFolder = app.vault.getFolderByPath(settings.chatsFolder);
     if (!chatFolder) return [];
 
     const files = app.vault.getFiles().filter(file => 
@@ -69,10 +69,10 @@ export const Chat: React.FC = () => {
   const ensureActiveChat = async (): Promise<TFile | null> => {
     if (chatFile) return chatFile;
     
-    let chatFolder: TFolder | null = app.vault.getFolderByPath(plugin.settings.chatsFolder);
+    let chatFolder: TFolder | null = app.vault.getFolderByPath(settings.chatsFolder);
     if (!chatFolder) {
       try {
-        chatFolder = await app.vault.createFolder(plugin.settings.chatsFolder);
+        chatFolder = await app.vault.createFolder(settings.chatsFolder);
       } catch (err) {
         console.error("Error creating chat folder:", err);
         return null;
@@ -176,7 +176,7 @@ export const Chat: React.FC = () => {
     const time = new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString();
     
     // Add user message immediately
-    const userMessage = { sender: 'user' as const, content: message, timestamp: time };
+    const userMessage = { sender: MessageSender.USER, content: message, timestamp: time };
     setConversation((prev) => [...prev, userMessage]);
     
     // Save the message in the chat file
@@ -222,12 +222,12 @@ export const Chat: React.FC = () => {
     // Just append the last messags of the chat if it is the first time sending a message after a restart
     let lastMessages: Message[] = [];
     if (!hasSentFirst.current) {
-      lastMessages = await getLastNMessages(activeChatFile, plugin.settings.amountOfMessagesInMemory * 2);
+      lastMessages = await getLastNMessages(activeChatFile, settings.amountOfMessagesInMemory * 2);
       hasSentFirst.current = true;
     }
     try {
-      const response = await callAgent(plugin, fullMessage, threadId, imagesToSend, lastMessages);
-      const botMessage = { sender: 'bot' as const, content: response, timestamp: time };
+      const response = await callAgent(fullMessage, threadId, imagesToSend, lastMessages);
+      const botMessage = { sender: MessageSender.BOT as const, content: response, timestamp: time };
       setConversation((prev) => [...prev, botMessage]);
 
       // Verify chat file still exists before saving bot message
@@ -240,7 +240,7 @@ export const Chat: React.FC = () => {
     
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      const errorBotMessage = { sender: 'bot' as const, content: `❌ ERROR: ${errorMessage}`, timestamp: time };
+      const errorBotMessage = { sender: MessageSender.BOT as const, content: `❌ ERROR: ${errorMessage}`, timestamp: time };
       setConversation((prev) => [...prev, errorBotMessage]);
 
       // Verify chat file still exists before saving error message

@@ -2,17 +2,16 @@ import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
 import { getApp, getPlugin } from "../../plugin";
-import { getLLM } from "../agent";
+import { ModelManager } from '../router/modelManager';
 import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName } from "../../utils/rename";
 import { formatTags } from '../../utils/formating';
-import { getSamplePrompt, getApiKey } from '../../utils/llm';
+import { getSamplePrompt } from '../../utils/llm';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
-    const plugin = getPlugin();
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
 
     // Find the closest folder
@@ -37,12 +36,6 @@ export const create_note = tool(async (input) => {
     if (!content) {
         if (topic && useLLM) {
             try {
-                const provider = plugin.settings.provider;
-                const model = plugin.settings.model;
-            
-                // Choose the apiKey depending on the provider
-                let apiKey: string = getApiKey(provider);
-
                 // Prompts
                 let sysPrompt = getSamplePrompt('write');
                 if (context) sysPrompt = `${sysPrompt}\nUse the following context to write the note: ${context}.`;
@@ -50,7 +43,7 @@ export const create_note = tool(async (input) => {
                 const humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
                 
                 // Initialize LLM
-                const llm = getLLM(provider, model, apiKey);
+                const llm = ModelManager.getInstance().getModel();
                 if (!llm) throw new Error("Failed to initialize LLM");
 
                 // Invoke the LLM
@@ -188,13 +181,7 @@ export const edit_note = tool(async (input) => {
     // Content generation
     try {
         if (newContent) {
-            const provider = plugin.settings.provider;
-            const model = plugin.settings.model;
-            
-            // Choose the apiKey depending on the provider
-            let apiKey: string = getApiKey(provider);
-
-            const llm = getLLM(provider, model, apiKey);
+            const llm = ModelManager.getInstance().getModel();
             if (!llm) throw new Error("Failed to initialize LLM");
             
             const response = await llm.invoke([

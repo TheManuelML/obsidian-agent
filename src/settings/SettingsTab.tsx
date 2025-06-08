@@ -1,6 +1,6 @@
 import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin } from "../plugin";
-import { allAvailableModels } from "./providers";
+import { allAvailableModels } from "./models";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {

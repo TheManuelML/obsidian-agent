@@ -1,7 +1,6 @@
 import { FuzzySuggestModal, App } from 'obsidian';
-import { getPlugin } from 'src/plugin';
-import { allAvailableModels } from 'src/settings/providers';
-import { Model } from 'src/types';
+import { getSettings } from 'src/plugin';
+import { Model, allAvailableModels } from 'src/settings/models';
 
 export class ChooseModelModal extends FuzzySuggestModal<Model> {
   private onChoose: (model: Model) => void;
@@ -10,9 +9,9 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
 
   constructor(app: App, onChoose: (model: Model) => void) {
     super(app)
-    const plugin = getPlugin(); 
+    const settings = getSettings(); 
     this.onChoose = onChoose;
-    this.activeModel = plugin.settings.model;
+    this.activeModel = settings.model;
     this.availableModels = allAvailableModels;
   }
 

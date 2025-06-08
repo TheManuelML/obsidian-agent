@@ -97,13 +97,21 @@ export function getApp(): App {
 export function setPlugin(p: ObsidianAgentPlugin) {
   pluginInstance = p;
 }
-
 // Function that returns the plugin instance
 export function getPlugin(): ObsidianAgentPlugin {
   if (!pluginInstance) {
     throw new Error("Plugin instance not set yet");
   }
   return pluginInstance;
+}
+
+// Function that return the settings
+export function getSettings(): AgentSettings {
+  if (!pluginInstance) {
+    throw new Error("Plugin instance not set yet");
+  }
+  const plugin = getPlugin();
+  return plugin.settings
 }
 
 // Function that returns the root folder of the vault

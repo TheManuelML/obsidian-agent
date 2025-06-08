@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { TFile } from "obsidian";
-import { getApp, getPlugin } from "../../plugin";
+import { getApp, getSettings } from "../../plugin";
 import { importConversation } from "../../utils/chatHistory";
 import { ChatFormProps } from "../../types/index";
 
@@ -14,7 +14,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     handleCreateChat
 }) => {
     const app = getApp();
-    const plugin = getPlugin();
+    const settings = getSettings();
 
     const [isRenaming, setIsRenaming] = useState(false);
     const [newChatName, setNewChatName] = useState("");
@@ -49,7 +49,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     const handleRenameChat = async () => {
         if (!chatFile || !newChatName.trim()) return;
 
-        const newPath = `${plugin.settings.chatsFolder}/${newChatName}.md`;
+        const newPath = `${settings.chatsFolder}/${newChatName}.md`;
         try {
             await app.fileManager.renameFile(chatFile, newPath);
             await loadChatFiles();

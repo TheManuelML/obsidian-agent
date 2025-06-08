@@ -1,24 +1,6 @@
 import { TFolder } from "obsidian";
-import { getRootFolder, getPlugin } from "src/plugin";
+import { getRootFolder } from "src/plugin";
 import { getFolderStructure, formatFolderTree } from "./vaultStructure";
-
-// Function to get the API key depending on the provider
-export function getApiKey(provider: string): string {
-    const plugin = getPlugin();
-    
-    if (provider === 'google') {
-        if (!plugin.settings.googleApiKey) throw new Error("Google API key is required for Google provider.");
-        return plugin.settings.googleApiKey;
-    } else if (provider === 'openai') {
-        if (!plugin.settings.openaiApiKey) throw new Error("OpenAI API key is required for OpenAI provider.");
-        return plugin.settings.openaiApiKey;
-    } else if (provider === 'anthropic') {
-        if (!plugin.settings.anthropicApiKey) throw new Error("Anthropic API key is required for Anthropic provider.");
-        return plugin.settings.anthropicApiKey;
-    }
-    
-    return '';
-}
 
 // Returns a sample prompt for the given purpose
 export function getSamplePrompt(purpose: string): string {
