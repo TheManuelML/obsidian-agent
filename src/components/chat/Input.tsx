@@ -12,6 +12,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
+  let [selectedModel, setSelectedModel] = useState(plugin.settings.model)
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -69,7 +70,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const openModelPicker = () => {
     new ChooseModelModal(app, (model: Model) => {
       // Set the selected model in the settings
-      plugin.settings.model = model.name
+      plugin.settings.model = model.name;
+      setSelectedModel(model.name);
       return;
     }).open();
   }
@@ -243,21 +245,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
               <button
                   onClick={openModelPicker}
                   style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
+                    backgroundColor: "var(--background-secondary-alt)",
                     border: "none",
-                    borderRadius: "100%",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                    gap: "0.25rem",
+                    borderRadius: "var(--radius-s)",
+                    padding: "0.5rem",
                     cursor: "pointer",
                   }}
                 >
-                  <AtSign size={16} style={{ stroke: "var(--text-muted)" }} />
-                  <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
+                  {selectedModel}
                 </button>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>

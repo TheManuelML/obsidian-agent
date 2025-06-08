@@ -22,7 +22,7 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
 
   protected formatModelName(model: Model, isActive: boolean): string {
     let name = model.name;
-    if (isActive) model.name += " (current)";
+    if (isActive) name += " (current)";
     return name;
   }
 
