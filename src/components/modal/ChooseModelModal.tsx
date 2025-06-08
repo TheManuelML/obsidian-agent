@@ -20,7 +20,7 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     return this.availableModels;
   }
 
-  protected formatNoteTitle(model: Model, isActive: boolean): string {
+  protected formatModelName(model: Model, isActive: boolean): string {
     let name = model.name;
     if (isActive) model.name += " (current)";
     return name;
@@ -32,7 +32,7 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
 
   getItemText(item: Model): string {
     const isActive = item.name === this.activeModel;
-    return this.formatNoteTitle(item, isActive);
+    return this.formatModelName(item, isActive);
   }
 
   onChooseItem(item: Model): void {

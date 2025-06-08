@@ -13,6 +13,6 @@ export function formatTagsForChat(creationDate: string, thread_id: string): stri
 // Format messages to a string for display
 export const formatMessagesForDisplay = (messages: Message[]): string => {
     return messages.map(message => {
-      return `**${message.type.toUpperCase()}** - *${message.timestamp}*:\n${message.text}`;
+      return `**${message.sender.toUpperCase()}** - *${message.timestamp}*:\n${message.content}`;
     }).join('\n\n');
 }

@@ -1,6 +1,7 @@
 import { TFile } from "obsidian";
 import { ReactElement, RefObject } from "react";
 
+// Models related interfaces
 export interface Model {
     provider: string,
     name: string,
@@ -10,11 +11,10 @@ export interface Model {
     streaming: boolean,
 }
 
-
+// Chat related interfaces
 export interface Message {
-    sender: ReactElement;
-    text: string;
-    type: 'user' | 'bot';
+    sender: 'user' | 'bot';
+    content: string;
     timestamp: string;
 }
 

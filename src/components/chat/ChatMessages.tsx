@@ -1,5 +1,5 @@
 import React, { cloneElement } from "react";
-import { Clipboard, Bot, SquareArrowOutUpRight } from "lucide-react";
+import { Clipboard, Bot, SquareArrowOutUpRight, User } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element } from "html-react-parser";
 import { marked } from "marked";
 import { getApp } from "../../plugin";
@@ -107,25 +107,25 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ conversation, isLoad
                 }}>
                     <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem" }}>
                         <div style={{ 
-                            opacity: msg.type === 'user' 
+                            opacity: msg.sender === 'user' 
                                 ? "0.8" 
                                 : "1.0",
-                            color: msg.type === 'user'
+                            color: msg.sender === 'user'
                                 ? "var(--interactive-accent)"
                                 : "var(--interactive-accent-hover)",
                         }}>
-                            {cloneElement(msg.sender as React.ReactElement<any>, { size: "28" })}
+                            {cloneElement(msg.sender === 'user' ? <User/> : <Bot/>, { size: "28" })}
                         </div>
                         <span style={{ 
                             opacity: '0.8', 
-                            color: msg.type === 'user' ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
+                            color: msg.sender === 'user' ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)', 
                             fontSize: "var(--font-ui-smaller)",
                             fontWeight: "semibold",
                         }}>
                             {msg.timestamp.toString()}
                         </span>
                     </div>
-                    {parseCodeSnippets(msg.text).map((frag, j) => (
+                    {parseCodeSnippets(msg.content).map((frag, j) => (
                         frag.isCode ? (
                             <div key={j} style={{ position: "relative", marginTop: "0.5rem" }}>
                                 <button 
@@ -169,7 +169,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ conversation, isLoad
                                     wordBreak: "break-word",
                                     overflowWrap: "break-word",
                                     opacity: "0.9",
-                                    color: msg.type === 'user' 
+                                    color: msg.sender === 'user' 
                                         ? "var(--text-muted)" 
                                         : "var(--text-normal)"
                                 }}

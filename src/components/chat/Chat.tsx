@@ -176,7 +176,7 @@ export const Chat: React.FC = () => {
     const time = new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString();
     
     // Add user message immediately
-    const userMessage = { sender: <User size={20}/>, text: message, type: 'user' as const, timestamp: time };
+    const userMessage = { sender: 'user' as const, content: message, timestamp: time };
     setConversation((prev) => [...prev, userMessage]);
     
     // Save the message in the chat file
@@ -227,7 +227,7 @@ export const Chat: React.FC = () => {
     }
     try {
       const response = await callAgent(plugin, fullMessage, threadId, imagesToSend, lastMessages);
-      const botMessage = { sender: <Bot size={20}/>, text: response, type: 'bot' as const, timestamp: time };
+      const botMessage = { sender: 'bot' as const, content: response, timestamp: time };
       setConversation((prev) => [...prev, botMessage]);
 
       // Verify chat file still exists before saving bot message
@@ -240,7 +240,7 @@ export const Chat: React.FC = () => {
     
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      const errorBotMessage = { sender: <Bot size={20}/>, text: `❌ ERROR: ${errorMessage}`, type: 'bot' as const, timestamp: time };
+      const errorBotMessage = { sender: 'bot' as const, content: `❌ ERROR: ${errorMessage}`, timestamp: time };
       setConversation((prev) => [...prev, errorBotMessage]);
 
       // Verify chat file still exists before saving error message
