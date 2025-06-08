@@ -1,6 +1,16 @@
 import { TFile } from "obsidian";
 import { ReactElement, RefObject } from "react";
 
+export interface Model {
+    provider: string,
+    name: string,
+    readImage: boolean,
+    webSearch: boolean,
+    embedding: boolean,
+    streaming: boolean,
+}
+
+
 export interface Message {
     sender: ReactElement;
     text: string;

@@ -2,9 +2,9 @@ import React, { useState, useRef } from "react";
 import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getPlugin } from "../../plugin";
-import { ContextNoteModal } from "../modal/ContextNoteModal";
-import { allModels } from "../../settings/providers";
-import { ChatInputProps } from "../../types/index";
+import { AddContextModal } from "../modal/AddContextModal";
+import { ChooseModelModal } from "../modal/ChooseModelModal";
+import { Model, ChatInputProps } from "../../types/index";
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const app = getApp();
@@ -14,16 +14,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [message, setMessage] = useState("");
   const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-
-  // Function to handle model change
-  const handleModelChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedModel = allModels.find(m => m.model === event.target.value);
-    if (selectedModel && plugin) {
-      plugin.settings.model = selectedModel.model;
-      plugin.settings.provider = selectedModel.provider;
-      await plugin.saveSettings();
-    }
-  };
 
   // Function to handle the message sending
   const handleSend = async () => {
@@ -58,9 +48,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Function to open the ContextNoteModal
+  // Function to open the AddContextModal
   const openNotePicker = () => {
-    new ContextNoteModal(app, (note: TFile) => {
+    new AddContextModal(app, (note: TFile) => {
       setselectedNotes((prev) => {
         // If no previous notes, create new array with the note
         if (!prev) return [note];
@@ -72,6 +62,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
         // Add new note to existing array
         return [...prev, note];
       });
+    }).open();
+  }
+
+  // Function to open the ChooseModelModal
+  const openModelPicker = () => {
+    new ChooseModelModal(app, (model: Model) => {
+      // Set the selected model in the settings
+      plugin.settings.model = model.name
+      return;
     }).open();
   }
 
@@ -241,25 +240,25 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
               </button>
             </div>
             <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
-              <select
-                onChange={handleModelChange}
-                style={{
-                  backgroundColor: "var(--dropdown-background)",
-                  border: "1px solid var(--dropdown-background)",
-                  borderRadius: "var(--radius-s)",
-                  padding: "0.25rem 0.5rem",
-                  fontSize: "var(--font-ui-small)",
-                  color: "var(--text-normal)",
-                  cursor: "pointer",
-                }}
-                defaultValue={plugin.settings.model || "gemini-2.0-flash"}
-              >
-                {allModels.map(({ model }) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
+              <button
+                  onClick={openModelPicker}
+                  style={{
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    border: "none",
+                    borderRadius: "100%",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                    gap: "0.25rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <AtSign size={16} style={{ stroke: "var(--text-muted)" }} />
+                  <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
+                </button>
             </div>
             <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
               <div>

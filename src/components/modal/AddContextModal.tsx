@@ -1,6 +1,6 @@
 import { FuzzySuggestModal, TFile, App } from 'obsidian';
 
-export class ContextNoteModal extends FuzzySuggestModal<TFile> {
+export class AddContextModal extends FuzzySuggestModal<TFile> {
   private onChoose: (file: TFile) => void;
   protected activeNote: TFile | null;
   protected availableNotes: TFile[];

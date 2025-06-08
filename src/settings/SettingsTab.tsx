@@ -1,6 +1,6 @@
 import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin } from "../plugin";
-import { allModels } from "./providers";
+import { allAvailableModels } from "./providers";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
@@ -13,8 +13,6 @@ export interface AgentSettings {
   chatsFolder: string;
   amountOfMessagesInMemory: number;
 }
-
-
 
 // Settings tab class
 export class AgentSettingsTab extends PluginSettingTab {
@@ -38,8 +36,8 @@ export class AgentSettingsTab extends PluginSettingTab {
       .addDropdown((dropdown: DropdownComponent) => {
 
         // Add all models to dropdown
-        allModels.forEach(({ model }) => {
-          dropdown.addOption(model, model);
+        allAvailableModels.forEach((model) => {
+          dropdown.addOption(model.name, model.name);
         });
 
         // Set current model
@@ -47,7 +45,7 @@ export class AgentSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.model)
           .onChange(async (value) => {
             // Find the provider for the selected model
-            const selectedModel = allModels.find(m => m.model === value);
+            const selectedModel = allAvailableModels.find(m => m.name === value);
             if (selectedModel) {
               this.plugin.settings.model = value;
               this.plugin.settings.provider = selectedModel.provider;
