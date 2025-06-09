@@ -1,10 +1,9 @@
-import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
-import { getSettings } from "src/plugin";
-
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
+import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
+import { getSettings } from "src/plugin";
 
 // Map the model provider with its type in Langchain
 const ChatModelTypeMap = {
@@ -13,7 +12,7 @@ const ChatModelTypeMap = {
     [ModelProvider.ANTHROPIC]: ChatAnthropic,
 } as const;
 
-// Class that creates the model
+// Class that creates the model based on the provider
 export class ModelManager {
     private static instance: ModelManager;
 

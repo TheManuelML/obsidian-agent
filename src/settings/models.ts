@@ -23,15 +23,11 @@ export interface ModelConfig {
   temperature?: number;
   streaming: boolean;
   maxRetries: number;
-  maxConcurrency?: number;
-  maxTokens?: number;
-  maxCompletionTokens?: number;
   apiKey?: string;
-  enableCors?: boolean;
-  safetySettings?: SafetySetting[]
+  safetySettings?: SafetySetting[] // For google and vertexAI models
 }
 
-// Available names and their providers
+// Available models
 export const allAvailableModels: Model[] = [
     { 
       provider: ModelProvider.GOOGLE, 

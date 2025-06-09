@@ -11,7 +11,7 @@ let pluginInstance: ObsidianAgentPlugin;
 export class ObsidianAgentPlugin extends Plugin {
   settings!: AgentSettings;
 
-  // Properties for the agent
+  // Agent dinamic storage
   agent?: Runnable;
   modelName?: string;
   memorySaver?: MemorySaver;

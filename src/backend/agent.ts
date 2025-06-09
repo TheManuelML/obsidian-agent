@@ -1,51 +1,9 @@
 import { HumanMessage } from "@langchain/core/messages";
-import { MemorySaver } from "@langchain/langgraph";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { create_note, read_note, edit_note } from "./tools/obsidian_files";
-import { create_dir, list_files } from "./tools/obsidian_dirs";
-import { rename } from "./tools/obsidian_rename";
-import { search } from "./tools/obsidian_search";
 import { getPlugin, getSettings } from "../plugin";
 import { getSamplePrompt } from "../utils/llm";
 import { formatMessagesForDisplay } from "../utils/formating";
 import { Message } from "src/types";
-import { ModelManager } from "./router/modelManager";
-
-// Function to create the agent and store it in the plugin
-export function initializeAgent() {
-    const plugin = getPlugin();
-    const settings = getSettings();
-    
-    if (settings.model != plugin.modelName) {
-        const llm = ModelManager.getInstance().getModel();
-        if (!llm) throw new Error("Failed to initialize LLM with LangChain");
-        
-        // MemorySaver works in the RAM. Each time agent is initialized, we create a new instance of MemorySaver.
-        // Use settings: amountOfMessagesInMemory
-        // This allows the agent to read N numbers of messages in the chat history just after a restart.
-        const memorySaver = new MemorySaver();
-        
-        plugin.agent = createReactAgent({
-            llm,
-            tools: [
-                create_note,
-                read_note,
-                edit_note,
-                create_dir,
-                list_files,
-                search,
-                rename,
-            ],
-            checkpointSaver: memorySaver,
-        });
-
-        // Recycle the memory saver, only create a new one if it doesn't exist
-        if (!plugin.memorySaver) plugin.memorySaver = new MemorySaver();
-
-        // Update the model name
-        plugin.modelName = settings.model;
-    }
-}
+import { initializeAgent } from "./managers/agentManager";
 
 // Function to call the agent
 export async function callAgent(

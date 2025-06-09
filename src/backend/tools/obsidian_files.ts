@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
 import { getApp, getPlugin } from "../../plugin";
-import { ModelManager } from '../router/modelManager';
+import { ModelManager } from '../managers/modelManager';
 import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName } from "../../utils/rename";
 import { formatTags } from '../../utils/formating';
