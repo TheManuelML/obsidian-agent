@@ -18,7 +18,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [selectedNotes, setselectedNotes] = useState<TFile[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
-  // Function to handle the message sending
+  // Function to handle the message sending to the Chat
   const handleSend = async () => {
     if (message.trim()) {
       onSend(message.trim(), selectedNotes, selectedImages); // Call the parent function to handle the message
@@ -26,9 +26,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       // Clear the input fields
       setMessage("");
       setSelectedImages([]);
-      setselectedNotes([]); // Clear selected notes after sending
+      setselectedNotes([]);
 
-      // Reset height
+      // Reset height of the textarea
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
     }
   };
@@ -45,7 +45,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       imageInputRef.current.value = '';
     }
   };
-
+  
   // Function to remove a image from the selected images
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
@@ -67,6 +67,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       });
     }).open();
   }
+  
+  // Removes a note from the selected notes
+  const removeNote = (toRemove: TFile) => {
+    setselectedNotes((prev) => {
+      if (!prev) return [];
+      
+      const filteredNotes = prev.filter((note) => note.path !== toRemove.path);
+      return filteredNotes;
+    });
+  };
 
   // Function to open the ChooseModelModal
   const openModelPicker = () => {
@@ -81,16 +91,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       return;
     }).open();
   }
-
-  // Function to remove a note from the selected notes
-  const removeNote = (toRemove: TFile) => {
-    setselectedNotes((prev) => {
-      if (!prev) return [];
-      
-      const filteredNotes = prev.filter((note) => note.path !== toRemove.path);
-      return filteredNotes;
-    });
-  };
 
   return (
     <div style={{ width: "100%" }}>
