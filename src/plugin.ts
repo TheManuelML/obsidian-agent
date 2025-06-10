@@ -1,5 +1,3 @@
-import { MemorySaver } from '@langchain/langgraph';
-import { Runnable } from '@langchain/core/runnables';
 import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
 import { ChatView, VIEW_TYPE_AGENT } from "./components/chat/View";
 import { AgentSettings, AgentSettingsTab } from "./settings/SettingsTab";
@@ -10,11 +8,6 @@ let pluginInstance: ObsidianAgentPlugin;
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
   settings!: AgentSettings;
-
-  // Agent dinamic storage
-  agent?: Runnable;
-  modelName?: string;
-  memorySaver?: MemorySaver;
 
   // Method that loads the plugin
   async onload() {
