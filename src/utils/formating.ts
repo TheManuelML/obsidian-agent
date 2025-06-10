@@ -1,5 +1,3 @@
-import { Message } from "src/types";
-
 // Formats the tags in order to be used in the note
 export function formatTags(tags: string[]): string {
     return `---\ntags:\n- ${tags.join('\n- ')}\n---\n`;
@@ -8,11 +6,4 @@ export function formatTags(tags: string[]): string {
 // Formats the tags for the chat metadata
 export function formatTagsForChat(creationDate: string, thread_id: string): string {
     return `---\ncreation_date: ${creationDate}\nthread_id: ${thread_id}\ntags:\n- chat\n---\n`;
-}
-
-// Format messages to a string for display
-export const formatMessagesForDisplay = (messages: Message[]): string => {
-    return messages.map(message => {
-      return `**${message.sender.toUpperCase()}** - *${message.timestamp}*:\n${message.content}`;
-    }).join('\n\n');
 }

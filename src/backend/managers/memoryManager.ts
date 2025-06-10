@@ -1,6 +1,6 @@
 import { MemorySaver } from "@langchain/langgraph";
 
-// Class that creates and cleans the memory
+// Class that creates and cleans a singleton memory
 export class MemoryManager {
   private static instance: MemoryManager;
   private memorySaver: MemorySaver;
@@ -9,6 +9,7 @@ export class MemoryManager {
     this.memorySaver = this.createMemorySaver();
   }
 
+  // Gets the instance of the singleton
   static getInstance(): MemoryManager {
     if (!MemoryManager.instance) {
       MemoryManager.instance = new MemoryManager();

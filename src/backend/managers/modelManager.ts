@@ -73,13 +73,17 @@ export class ModelManager {
     // Returns the Langchain model ready to invoke
     public getModel() {
         const settings = getSettings();
-        
+
+        // Search the selected model on the model list 
         const model = allAvailableModels.find(m => m.name === settings.model);
         if (!model) throw new Error ("No model was provided in the settings");
         
+        // Configure the model depending on the provider
         const config: ModelConfig = this.getModelConfig(model);
+        // Map the langchain class
         const ChatModelClass = ChatModelTypeMap[model.provider];
 
+        // Create the chat model
         const chatModel = new ChatModelClass({
             model: config.modelName,
             temperature: config.temperature,

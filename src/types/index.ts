@@ -10,10 +10,11 @@ export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
     timestamp: string;
+    isErrorMessage?: boolean;
 }
 
 export interface ChatInputProps {
-    onSend: (message: string, notes?: TFile[] | null, images?: File[] | null) => void;
+    onSend: (message: string, notes?: TFile[], images?: File[]) => void;
 }
 
 export interface ChatFormProps {

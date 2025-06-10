@@ -1,18 +1,20 @@
+// TODO: Modularize the chat handlers
+
 import { useState, useRef, useEffect } from "react";
 import { TFile, TFolder } from "obsidian";
-import { getApp, getPlugin, getSettings } from "../../plugin";
+import { getApp, getSettings } from "src/plugin";
 import { ChatInput } from "./Input";
-import { callAgent } from "../../backend/agent";
 import { ChatForm } from "./ChatForm";
 import { ChatMessages } from "./ChatMessages";
-import { formatTagsForChat } from "../../utils/formating";
-import { processAttachedImages } from "../../utils/processImages";
-import { exportMessage, importConversation, getThreadId, getLastNMessages } from "../../utils/chatHistory";
-import { Message, MessageSender } from "../../types/index";
+import { formatTagsForChat } from "src/utils/formating";
+import { getTime, getTimeId } from "src/utils/time";
+import { exportMessage, importConversation, getThreadId, getLastNMessages } from "src/utils/chatHistory";
+import { Message, MessageSender } from "src/types/index";
+import { ChainManager } from "src/backend/managers/chainManager";
+import { ChainRunner } from "src/backend/managers/chainRunner";
 
 export const Chat: React.FC = () => {
   const app = getApp();
-  const plugin = getPlugin();
   const settings = getSettings();
   
   const [conversation, setConversation] = useState<Message[]>([]);
@@ -34,20 +36,22 @@ export const Chat: React.FC = () => {
       }
     }
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = getTimeId();
     const chatFileName = `chat-${timestamp}.md`;
     const chatFilePath = `${chatFolder.path}/${chatFileName}`;
-
+    
     const tags = formatTagsForChat(
-      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
+      getTime(), 
       chatFileName.replace('.md', '')
     );
 
     try {
       const newFile = await app.vault.create(chatFilePath, tags);
       setChatFile(newFile);
+      
       await loadChatFiles();
-      setConversation([]);
+      
+      setConversation([]); // Empty conversation for a new chat
     } catch (err) {
       console.error("Error creating chat file:", err);
     }
@@ -93,15 +97,16 @@ export const Chat: React.FC = () => {
     }
 
     // If no chat files exist, create a new one
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = getTimeId();
     const chatFileName = `chat-${timestamp}.md`;
     const chatFilePath = `${chatFolder.path}/${chatFileName}`;
 
-    let newFile: TFile;
     const tags = formatTagsForChat(
-      new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString(), 
+      getTime(), 
       chatFileName.replace('.md', '')
     );
+    
+    let newFile: TFile;
     try {
       newFile = await app.vault.create(chatFilePath, tags);
       setChatFile(newFile);
@@ -156,101 +161,125 @@ export const Chat: React.FC = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
-  const handleSend = async (message: string, notes?: TFile[] | null, images?: File[] | null) => {
-    // Ensure we have a chat file before proceeding
-    const activeChatFile = await ensureActiveChat();
-    if (!activeChatFile) return;
 
-    // Verify the chat file still exists
-    const fileExists = app.vault.getAbstractFileByPath(activeChatFile.path);
-    if (!fileExists) {
-      console.error("Chat file was deleted, creating a new one...");
-      const newChat = await ensureActiveChat();
-      if (!newChat) {
-        console.error("Failed to create new chat file.");
-        return;
-      }
-    }
-
-    // Get current time for the message timestamp
-    const time = new Date(Date.now()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).toString();
-    
-    // Add user message immediately
-    const userMessage = { sender: MessageSender.USER, content: message, timestamp: time };
-    setConversation((prev) => [...prev, userMessage]);
-    
-    // Save the message in the chat file
+  const startStreaming = async (message: string, notes?: TFile[], images?: File[]) => {
+    const chain = ChainManager.getInstance().getChain();
+    const runner = new ChainRunner();
+  
     try {
+      // Ensure we have a chat file before proceeding
+      const activeChatFile = await ensureActiveChat();
+      if (!activeChatFile) throw new Error("No se pudo crear o encontrar archivo de chat");
+  
+      // Verify the chat file still exists
+      const fileExists = app.vault.getAbstractFileByPath(activeChatFile.path);
+      if (!fileExists) {
+        console.error("Chat file was deleted, creating a new one...");
+        const newChat = await ensureActiveChat();
+        if (!newChat) throw new Error("No se pudo recrear archivo de chat");
+      }
+  
+      // Add user message to the conversation
+      const userMessage = {
+        sender: MessageSender.USER,
+        content: message,
+        timestamp: getTime(),
+      };
+      
+      setConversation((prev) => [...prev, userMessage]);
+      setIsLoading(true);
+  
+      // Export the user message to the chat file
       await exportMessage(userMessage, activeChatFile);
-    } catch (err) {
-      console.error("Error saving user message:", err);
-      return;
-    }
-
-    setIsLoading(true);
-
-    let fullMessage = message;
-    let imagesToSend: string[] = [];
-    
-    // Read attached images
-    if (images && images.length > 0) {
-      const imageDataList = await processAttachedImages(images);
-      
-      // Only process images
-      for (const imageData of imageDataList) {
-        if (imageData.type.startsWith("image/")) {
-          imagesToSend.push(imageData.content);
-        }
+  
+      // Create a placeholder message for the AI
+      const tempBotMessage = {
+        sender: MessageSender.BOT,
+        content: "",
+        timestamp: getTime(),
+      };
+      setConversation((prev) => [...prev, tempBotMessage]);
+  
+      // Get last messages if it's the first time sending after restart
+      let lastMessages: Message[] = [];
+      if (!hasSentFirst.current) {
+        lastMessages = await getLastNMessages(activeChatFile, settings.amountOfMessagesInMemory * 2);
+        hasSentFirst.current = true;
       }
-    }
-
-    // Add the path of the attached files
-    if (notes && notes.length > 0) {
-      fullMessage += "\nTake into account the following files:"
-
-      let noteSection = "";      
-      for (const note of notes) {
-        noteSection += `\n- ${note.path}`     
-      } 
-      
-      fullMessage += noteSection;
-    }
-    
-    // Get the thread_id from the files tags
-    const threadId = await getThreadId(activeChatFile);
-    
-    // Just append the last messags of the chat if it is the first time sending a message after a restart
-    let lastMessages: Message[] = [];
-    if (!hasSentFirst.current) {
-      lastMessages = await getLastNMessages(activeChatFile, settings.amountOfMessagesInMemory * 2);
-      hasSentFirst.current = true;
-    }
-    try {
-      const response = await callAgent(fullMessage, threadId, imagesToSend, lastMessages);
-      const botMessage = { sender: MessageSender.BOT as const, content: response, timestamp: time };
-      setConversation((prev) => [...prev, botMessage]);
-
-      // Verify chat file still exists before saving bot message
+  
+      let accumulated = "";
+      let hasReceivedFirstChunk = false;
+  
+      const updateAiMessage = (chunk: string) => {
+        if (!hasReceivedFirstChunk) {
+          setIsLoading(false); // Remove loading animation on first chunk
+          hasReceivedFirstChunk = true;
+        }
+        
+        accumulated += chunk;
+        
+        // Update the last message in conversation directly
+        setConversation((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: accumulated
+          };
+          return updated;
+        });
+      };
+  
+      // Get the thread_id from the files tags
+      const threadId = await getThreadId(activeChatFile);
+      // Run the streaming
+      await runner.run(chain, threadId, userMessage, notes, images, updateAiMessage);
+  
+      // Export the final bot message
       const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
       if (currentChatFile) {
-        await exportMessage(botMessage, currentChatFile as TFile);
+        const finalBotMessage = {
+          sender: MessageSender.BOT,
+          content: accumulated,
+          timestamp: getTime(),
+        };
+        await exportMessage(finalBotMessage, currentChatFile as TFile);
       } else {
         console.error("Chat file was deleted while waiting for response");
       }
-    
+  
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error processing message.";
-      const errorBotMessage = { sender: MessageSender.BOT as const, content: `❌ ERROR: ${errorMessage}`, timestamp: time };
-      setConversation((prev) => [...prev, errorBotMessage]);
-
-      // Verify chat file still exists before saving error message
-      const currentChatFile = app.vault.getAbstractFileByPath(activeChatFile.path);
-      if (currentChatFile) {
-        await exportMessage(errorBotMessage, currentChatFile as TFile);
-      } else {
-        console.error("Chat file was deleted while processing error");
+      console.error("Error during streaming:", err);
+      
+      // Update with error message
+      const errorMessage = `❌ ERROR: ${err instanceof Error ? err.message : "Error processing message."}`;
+      
+      setConversation((prev) => {
+        const updated = [...prev];
+        if (updated.length > 0) {
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            content: errorMessage,
+            isErrorMessage: true,
+          };
+        }
+        return updated;
+      });
+  
+      // Try to export error message too
+      try {
+        const activeChatFile = await ensureActiveChat();
+        if (activeChatFile) {
+          const errorBotMessage = {
+            sender: MessageSender.BOT,
+            content: errorMessage,
+            timestamp: getTime(),
+            isErrorMessage: true,
+          };
+          await exportMessage(errorBotMessage, activeChatFile);
+        }
+      } catch (exportErr) {
+        console.error("Error saving error message:", exportErr);
       }
-    
     } finally {
       setIsLoading(false);
     }
@@ -278,7 +307,7 @@ export const Chat: React.FC = () => {
         bottomRef={bottomRef}
       />
       <div style={{ marginBottom: "1rem", position: "relative" }}>
-        <ChatInput onSend={handleSend}/>
+        <ChatInput onSend={startStreaming}/>
       </div>  
     </div>
   );

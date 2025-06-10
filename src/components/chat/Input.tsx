@@ -9,14 +9,13 @@ import { Model } from "src/settings/models";
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const app = getApp();
-  const plugin = getPlugin();
   const settings = getSettings();
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
-  let [selectedModel, setSelectedModel] = useState(settings.model)
-  const [selectedNotes, setselectedNotes] = useState<TFile[] | null>(null);
+  const [selectedModel, setSelectedModel] = useState(settings.model)
+  const [selectedNotes, setselectedNotes] = useState<TFile[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   // Function to handle the message sending
@@ -27,7 +26,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       // Clear the input fields
       setMessage("");
       setSelectedImages([]);
-      setselectedNotes(null); // Clear selected notes after sending
+      setselectedNotes([]); // Clear selected notes after sending
 
       // Reset height
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
@@ -71,10 +70,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
 
   // Function to open the ChooseModelModal
   const openModelPicker = () => {
+    const plugin = getPlugin();
+
     new ChooseModelModal(app, (model: Model) => {
-      // Set the selected model in the settings
-      settings.model = model.name;
-      setSelectedModel(model.name);
+      // Change model in the settings and save changes
+      settings.model = model.name; 
+      plugin.saveSettings();
+      // Change the state
+      setSelectedModel(model.name); 
       return;
     }).open();
   }
@@ -82,10 +85,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   // Function to remove a note from the selected notes
   const removeNote = (toRemove: TFile) => {
     setselectedNotes((prev) => {
-      if (!prev) return null;
+      if (!prev) return [];
       
       const filteredNotes = prev.filter((note) => note.path !== toRemove.path);
-      return filteredNotes.length > 0 ? filteredNotes : null;
+      return filteredNotes;
     });
   };
 
