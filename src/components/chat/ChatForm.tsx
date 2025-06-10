@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getSettings } from "../../plugin";
@@ -18,6 +18,15 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 
     const [isRenaming, setIsRenaming] = useState(false);
     const [newChatName, setNewChatName] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isRenaming && inputRef.current) {
+            inputRef.current.focus();
+            // Set initial value to current chat name without extension
+            setNewChatName(chatFile?.basename || "");
+        }
+    }, [isRenaming, chatFile]);
 
     // Select a chat
     const handleChatSelect = async (filePath: string) => {
@@ -138,9 +147,17 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             {isRenaming ? (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                     <input
+                        ref={inputRef}
                         type="text"
                         value={newChatName}
                         onChange={(e) => setNewChatName(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && newChatName.trim()) {
+                                handleRenameChat();
+                            } else if (e.key === 'Escape') {
+                                cancelRename();
+                            }
+                        }}
                         placeholder="New chat name"
                         style={{
                             padding: "0.5rem",
