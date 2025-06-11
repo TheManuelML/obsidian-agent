@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { getApp, getPlugin } from "../../plugin";
+import { getApp } from "../../plugin";
 import { ModelManager } from '../managers/modelManager';
 import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName } from "../../utils/rename";
@@ -110,6 +110,97 @@ export const create_note = tool(async (input) => {
 })
 
 
+// Obsidian tool to update or write on existing notes
+export const edit_note = tool(async (input) => {
+    const app = getApp();
+    let { fileName, newContent, useLLM = true, tags = [], context } = input;
+
+    // Find the closest file
+    const matchedFile = findClosestFile(fileName);
+    
+    // Check if the file exists
+    if (!matchedFile) {
+        const errorMsg = `Could not find any note with the name or similar to "${fileName}".`
+        console.error(errorMsg);
+        return {
+            success: false,
+            error: errorMsg,
+        };
+    }
+
+    // Read the file
+    let oldContent = await app.vault.read(matchedFile);
+    let updatedContent = '';
+
+    // If the user do not want to generate content replace directly
+    if (!useLLM) {
+        updatedContent = newContent || oldContent;
+        if (tags.length > 0) {
+            const formattedTags = formatTags(tags);
+            updatedContent += `\n\n${formattedTags}`;
+        }
+    } else {
+        try {
+            const llm = ModelManager.getInstance().getModel();
+            if (!llm) throw new Error("Failed to initialize LLM");
+
+            let sysPrompt = getSamplePrompt('edit');
+            if (context) {
+                sysPrompt += `\nYou can use the following context while editing: ${context}`;
+            }
+
+            const humanPrompt = `Update the following markdown note:\n### NOTE ###\n${oldContent}\n### END NOTE ###\n` +
+                `Apply the following update or topic: "${newContent}".\n` +
+                (tags.length > 0 ? `Add or update with these tags: ${tags.join(', ')}.\n` : '') +
+                `Return the full updated markdown note.`;
+
+            const response = await llm.invoke([
+                new SystemMessage(sysPrompt),
+                new HumanMessage(humanPrompt),
+            ]);
+
+            updatedContent = response.content.toString();
+        } catch (err) {
+            console.error('Error invoking LLM:', err);
+            return {
+                success: false,
+                error: err instanceof Error ? err.message : 'Unknown error'
+            };
+        }
+    }
+
+    // Save the updated content
+    try {
+        await app.vault.modify(matchedFile, updatedContent);
+    } catch (err) {
+        console.error('Error updating file:', err);
+        return {
+            success: false,
+            error: err instanceof Error ? err.message : 'Unknown error'
+        };
+    }
+
+    return {
+        success: true,
+        usedLLM: useLLM,
+        path: matchedFile.path,
+        oldContent,
+        newContent: updatedContent,
+        tags,
+    };
+}, {
+    name: 'update_note',
+    description: 'Replaces or edits a note. Can use LLM or not, supports tags and context.',
+    schema: z.object({
+        fileName: z.string().describe('The name or path of the note to update'),
+        newContent: z.string().optional().describe('New content or instructions to apply to the note'),
+        useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the updated note'),
+        tags: z.array(z.string()).optional().describe('Tags to add or update in the note'),
+        context: z.string().optional().describe('Additional context for the LLM to use when editing'),
+    })
+});
+
+
 // Obsidian tool to read notes
 export const read_note = tool(async (input) => {
     const app = getApp();
@@ -148,79 +239,5 @@ export const read_note = tool(async (input) => {
     description: 'Reads the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
     schema: z.object({
         fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
-    })
-});
-
-
-// Obsidian tool to update or write on existing notes
-export const edit_note = tool(async (input) => {
-    const app = getApp();
-    const plugin = getPlugin();
-    let { fileName, newContent } = input;
-
-    // Find the closest file
-    const matchedFile = findClosestFile(fileName);
-    
-    // Check if the file exists
-    if (!matchedFile) {
-        console.error(`Could not find any note with the name or similar to "${fileName}".`);
-        return {
-            success: false,
-            error: `Could not find any note with the name or similar to "${fileName}".`
-        };
-    }
-
-    // Read the file
-    let text = await app.vault.read(matchedFile);
-    let newNoteContent: string = '';
-
-    // Prompts
-    let sysPrompt = getSamplePrompt('write');
-    let humanPrompt = `Please update the content of the following note: \n### NOTE ###\n${text}\n### END NOTE ###\nUse this topic or specific content to update the note: ${newContent}.\nRETURN THE COMPLETE NOTE WITH THE UPDATED CONTENT.`
-    
-    // Content generation
-    try {
-        if (newContent) {
-            const llm = ModelManager.getInstance().getModel();
-            if (!llm) throw new Error("Failed to initialize LLM");
-            
-            const response = await llm.invoke([
-                new SystemMessage(sysPrompt),
-                new HumanMessage(humanPrompt),
-            ]);
-            newNoteContent = response.content.toString();
-        }
-    } catch (err) {
-        console.error('Error invoking LLM:', err);
-        return {
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error'
-        };
-    }
-  
-    // Update the note
-    try {
-        await app.vault.modify(matchedFile, newNoteContent);
-    } catch (err) {
-        console.error('Error updating file:', err);
-        return {
-            success: false,
-            error: err instanceof Error ? err.message : 'Unknown error'
-        };
-    }
-  
-    return {
-        success: true, 
-        path: matchedFile.path,
-        oldContent: text,
-        newContent: newNoteContent,
-    };
-}, {
-    // Tool schema and metadata
-    name: 'update_note',
-    description: 'Replaces or add content to a note. Can be used to update a specific section or the whole note.',
-    schema: z.object({
-      fileName: z.string().describe('The name or path of the note to update'),
-      newContent: z.string().describe('The changes to apply to the note, or the new content to write'),
     })
 });

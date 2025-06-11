@@ -10,7 +10,6 @@ export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
     timestamp: string;
-    isErrorMessage?: boolean;
 }
 
 export interface ChatInputProps {
