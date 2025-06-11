@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getApp } from "../../plugin";
 import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName, getNextAvailableFolderName } from "../../utils/rename";
+import { Notice } from 'obsidian';
 
 export const rename = tool(async (input) => {
     // Declaring app and inputs
@@ -23,7 +24,11 @@ export const rename = tool(async (input) => {
 
         // Check if the new name already exists
         if (app.vault.getAbstractFileByPath(newName)) {
-            if (!matchedFile.parent) throw new Error('File has no parent directory') 
+            if (!matchedFile.parent) {
+                const errorMsg = 'File has no parent directory';
+                new Notice(errorMsg, 5000);
+                throw new Error(errorMsg); 
+            }
             newName = getNextAvailableFileName(newName, matchedFile.parent.path);
         }
 
@@ -36,7 +41,8 @@ export const rename = tool(async (input) => {
                 newPath: matchedFile.parent ? `${matchedFile.parent.path}/${newName}` : newName
             };
         } catch (err) {
-            console.error('Error renaming file:', err);
+            const errorMsg = 'Error renaming file: ' + err;  
+            new Notice(errorMsg, 5000);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'
@@ -76,7 +82,8 @@ export const rename = tool(async (input) => {
                 newFolder: newPath
             };
         } catch (err) {
-            console.error('Error renaming directory in Obsidian:', err);
+            const errorMsg = 'Error renaming directory in Obsidian: ' + err;  
+            new Notice(errorMsg, 5000);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'

@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { TFile, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { getTime } from "src/utils/time";
 import { exportMessage, getThreadId, getLastNMessages } from "src/utils/chatHistory";
@@ -27,7 +27,9 @@ export class ChatStreamingService {
       // Verify chat file exists
       const fileExists = this.app.vault.getAbstractFileByPath(chatFile.path);
       if (!fileExists) {
-        throw new Error("Chat file was deleted, please create a new chat");
+        const errorMsg = "Chat file was deleted, please create a new chat";
+        new Notice(errorMsg, 5000); 
+        throw new Error(errorMsg);
       }
 
       // Add user message
@@ -90,47 +92,7 @@ export class ChatStreamingService {
       await exportMessage(finalBotMessage, chatFile);
 
     } catch (err) {
-      await this.handleStreamingError(err, updateConversation, chatFile);
+      new Notice(err as string, 5000);
     }
-  }
-
-  // Handle error messages
-  private async handleStreamingError(
-    err: unknown,
-    updateConversation: (updater: (prev: Message[]) => Message[]) => void,
-    chatFile: TFile
-  ) {
-    console.error("Error during streaming:", err);
-    
-    const errorMessage = `❌ ERROR: ${err instanceof Error ? err.message : "Error processing message."}`;
-    
-    updateConversation(prev => {
-      const updated = [...prev];
-      if (updated.length > 0) {
-        updated[updated.length - 1] = {
-          ...updated[updated.length - 1],
-          content: errorMessage,
-          isErrorMessage: true,
-        };
-      }
-      return updated;
-    });
-
-    // Try to save error message
-    try {
-      const errorBotMessage: Message = {
-        sender: MessageSender.BOT,
-        content: errorMessage,
-        timestamp: getTime(),
-        isErrorMessage: true,
-      };
-      await exportMessage(errorBotMessage, chatFile);
-    } catch (exportErr) {
-      console.error("Error saving error message:", exportErr);
-    }
-  }
-
-  resetFirstMessageFlag() {
-    this.hasSentFirst = false;
   }
 }

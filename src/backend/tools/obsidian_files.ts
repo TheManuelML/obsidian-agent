@@ -7,6 +7,7 @@ import { findClosestFile, findMatchingFolder } from '../../utils/searching';
 import { getNextAvailableFileName } from "../../utils/rename";
 import { formatTags } from '../../utils/formating';
 import { getSamplePrompt } from '../../utils/llm';
+import { Notice } from 'obsidian';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -44,7 +45,11 @@ export const create_note = tool(async (input) => {
                 
                 // Initialize LLM
                 const llm = ModelManager.getInstance().getModel();
-                if (!llm) throw new Error("Failed to initialize LLM");
+                if (!llm) {
+                    const errorMsg = "Failed to initialize LLM" 
+                    new Notice(errorMsg, 5000);
+                    throw new Error(errorMsg);
+                }
 
                 // Invoke the LLM
                 const response = await llm.invoke([
@@ -54,7 +59,8 @@ export const create_note = tool(async (input) => {
                 content = response.content.toString();
             
             } catch (err) {
-                console.error('Error invoking LLM:', err);
+                const errorMsg = 'Error invoking LLM: ' + err;  
+                new Notice(errorMsg, 5000);
                 return {
                     success: false,
                     error: err instanceof Error ? err.message : 'Unknown error'
@@ -78,7 +84,8 @@ export const create_note = tool(async (input) => {
         // Write the note in Obsidian
         await app.vault.create(full_path, content);
     } catch (err) {
-        console.error('Error creating file in Obsidian:', err);
+        const errorMsg = 'Error creating file in Obsidian: ' + err;  
+        new Notice(errorMsg, 5000);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -142,7 +149,11 @@ export const edit_note = tool(async (input) => {
     } else {
         try {
             const llm = ModelManager.getInstance().getModel();
-            if (!llm) throw new Error("Failed to initialize LLM");
+            if (!llm) {
+                const errorMsg = "Failed to initialize LLM" 
+                new Notice(errorMsg, 5000);
+                throw new Error(errorMsg);
+            }
 
             let sysPrompt = getSamplePrompt('edit');
             if (context) {
@@ -161,7 +172,8 @@ export const edit_note = tool(async (input) => {
 
             updatedContent = response.content.toString();
         } catch (err) {
-            console.error('Error invoking LLM:', err);
+            const errorMsg = 'Error invoking LLM: ' + err;  
+            new Notice(errorMsg, 5000);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'
@@ -173,7 +185,8 @@ export const edit_note = tool(async (input) => {
     try {
         await app.vault.modify(matchedFile, updatedContent);
     } catch (err) {
-        console.error('Error updating file:', err);
+        const errorMsg = 'Error updating file: ' + err;  
+        new Notice(errorMsg, 5000);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -227,7 +240,8 @@ export const read_note = tool(async (input) => {
             path: matchedFile.path
         };
     } catch (err) {
-        console.error("Error reading file:", err);
+        const errorMsg = 'Error reading file: ' + err;  
+        new Notice(errorMsg, 5000);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'

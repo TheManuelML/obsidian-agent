@@ -4,6 +4,8 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
 import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
 import { getSettings } from "src/plugin";
+import { Notice } from "obsidian";
+import { Thermometer } from "lucide-react";
 
 // Map the model provider with its type in Langchain
 const ChatModelTypeMap = {
@@ -33,12 +35,19 @@ export class ModelManager {
 
     // Gets the model configuration depending on the provider
     public getModelConfig(model: Model): ModelConfig {
+        const providerApiKey = this.providerApiKeyMap[model.provider]();
+        if (!providerApiKey) {
+            const errorMsg = `API key for provider ${model.provider}, is not set.`;
+            new Notice(errorMsg, 5000);
+            throw new Error(errorMsg);
+        }
+
         const baseConfig: ModelConfig = {
             modelName: model.name,
             temperature: 0.7, // DEFAULT
             streaming: true, // DEFAULT
             maxRetries: 3, // DEFAULT
-            apiKey: this.providerApiKeyMap[model.provider](),
+            apiKey: providerApiKey,
         };
 
         switch (model.provider) {
@@ -66,7 +75,9 @@ export class ModelManager {
                 }
             
             default:
-                throw new Error(`Unsupported provider: ${model.provider}`);
+                const errorMsg = `Unsupported provider: ${model.provider}`;
+                new Notice(errorMsg, 5000);
+                throw new Error(errorMsg);
         }
     }
 
@@ -76,7 +87,11 @@ export class ModelManager {
 
         // Search the selected model on the model list 
         const model = allAvailableModels.find(m => m.name === settings.model);
-        if (!model) throw new Error ("No model was provided in the settings");
+        if (!model) {
+            const errorMsg = "No model was provided in the settings";
+            new Notice(errorMsg, 5000);
+            throw new Error (errorMsg);
+        }
         
         // Configure the model depending on the provider
         const config: ModelConfig = this.getModelConfig(model);

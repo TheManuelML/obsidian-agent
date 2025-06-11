@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
-import { TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
 import { getApp, getSettings } from "../../plugin";
 import { importConversation } from "../../utils/chatHistory";
 import { ChatFormProps } from "../../types/index";
@@ -45,7 +45,9 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             setChatFile(file);
             setConversation(await importConversation(file));
         } catch (err) {
-            console.error("Error selecting chat:", err);
+            const errorMsg = 'Error selecting chat: ' + err;  
+            new Notice(errorMsg, 5000);
+
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
                 setChatFile(updatedChats[0]);
@@ -68,7 +70,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             const rename = app.vault.getAbstractFileByPath(newPath) as TFile;
             if (rename) setChatFile(rename);
         } catch (err) {
-            console.error("Error renaming chat file:", err);
+            const errorMsg = "Error renaming chat file: " + err;
+            new Notice(errorMsg, 5000);
         }
     };
     // Cancel the rename of a chat
@@ -109,7 +112,9 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 setConversation(await importConversation(nextChat));
             }
         } catch (err) {
-            console.error("Error deleting chat:", err);
+            const errorMsg = "Error deleting chat file: " + err;
+            new Notice(errorMsg, 5000);
+            
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
                 setChatFile(updatedChats[0]);

@@ -5,6 +5,7 @@ import { formatTagsForChat } from "src/utils/formating";
 import { getTime, getTimeId } from "src/utils/time";
 import { importConversation } from "src/utils/chatHistory";
 import { Message } from "src/types/index";
+import { Notice } from "obsidian";
 
 // Manage the creation of chatFiles and chatFolders
 export const useChatFile = () => {
@@ -32,7 +33,9 @@ export const useChatFile = () => {
     try {
       return await app.vault.createFolder(settings.chatsFolder);
     } catch (err) {
-      console.error("Error creating chat folder:", err);
+      const errorMsg = "Error creating chat folder: " + err;
+      new Notice(errorMsg, 5000);
+      
       return null;
     }
   };
@@ -48,7 +51,9 @@ export const useChatFile = () => {
     try {
       return await app.vault.create(chatFilePath, tags);
     } catch (err) {
-      console.error("Error creating chat file:", err);
+      const errorMsg = "Error creating chat file: " + err;
+      new Notice(errorMsg, 5000);
+
       return null;
     }
   };

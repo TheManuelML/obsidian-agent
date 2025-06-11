@@ -4,6 +4,7 @@ import { getApp } from "../../plugin";
 import { getNextAvailableFolderName } from '../../utils/rename';
 import { findMatchingFolder } from '../../utils/searching'
 import { getFolderStructure } from '../../utils/vaultStructure';
+import { Notice } from 'obsidian';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {
@@ -29,7 +30,8 @@ export const create_dir = tool(async (input) => {
             directory: dir_path + name
         };
     } catch (err) {
-        console.error('Error creating directory in Obsidian:', err);
+        const errorMsg = 'Error creating directory in Obsidian: ' + err;  
+        new Notice(errorMsg, 5000);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -77,7 +79,8 @@ export const list_files = tool(async (input) => {
             tree
         };
     } catch (err) {
-        console.error('Error listing files in Obsidian:', err);
+        const errorMsg = 'Error listing files in Obsidian: ' + err;  
+        new Notice(errorMsg, 5000);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'

@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { Message } from "src/types";
@@ -48,8 +48,9 @@ export class ChainRunner {
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
             }
-        } catch (error) {
-            console.error("Error de streaming:", error);
+        } catch (err) {
+            const errorMsg = "Streaming error: " + err;
+            new Notice(errorMsg, 5000);
         }
     }
 
@@ -92,8 +93,9 @@ export class ChainRunner {
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
             }
-        } catch (error) {
-            console.error("Error de streaming:", error);
+        } catch (err) {
+            const errorMsg = "Streaming error: " + err;
+            new Notice(errorMsg, 5000);
         }
     }
 
