@@ -2,18 +2,14 @@ import React, { cloneElement } from "react";
 import { Clipboard, Bot, SquareArrowOutUpRight, User } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element } from "html-react-parser";
 import { marked } from "marked";
-import { getApp } from "../../plugin";
-import { parseCodeSnippets, parseLinkToNote } from "../../utils/parsing";
-import { Message, MessageSender } from "../../types";
+import { getApp } from "src/plugin";
+import { parseCodeSnippets, parseLinkToNote } from "src/utils/parsing";
+import { MessageSender, ChatSingleMessageProps } from "src/types";
 
 // Custom components for special tags
 const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (
     <span className={`custom-tag ${tag}`}>{children}</span>
 );
-
-interface ChatSingleMessageProps {
-    message: Message;
-}
 
 export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
     const app = getApp();

@@ -17,7 +17,6 @@ export class ChatStreamingService {
     message: string,
     chatFile: TFile,
     updateConversation: (updater: (prev: Message[]) => Message[]) => void,
-    setIsLoading: (loading: boolean) => void,
     notes?: TFile[],
     images?: File[]
   ) {
@@ -39,7 +38,6 @@ export class ChatStreamingService {
       };
       
       updateConversation(prev => [...prev, userMessage]);
-      setIsLoading(true);
 
       // Export user message
       await exportMessage(userMessage, chatFile);
@@ -64,7 +62,6 @@ export class ChatStreamingService {
 
       const updateAiMessage = (chunk: string) => {
         if (!hasReceivedFirstChunk) {
-          setIsLoading(false);
           hasReceivedFirstChunk = true;
         }
         
@@ -94,8 +91,6 @@ export class ChatStreamingService {
 
     } catch (err) {
       await this.handleStreamingError(err, updateConversation, chatFile);
-    } finally {
-      setIsLoading(false);
     }
   }
 

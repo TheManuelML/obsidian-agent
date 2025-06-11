@@ -28,7 +28,6 @@ export interface ChatFormProps {
 
 export interface ChatMessagesProps {
     conversation: Message[];
-    isLoading: boolean;
     bottomRef: RefObject<HTMLDivElement | null>;
 }
 

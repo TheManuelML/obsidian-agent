@@ -27,6 +27,5 @@ export class MemoryManager {
 
   public clearMemory(): void {
     this.memorySaver = this.createMemorySaver();
-    console.log("Memory cleared.");
   }
 }

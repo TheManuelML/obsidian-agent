@@ -9,7 +9,6 @@ import { useAutoScroll } from "./hooks/useAutoScroll";
 import { ChatStreamingService } from "./services/chatStreamingService";
 
 export const Chat: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const streamingService = new ChatStreamingService();
 
   const {
@@ -49,7 +48,6 @@ export const Chat: React.FC = () => {
       message,
       activeChatFile,
       setConversation,
-      setIsLoading,
       notes,
       images
     );
@@ -73,7 +71,6 @@ export const Chat: React.FC = () => {
       />
       <ChatMessages 
         conversation={conversation}
-        isLoading={isLoading}
         bottomRef={bottomRef}
       />
       <div style={{ marginBottom: "1rem", position: "relative" }}>
