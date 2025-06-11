@@ -15,10 +15,6 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     this.availableModels = allAvailableModels;
   }
 
-  protected getModels(): Model[] {
-    return this.availableModels;
-  }
-
   protected formatModelName(model: Model, isActive: boolean): string {
     let name = model.name;
     if (isActive) name += " (current)";

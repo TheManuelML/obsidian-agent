@@ -14,31 +14,33 @@ export class ChainRunner {
         images: File[] | undefined, 
         updateAiMessage: (chunk: string) => void
     ) {
+        let fullMessage = message.content;
+
         // If there are attached notes append the paths to the message
         if (notes && notes.length > 0) {
-            message.content += `\n###\nTake into account the following files:`
+            fullMessage += `\n###\nTake into account the following files:`
             for (const note of notes) {
                 const notePath = note.path;
-                message.content += `\n${notePath}`;
+                fullMessage += `\n${notePath}`;
             }
         }
 
         // Switch depending on the modality: (simple | multimodal)
         if (!images) {
-            this.simpleRun(chain, threadId, message, updateAiMessage);
+            await this.simpleRun(chain, threadId, fullMessage, updateAiMessage);
         } else {
-            this.multimodalRun(chain, threadId, message, images, updateAiMessage)
+            await this.multimodalRun(chain, threadId, fullMessage, images, updateAiMessage)
         }
     }
 
     // Run the chain using a simple streaming call
     async simpleRun(chain: Runnable,
         threadId: string, 
-        message: Message,
+        messageContent: string,
         updateAiMessage: (chunk: string) => void
     ) {
         const inputs = {
-            messages: [{ role: "user", content: message.content }],
+            messages: [{ role: "user", content: messageContent }],
         };
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
@@ -58,7 +60,7 @@ export class ChainRunner {
     async multimodalRun(
         chain: Runnable,
         threadId: string, 
-        message: Message,
+        messageContent: string,
         images: File[] | undefined, 
         updateAiMessage: (chunk: string) => void
     ) {
@@ -68,7 +70,7 @@ export class ChainRunner {
         const inputs = { 
             messages: [{ 
                 role: "user", 
-                content: [{type: "text", text: message.content} as ContentItem]
+                content: [{type: "text", text: messageContent} as ContentItem]
             }]
         };
 

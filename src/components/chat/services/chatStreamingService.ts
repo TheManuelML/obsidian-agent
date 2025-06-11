@@ -38,7 +38,6 @@ export class ChatStreamingService {
         content: message,
         timestamp: getTime(),
       };
-      
       updateConversation(prev => [...prev, userMessage]);
 
       // Export user message
@@ -81,15 +80,33 @@ export class ChatStreamingService {
 
       // Execute streaming
       const threadId = await getThreadId(chatFile);
-      await runner.run(chain, threadId, userMessage, notes, images, updateAiMessage);
+      try {
+        await runner.run(chain, threadId, userMessage, notes, images, updateAiMessage);
 
-      // Export final message
-      const finalBotMessage: Message = {
-        sender: MessageSender.BOT,
-        content: accumulated,
-        timestamp: getTime(),
-      };
-      await exportMessage(finalBotMessage, chatFile);
+        // Only export the final message if we received any content
+        if (accumulated.trim()) {
+          const finalBotMessage: Message = {
+            sender: MessageSender.BOT,
+            content: accumulated,
+            timestamp: getTime(),
+          };
+          await exportMessage(finalBotMessage, chatFile);
+        } else {
+          new Notice("No response received from the AI", 5000);
+
+          // Export an empty message
+          const finalBotMessage: Message = {
+            sender: MessageSender.BOT,
+            content: "",
+            timestamp: getTime(),
+          };
+          await exportMessage(finalBotMessage, chatFile);
+        }
+      } catch (err) {
+        const errorMsg = "Error during streaming: " + err;
+        new Notice(errorMsg, 5000);
+        throw new Error(errorMsg);
+      }
 
     } catch (err) {
       new Notice(err as string, 5000);
