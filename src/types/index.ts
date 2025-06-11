@@ -31,3 +31,7 @@ export interface ChatMessagesProps {
     isLoading: boolean;
     bottomRef: RefObject<HTMLDivElement | null>;
 }
+
+export interface ChatSingleMessageProps {
+    message: Message;
+}
