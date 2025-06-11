@@ -1,7 +1,7 @@
 import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
-import { ChatView, VIEW_TYPE_AGENT } from "./components/chat/View";
-import { AgentSettings, AgentSettingsTab } from "./settings/SettingsTab";
-import { DEFAULT_SETTINGS } from "./settings/defaults";
+import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/View";
+import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
+import { DEFAULT_SETTINGS } from "src/settings/defaults";
 
 let pluginInstance: ObsidianAgentPlugin;
 

@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { TFile, TFolder } from "obsidian";
+import { TFile, TFolder, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { formatTagsForChat } from "src/utils/formating";
 import { getTime, getTimeId } from "src/utils/time";
 import { importConversation } from "src/utils/chatHistory";
 import { Message } from "src/types/index";
-import { Notice } from "obsidian";
 
 // Manage the creation of chatFiles and chatFolders
 export const useChatFile = () => {

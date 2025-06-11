@@ -1,5 +1,3 @@
-// TODO: Implement FUZZY search
-
 import { TFile, TFolder } from "obsidian";
 import { getApp } from "src/plugin";
 

@@ -2,10 +2,9 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
-import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
-import { getSettings } from "src/plugin";
 import { Notice } from "obsidian";
-import { Thermometer } from "lucide-react";
+import { getSettings } from "src/plugin";
+import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
 
 // Map the model provider with its type in Langchain
 const ChatModelTypeMap = {

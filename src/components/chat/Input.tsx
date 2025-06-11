@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
 import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
 import { TFile } from "obsidian";
-import { getApp, getPlugin, getSettings } from "../../plugin";
-import { AddContextModal } from "../modal/AddContextModal";
-import { ChooseModelModal } from "../modal/ChooseModelModal";
-import { ChatInputProps } from "../../types/index";
+import { getApp, getPlugin, getSettings } from "src/plugin";
+import { AddContextModal } from "src/components/modal/AddContextModal";
+import { ChooseModelModal } from "src/components/modal/ChooseModelModal";
 import { Model } from "src/settings/models";
+import { ChatInputProps } from "src/types/index";
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const app = getApp();

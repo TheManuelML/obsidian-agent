@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { Bot, User } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element, domToReact } from "html-react-parser";
-import { MessageSender, ChatSingleMessageProps } from "src/types";
 import { Component, MarkdownRenderer } from "obsidian";
+import { MessageSender, ChatSingleMessageProps } from "src/types";
 
 // Custom components for special tags
 const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (

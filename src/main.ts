@@ -1,3 +1,3 @@
-import { ObsidianAgentPlugin } from "./plugin";
+import { ObsidianAgentPlugin } from "src/plugin";
 
 export default class extends ObsidianAgentPlugin {}

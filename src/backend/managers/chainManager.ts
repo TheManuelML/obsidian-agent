@@ -1,13 +1,13 @@
-import { MemoryManager } from "./memoryManager";
-import { ModelManager } from "./modelManager";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
 import { LanguageModelLike } from "@langchain/core/language_models/base";
 import { Runnable } from "@langchain/core/runnables";
-import { create_note, edit_note, read_note } from "../tools/obsidian_files";
-import { create_dir, list_files } from "../tools/obsidian_dirs";
-import { search } from "../tools/obsidian_search";
-import { rename } from "../tools/obsidian_rename";
+import { create_note, edit_note, read_note } from "src/backend/tools/obsidian_files";
+import { create_dir, list_files } from "src/backend/tools/obsidian_dirs";
+import { search } from "src/backend/tools/obsidian_search";
+import { rename } from "src/backend/tools/obsidian_rename";
+import { MemoryManager } from "src/backend/managers/memoryManager";
+import { ModelManager } from "src/backend/managers/modelManager";
 
 // Manage the creation and update of the chain
 export class ChainManager {

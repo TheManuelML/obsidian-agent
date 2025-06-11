@@ -1,6 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { findClosestFile, findMatchingFolder } from "../../utils/searching";
+import { findClosestFile, findMatchingFolder } from "src/utils/searching";
 
 // Tool to search notes and folders
 export const search = tool(async (input) => {

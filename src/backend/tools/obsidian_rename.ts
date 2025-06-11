@@ -1,9 +1,9 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { getApp } from "../../plugin";
-import { findClosestFile, findMatchingFolder } from '../../utils/searching';
-import { getNextAvailableFileName, getNextAvailableFolderName } from "../../utils/rename";
 import { Notice } from 'obsidian';
+import { getApp } from "src/plugin";
+import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
+import { getNextAvailableFileName, getNextAvailableFolderName } from "src/utils/rename";
 
 export const rename = tool(async (input) => {
     // Declaring app and inputs

@@ -1,13 +1,12 @@
 import { tool } from '@langchain/core/tools';
-import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { getApp } from "../../plugin";
-import { ModelManager } from '../managers/modelManager';
-import { findClosestFile, findMatchingFolder } from '../../utils/searching';
-import { getNextAvailableFileName } from "../../utils/rename";
-import { formatTags } from '../../utils/formating';
-import { getSamplePrompt } from '../../utils/llm';
 import { Notice } from 'obsidian';
+import { getApp } from "src/plugin";
+import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
+import { getNextAvailableFileName } from "src/utils/rename";
+import { formatTags } from 'src/utils/formating';
+import { getSamplePrompt } from 'src/utils/llm';
+import { ModelManager } from 'src/backend/managers/modelManager';
 
 // Obsidian tool to write notes
 export const create_note = tool(async (input) => {
@@ -53,8 +52,8 @@ export const create_note = tool(async (input) => {
 
                 // Invoke the LLM
                 const response = await llm.invoke([
-                    new SystemMessage(sysPrompt),
-                    new HumanMessage(humanPrompt),
+                    { role: 'system', content: sysPrompt },
+                    { role: 'user', content: humanPrompt },
                 ]);
                 content = response.content.toString();
             
@@ -160,14 +159,14 @@ export const edit_note = tool(async (input) => {
                 sysPrompt += `\nYou can use the following context while editing: ${context}`;
             }
 
-            const humanPrompt = `Update the following markdown note:\n### NOTE ###\n${oldContent}\n### END NOTE ###\n` +
-                `Apply the following update or topic: "${newContent}".\n` +
+            const humanPrompt = `Update the following markdown note:\n###\n${oldContent}\n###` +
+                (newContent ? `Apply the following update or topic: "${newContent}".\n`: '') +
                 (tags.length > 0 ? `Add or update with these tags: ${tags.join(', ')}.\n` : '') +
                 `Return the full updated markdown note.`;
 
             const response = await llm.invoke([
-                new SystemMessage(sysPrompt),
-                new HumanMessage(humanPrompt),
+                { role: 'system', content: sysPrompt },
+                { role: 'user', content: humanPrompt },
             ]);
 
             updatedContent = response.content.toString();

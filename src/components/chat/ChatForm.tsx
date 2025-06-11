@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { Notice, TFile } from "obsidian";
-import { getApp, getSettings } from "../../plugin";
-import { importConversation } from "../../utils/chatHistory";
-import { ChatFormProps } from "../../types/index";
+import { getApp, getSettings } from "src/plugin";
+import { importConversation } from "src/utils/chatHistory";
+import { ChatFormProps } from "src/types/index";
 
 export const ChatForm: React.FC<ChatFormProps> = ({
     chatFile,

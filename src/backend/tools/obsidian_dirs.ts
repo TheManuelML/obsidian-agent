@@ -1,20 +1,20 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { getApp } from "../../plugin";
-import { getNextAvailableFolderName } from '../../utils/rename';
-import { findMatchingFolder } from '../../utils/searching'
-import { getFolderStructure } from '../../utils/vaultStructure';
 import { Notice } from 'obsidian';
+import { getApp } from "src/plugin";
+import { getNextAvailableFolderName } from 'src/utils/rename';
+import { findMatchingFolder } from 'src/utils/searching'
+import { getFolderStructure } from 'src/utils/vaultStructure';
 
 // Obsidian tool to create directories
 export const create_dir = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
-    let { name = 'New Directory', dir_path = '/' } = input; 
+    let { name = 'New Directory', dir_path = '/' } = input;
 
     // Sanitize the path
     dir_path = dir_path.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
-    
+
     // Create the directory
     try {
         // Check if the directory already exists
@@ -23,14 +23,14 @@ export const create_dir = tool(async (input) => {
             name = getNextAvailableFolderName(name, dir_path);
         }
 
-        await app.vault.createFolder(dir_path + '/' + name);  
+        await app.vault.createFolder(dir_path + '/' + name);
 
         return {
             success: true,
             directory: dir_path + name
         };
     } catch (err) {
-        const errorMsg = 'Error creating directory in Obsidian: ' + err;  
+        const errorMsg = 'Error creating directory in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
         return {
             success: false,
@@ -55,7 +55,7 @@ export const list_files = tool(async (input) => {
 
     // Find the matching folder if the path is not absolute    
     const matchingFolder = findMatchingFolder(dir_path);
-    
+
     // Check if the directory exists
     if (!matchingFolder) {
         console.error('Directory not found:', dir_path);
@@ -64,7 +64,7 @@ export const list_files = tool(async (input) => {
             error: 'Directory not found'
         };
     }
-    
+
     // Get the folder structure in a tree form
     try {
         const tree = {
@@ -79,7 +79,7 @@ export const list_files = tool(async (input) => {
             tree
         };
     } catch (err) {
-        const errorMsg = 'Error listing files in Obsidian: ' + err;  
+        const errorMsg = 'Error listing files in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
         return {
             success: false,

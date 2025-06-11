@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { TFile } from "obsidian";
-import { ChatInput } from "./Input";
-import { ChatForm } from "./ChatForm";
-import { ChatMessages } from "./ChatMessages";
-import { useChatFile } from "./hooks/useChatFile";
-import { useChatFileMonitor } from "./hooks/useChatFileMonitor";
-import { useAutoScroll } from "./hooks/useAutoScroll";
-import { ChatStreamingService } from "./services/chatStreamingService";
+import { ChatInput } from "src/components/chat/Input";
+import { ChatForm } from "src/components/chat/ChatForm";
+import { ChatMessages } from "src/components/chat/ChatMessages";
+import { useChatFile } from "src/components/chat/hooks/useChatFile";
+import { useChatFileMonitor } from "src/components/chat/hooks/useChatFileMonitor";
+import { useAutoScroll } from "src/components/chat/hooks/useAutoScroll";
+import { ChatStreamingService } from "src/components/chat/services/chatStreamingService";
 
 export const Chat: React.FC = () => {
   const streamingService = new ChatStreamingService();

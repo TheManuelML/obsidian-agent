@@ -1,6 +1,6 @@
 import { TFolder } from "obsidian";
 import { getRootFolder } from "src/plugin";
-import { getFolderStructure, formatFolderTree } from "./vaultStructure";
+import { getFolderStructure, formatFolderTree } from "src/utils/vaultStructure";
 
 // Returns a sample prompt for the given purpose
 export function getSamplePrompt(purpose: string): string {

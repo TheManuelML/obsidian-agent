@@ -18,7 +18,7 @@ export class ChainRunner {
 
         // If there are attached notes append the paths to the message
         if (notes && notes.length > 0) {
-            fullMessage += `\n###\nTake into account the following files:`
+            fullMessage += `\n###\nTake into account the following Obsdian notes:`
             for (const note of notes) {
                 const notePath = note.path;
                 fullMessage += `\n${notePath}`;
