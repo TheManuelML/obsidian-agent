@@ -7,7 +7,7 @@ import { findMatchingFolder } from 'src/utils/searching'
 import { getFolderStructure } from 'src/utils/vaultStructure';
 
 // Obsidian tool to create directories
-export const create_dir = tool(async (input) => {
+export const createDir = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     let { name = 'New Directory', dir_path = '/' } = input;
@@ -49,7 +49,7 @@ export const create_dir = tool(async (input) => {
 
 
 // List a tree of files and directories in a directory
-export const list_files = tool(async (input) => {
+export const listFiles = tool(async (input) => {
     // Declaring the app and inputs
     let { dir_path = '/' } = input;
 
@@ -89,7 +89,7 @@ export const list_files = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'list_files',
-    description: 'List files and directories in a directory.',
+    description: 'List files and directories of a directory.',
     schema: z.object({
         dir_path: z.string().optional().describe('The path of the directory to list files from'),
     })

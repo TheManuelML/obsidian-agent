@@ -9,7 +9,7 @@ import { ModelManager } from 'src/backend/managers/modelManager';
 import { PromptTemplateManager } from 'src/backend/managers/prompts/promptManager';
 
 // Obsidian tool to write notes
-export const create_note = tool(async (input) => {
+export const createNote = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
@@ -38,7 +38,7 @@ export const create_note = tool(async (input) => {
             try {
                 // Get prompt template
                 const promptManager = new PromptTemplateManager();
-                const promptValue = await promptManager.getOptimalPromptTemplate('write', topic);
+                const promptValue = await promptManager.getSimplePromptTemplate('write', topic);
                 
                 let sysPrompt = promptValue.messages[0].content; // Extract the string from SystemMessage type
                 if (context) sysPrompt = `${sysPrompt}\nUse the following context to write the note: ${context}.`;
@@ -120,7 +120,7 @@ export const create_note = tool(async (input) => {
 
 
 // Obsidian tool to update or write on existing notes
-export const edit_note = tool(async (input) => {
+export const editNote = tool(async (input) => {
     const app = getApp();
     let { fileName, newContent, useLLM = true, tags = [], context } = input;
 
@@ -158,7 +158,7 @@ export const edit_note = tool(async (input) => {
             }
 
             const promptManager = new PromptTemplateManager();
-            const promptValue = await promptManager.getOptimalPromptTemplate('write', newContent || '');
+            const promptValue = await promptManager.getSimplePromptTemplate('write', newContent || '');
             
             let sysPrompt = promptValue.messages[0].content; // Extract the string from SystemMessage type
             if (context) sysPrompt += `\nYou can use the following context while editing: ${context}`;
@@ -206,7 +206,7 @@ export const edit_note = tool(async (input) => {
     };
 }, {
     name: 'update_note',
-    description: 'Replaces or edits a note. Can use LLM or not, supports tags and context.',
+    description: 'Replaces or edits a note content. Can use LLM or not, supports tags and context.',
     schema: z.object({
         fileName: z.string().describe('The name or path of the note to update'),
         newContent: z.string().optional().describe('New content or instructions to apply to the note'),
@@ -218,7 +218,7 @@ export const edit_note = tool(async (input) => {
 
 
 // Obsidian tool to read notes
-export const read_note = tool(async (input) => {
+export const readNote = tool(async (input) => {
     const app = getApp();
     const { fileName } = input;
 
@@ -253,7 +253,7 @@ export const read_note = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'read_note',
-    description: 'Reads the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
+    description: 'Reads and acess the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
     schema: z.object({
         fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
     })

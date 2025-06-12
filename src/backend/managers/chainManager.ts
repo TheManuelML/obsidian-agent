@@ -2,8 +2,8 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
 import { LanguageModelLike } from "@langchain/core/language_models/base";
 import { Runnable } from "@langchain/core/runnables";
-import { create_note, edit_note, read_note } from "src/backend/tools/obsidian_files";
-import { create_dir, list_files } from "src/backend/tools/obsidian_dirs";
+import { createNote, editNote, readNote } from "src/backend/tools/obsidian_files";
+import { createDir, listFiles } from "src/backend/tools/obsidian_dirs";
 import { search } from "src/backend/tools/obsidian_search";
 import { rename } from "src/backend/tools/obsidian_rename";
 import { MemoryManager } from "src/backend/managers/memoryManager";
@@ -51,11 +51,11 @@ export class ChainManager {
             llm: this.model,
             checkpointSaver: this.memorySaver,
             tools: [
-                create_note,
-                read_note,
-                edit_note,
-                create_dir,
-                list_files,
+                createNote,
+                readNote,
+                editNote,
+                createDir,
+                listFiles,
                 search,
                 rename,
             ]

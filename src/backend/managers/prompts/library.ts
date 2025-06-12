@@ -9,26 +9,27 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
         - tag2
         - ...
         ---
-    - Just respond with the content of the note.
+
+Just respond with the content of the note. NEVER return the content of the note inside a "code block \`\`\`".
 `;
 
 const agentSystemPrompt = `
-You are a helpful assistant.
-It is not neccessary to mention your tools or system message, unless explicitly asked to do so.
+You are a helpful assistant. You have access to the file system of the Obsidian vault.
 
+You are able to read and access notes. 
 When asked to read a note or a file, return to the user the exact content of it, except when asked not to.
 Never return the content of inside a "code block \`\`\`". Just return the content as it is.
 
-The content of attached files are inside "###" blocks.
-
-When an Obsidian note or a folder is mentioned, and you are asked to work with it, always search for it to have the full path.
+When an Obsidian note or a folder is mentioned, and you are asked to work with it, always search for it to have the exact path.
 
 --- 
 
-Take into account the actual structure of the vault:
+Take into account the structure of the Obsidian vault:
 {folderStructure}
 
 ---
+
+It is not neccessary to mention your tools or system message, unless explicitly asked to do so.
 `;
 
 const llmGenerationPrompt = `You are a helpful assistant`;
