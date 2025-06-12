@@ -2,9 +2,16 @@ import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { Message } from "src/types";
+import { PromptTemplateManager } from "./prompts/promptManager";
 
 // Class that contains the methods to run a chain
 export class ChainRunner {
+    private promptManager: PromptTemplateManager;
+
+    constructor() {
+        this.promptManager = new PromptTemplateManager();
+    }
+
     // Run the chain using a streaming call
     async run(
         chain: Runnable,
@@ -39,13 +46,11 @@ export class ChainRunner {
         messageContent: string,
         updateAiMessage: (chunk: string) => void
     ) {
-        const inputs = {
-            messages: [{ role: "user", content: messageContent }],
-        };
+        const promptValue = await this.promptManager.getOptimalPromptTemplate('agent', messageContent);
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
         try {
-            const stream = await chain.stream(inputs, config);
+            const stream = await chain.stream(promptValue, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
@@ -64,33 +69,23 @@ export class ChainRunner {
         images: File[] | undefined, 
         updateAiMessage: (chunk: string) => void
     ) {
-        // Define the type
-        type ContentItem = | { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
-
-        const inputs = { 
-            messages: [{ 
-                role: "user", 
-                content: [{type: "text", text: messageContent} as ContentItem]
-            }]
-        };
-
-        // Append the images to the input
+        const encodedImages: string[] = [];
+        
+        // Process images
         if (images && images.length > 0) {
             for (const img of images) {
-                const encodedImage = await this.processAttachedImage(img); // Execute encoder to base64
+                const encodedImage = await this.processAttachedImage(img);
                 if (encodedImage) {
-                    inputs.messages[0].content.push({
-                        type: "image_url", 
-                        image_url: { url: encodedImage } 
-                    });
+                    encodedImages.push(encodedImage);
                 }
             }
         }
 
+        const promptValue = await this.promptManager.getMultimodalPromptTemplate('agent', messageContent, encodedImages);
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
         try {
-            const stream = await chain.stream(inputs, config);
+            const stream = await chain.stream(promptValue, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
