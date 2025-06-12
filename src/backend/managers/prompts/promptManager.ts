@@ -1,13 +1,10 @@
-import { ChatPromptValue } from "@langchain/core/prompt_values";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { promptLibrary } from "src/backend/managers/prompts/library";
 import { TFolder } from "obsidian";
 import { getRootFolder } from "src/plugin";
 import { getFolderStructure, formatFolderTree } from "src/utils/vaultStructure";
 
 export class PromptTemplateManager {
-    async getOptimalPromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string): Promise<ChatPromptValue> {
-        let promptValue;
+    async getSimplePromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string) {
         const systemPrompt = promptLibrary[situation];
 
         if (situation === 'agent') {
@@ -17,31 +14,13 @@ export class PromptTemplateManager {
 
             const systemPromptWithStructure = systemPrompt.replace("{folderStructure}", folderStructure);
 
-            // Create a new template with folderStructure variable
-            const agentTemplate = ChatPromptTemplate.fromMessages([
-                ["system", systemPromptWithStructure],
-                ["user", "{text}"],
-            ]);
-
-            promptValue = await agentTemplate.invoke({
-                text: userMessage,            
-            });
+            return this.formatPromptsForCompiledGraph(systemPromptWithStructure, userMessage);
         } else {
-            const promptTemplate = ChatPromptTemplate.fromMessages([
-                ["system", systemPrompt],
-                ["user", "{text}"],
-            ]);
-    
-            promptValue = await promptTemplate.invoke({
-                text: userMessage
-            });
-        }
-
-        return promptValue;
+            return this.formatPromptsForCompiledGraph(systemPrompt, userMessage);   
+        };
     }
 
-    async getMultimodalPromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string, images: string[]): Promise<ChatPromptValue> {
-        let promptValue;
+    async getMultimodalPromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string, images: string[]) {
         const systemPrompt = promptLibrary[situation];
 
         if (situation === 'agent') {
@@ -50,29 +29,34 @@ export class PromptTemplateManager {
             const folderStructure: string = formatFolderTree(getFolderStructure(rootFolder));
 
             const systemPromptWithStructure = systemPrompt.replace("{folderStructure}", folderStructure);
-
-            // Create a new template with folderStructure variable
-            const agentTemplate = ChatPromptTemplate.fromMessages([
-                ["system", systemPromptWithStructure],
-                ["user", "{text}"],
-            ]);
-
-            promptValue = await agentTemplate.invoke({
-                text: userMessage,
-                images,
-            });    
+            
+            return this.formatPromptsForCompiledGraph(systemPromptWithStructure, userMessage, images);
         } else {        
-            const promptTemplate = ChatPromptTemplate.fromMessages([
-                ["system", systemPrompt],
-                ["user", "{text}"],
-            ]);
-    
-            promptValue = await promptTemplate.invoke({
-                text: userMessage,
-                images: images,
-            });
-        }
+            return this.formatPromptsForCompiledGraph(systemPrompt, userMessage, images)
+        };
+    }
 
-        return promptValue;
+    formatPromptsForCompiledGraph(systemPrompt: string, userMessage: string, images?: string[]) {
+        const unifiedPrompt = `
+            Instructions:
+            ${systemPrompt}
+
+            User Input:
+            ${userMessage}
+        `;
+        
+        const inputs: { messages: Array<{"role": string, "content": string | Array<{"type": string, "text": string} | {"type": string, "image_url": {"url": string}}>}> } = { 
+            messages: [
+                {"role": "user", "content": [{"type": "text", "text": unifiedPrompt}]}
+            ]
+        };
+
+        if (images && images.length > 0) {
+            for (const img of images) {
+                (inputs.messages[1].content as Array<any>).push({"type": "image_url", "image_url": { "url": img }})
+            }
+        } 
+        
+        return inputs
     }
 }

@@ -97,7 +97,7 @@ export class ChatStreamingService {
           // Export an empty message
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,
-            content: "",
+            content: "*No message generated*",
             timestamp: getTime(),
           };
           await exportMessage(finalBotMessage, chatFile);

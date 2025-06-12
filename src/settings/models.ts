@@ -14,8 +14,7 @@ export enum ModelProvider {
 }
 
 export enum ModelName {
-  DEFAULT = "gemini-1.5-flash",
-  GEMINI_15_FLASH = "gemini-1.5-flash",
+  DEFAULT = "gemini-2.0-flash",
   GEMINI_15_PRO = "gemini-1.5-pro",
   GEMINI_20_FLASH = "gemini-2.0-flash",
   GPT_41 = "gpt-4.1",
@@ -42,11 +41,6 @@ export interface ModelConfig {
 
 // Available models
 export const allAvailableModels: Model[] = [
-    { 
-      provider: ModelProvider.GOOGLE, 
-      name: ModelName.GEMINI_15_FLASH,
-      capabilities: []
-    },
     { 
       provider: ModelProvider.GOOGLE, 
       name: ModelName.GEMINI_15_PRO,

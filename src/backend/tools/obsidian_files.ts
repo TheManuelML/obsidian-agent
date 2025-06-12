@@ -253,7 +253,7 @@ export const readNote = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'read_note',
-    description: 'Reads and acess the content of a note in Obsidian, accepting full paths, partial names, or names with typos.',
+    description: 'Reads and acess the content of a note in Obsidian. You DO NOT NEED the content of the note, just the path or name.',
     schema: z.object({
         fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
     })

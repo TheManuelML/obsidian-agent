@@ -46,11 +46,11 @@ export class ChainRunner {
         messageContent: string,
         updateAiMessage: (chunk: string) => void
     ) {
-        const promptValue = await this.promptManager.getOptimalPromptTemplate('agent', messageContent);
+        const inputs = await this.promptManager.getSimplePromptTemplate('agent', messageContent);
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
         try {
-            const stream = await chain.stream(promptValue, config);
+            const stream = await chain.stream(inputs, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
@@ -81,11 +81,11 @@ export class ChainRunner {
             }
         }
 
-        const promptValue = await this.promptManager.getMultimodalPromptTemplate('agent', messageContent, encodedImages);
+        const inputs = await this.promptManager.getMultimodalPromptTemplate('agent', messageContent, encodedImages);
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
-
+        
         try {
-            const stream = await chain.stream(promptValue, config);
+            const stream = await chain.stream(inputs, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);

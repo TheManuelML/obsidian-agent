@@ -39,7 +39,6 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
     }).replace(/`(\[[^\]]+\]\([^)]+\))`/g, '$1'); // Remove backsticks ``
 
     // You can add more transformation here if needed
-    console.log(linkProcessed);
     return linkProcessed;
   }, []);
 
