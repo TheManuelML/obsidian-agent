@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Copy } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element, domToReact } from "html-react-parser";
 import { Component, MarkdownRenderer } from "obsidian";
 import { MessageSender, ChatSingleMessageProps } from "src/types";
@@ -12,6 +12,13 @@ const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, 
 export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const componentRef = useRef<Component | null>(null);
+
+  const handleCopy = useCallback(() => {
+    const content = message.sender === MessageSender.USER 
+      ? message.content 
+      : contentRef.current?.innerText || '';
+    navigator.clipboard.writeText(content);
+  }, [message.content, message.sender]);
 
   // html-react-parser options with domToReact for nested children
   const options: HTMLReactParserOptions = {
@@ -67,13 +74,33 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
 
   return (
     <div className="chat-single-message" style={{ marginTop: "0.5rem", borderBottom: "1px solid var(--background-secondary-alt)" }}>
-      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <div style={{ opacity: message.sender === MessageSender.USER ? 0.8 : 1, color: message.sender === MessageSender.USER ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)' }}>
-          {message.sender === MessageSender.USER ? <User size={28} /> : <Bot size={28} />}
+      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ opacity: message.sender === MessageSender.USER ? 0.8 : 1, color: message.sender === MessageSender.USER ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)' }}>
+            {message.sender === MessageSender.USER ? <User size={28} /> : <Bot size={28} />}
+          </div>
+          <span style={{ opacity: "0.8", color: 'var(--text-muted)', fontSize: 'var(--font-ui-smaller)', fontWeight: 600 }}>
+            {new Date(message.timestamp).toLocaleTimeString()}
+          </span>
         </div>
-        <span style={{ opacity: "0.8", color: 'var(--text-muted)', fontSize: 'var(--font-ui-smaller)', fontWeight: 600 }}>
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </span>
+        <button 
+          onClick={handleCopy}
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            cursor: 'pointer',
+            padding: '4px',
+            borderRadius: '4px',
+            opacity: 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
+        >
+          <Copy size={16} />
+        </button>
       </div>
 
       {message.sender === MessageSender.USER ? (
