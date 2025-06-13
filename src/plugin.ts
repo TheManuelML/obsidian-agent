@@ -1,4 +1,4 @@
-import { Plugin, App, WorkspaceLeaf, TFolder } from 'obsidian';
+import { Plugin, App, WorkspaceLeaf } from 'obsidian';
 import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/View";
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
 import { DEFAULT_SETTINGS } from "src/settings/defaults";
@@ -105,16 +105,4 @@ export function getSettings(): AgentSettings {
   }
   const plugin = getPlugin();
   return plugin.settings
-}
-
-// Function that returns the root folder of the vault
-export function getRootFolder(): TFolder {
-  const app = getApp();
-  const root = app.vault.getRoot();
-
-  if (!(root instanceof TFolder)) {
-    throw new Error("Root is not a TFolder");
-  }
-
-  return root;
 }

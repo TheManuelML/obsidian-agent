@@ -1,4 +1,5 @@
 import { TFile, TFolder } from "obsidian";
+import { getApp } from "src/plugin";
 
 // Helper function to build the tree in a JSON format
 export function getFolderStructure(folder: TFolder): any[] {
@@ -32,4 +33,16 @@ export function formatFolderTree(tree: any[], depth = 0): string {
     }
     
     return result;
+}
+
+// Function that returns the root folder of the vault
+export function getRootFolder(): TFolder {
+    const app = getApp();
+    const root = app.vault.getRoot();
+  
+    if (!(root instanceof TFolder)) {
+      throw new Error("Root is not a TFolder");
+    }
+  
+    return root;
 }

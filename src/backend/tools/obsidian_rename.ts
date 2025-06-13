@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Notice } from 'obsidian';
 import { getApp } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
-import { getNextAvailableFileName, getNextAvailableFolderName } from "src/utils/rename";
+import { getNextAvailableFileName, getNextAvailableFolderName } from "src/utils/renaming";
 
 export const rename = tool(async (input) => {
     // Declaring app and inputs

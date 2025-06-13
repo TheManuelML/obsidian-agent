@@ -40,34 +40,34 @@ export interface ModelConfig {
 
 // Available models
 export const allAvailableModels: Model[] = [
-    { 
-      provider: ModelProvider.GOOGLE, 
-      name: ModelName.GEMINI_20_FLASH,
-      capabilities: []
-    },
-    { 
-      provider: ModelProvider.OPENAI, 
-      name: ModelName.GPT_41,
-      capabilities: []
-    },
-    { 
-      provider: ModelProvider.OPENAI, 
-      name: ModelName.GPT_4O,
-      capabilities: []
-    },
-    { 
-      provider: ModelProvider.OPENAI, 
-      name: ModelName.GPT_4O_MINI,
-      capabilities: []
-    },
-    { 
-      provider: ModelProvider.ANTHROPIC, 
-      name: ModelName.CLAUDE_35_SONNET,
-      capabilities: []
-    },
-    { 
-      provider: ModelProvider.ANTHROPIC, 
-      name: ModelName.CLAUDE_4_SONNET,
-      capabilities: []
-    }
-  ];
+  { 
+    provider: ModelProvider.GOOGLE, 
+    name: ModelName.GEMINI_20_FLASH,
+    capabilities: [ModelCapability.VISION, ModelCapability.REASONING]
+  },
+  { 
+    provider: ModelProvider.OPENAI, 
+    name: ModelName.GPT_41,
+    capabilities: [ModelCapability.REASONING, ModelCapability.VISION]
+  },
+  { 
+    provider: ModelProvider.OPENAI, 
+    name: ModelName.GPT_4O,
+    capabilities: [ModelCapability.REASONING, ModelCapability.VISION, ModelCapability.WEB_SEARCH]
+  },
+  { 
+    provider: ModelProvider.OPENAI, 
+    name: ModelName.GPT_4O_MINI,
+    capabilities: [ModelCapability.REASONING]
+  },
+  { 
+    provider: ModelProvider.ANTHROPIC, 
+    name: ModelName.CLAUDE_35_SONNET,
+    capabilities: [ModelCapability.REASONING]
+  },
+  { 
+    provider: ModelProvider.ANTHROPIC, 
+    name: ModelName.CLAUDE_4_SONNET,
+    capabilities: [ModelCapability.REASONING]
+  }
+];

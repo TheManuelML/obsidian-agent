@@ -45,7 +45,6 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
       return `[${p1.trim()}](obsidian://open?file=${encoded})`;
     }).replace(/`(\[[^\]]+\]\([^)]+\))`/g, '$1'); // Remove backsticks ``
 
-    // You can add more transformation here if needed
     return linkProcessed;
   }, []);
 
@@ -72,6 +71,32 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
     };
   }, [message.content, message.sender, preprocess]);
 
+  // Inject inline styles for tables when mounted
+  useEffect(() => {
+    const styleId = "chat-table-style";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        .bot-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 1em;
+        }
+        .bot-content th,
+        .bot-content td {
+          border: 1px solid var(--background-modifier-border);
+          padding: 0.5em;
+          text-align: center;
+        }
+        .bot-content th {
+          background-color: var(--background-secondary-alt);
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   return (
     <div className="chat-single-message" style={{ marginTop: "0.5rem", borderBottom: "1px solid var(--background-secondary-alt)" }}>
       <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
@@ -83,11 +108,11 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
             {new Date(message.timestamp).toLocaleTimeString()}
           </span>
         </div>
-        <button 
+        <button
           onClick={handleCopy}
-          style={{ 
-            background: 'none', 
-            border: 'none', 
+          style={{
+            background: 'none',
+            border: 'none',
             cursor: 'pointer',
             padding: '4px',
             borderRadius: '4px',
@@ -104,19 +129,30 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
       </div>
 
       {message.sender === MessageSender.USER ? (
-        <div 
-            className="user-content" 
-            style={{ 
-                marginTop: '0.25rem', 
-                whiteSpace: 'pre-wrap', 
-                wordBreak: 'break-word',  
-                color: 'var(--text-normal)',
-                marginBottom: '1rem' 
-            }}>
+        <div
+          className="user-content"
+          style={{
+            marginTop: '0.25rem',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            color: 'var(--text-normal)',
+            marginBottom: '1rem'
+          }}>
           {parse(message.content, options)}
         </div>
       ) : (
-        <div ref={contentRef} className="bot-content" style={{ marginTop: '0.25rem', whiteSpace: 'normal', wordBreak: 'break-word', color: 'var(--text-normal)' }} />
+        <div
+          ref={contentRef}
+          className="bot-content"
+          style={{
+            marginTop: '0.25rem',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            color: 'var(--text-normal)',
+            overflowX: 'auto',
+            paddingBottom: '0.5rem'
+          }}
+        />
       )}
     </div>
   );

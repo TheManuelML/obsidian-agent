@@ -1,8 +1,8 @@
 import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
+import { PromptTemplateManager } from "src/backend/managers/prompts/promptManager";
 import { Message } from "src/types";
-import { PromptTemplateManager } from "./prompts/promptManager";
 
 // Class that contains the methods to run a chain
 export class ChainRunner {

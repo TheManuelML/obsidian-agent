@@ -1,7 +1,6 @@
 import { promptLibrary } from "src/backend/managers/prompts/library";
 import { TFolder } from "obsidian";
-import { getRootFolder } from "src/plugin";
-import { getFolderStructure, formatFolderTree } from "src/utils/vaultStructure";
+import { getFolderStructure, formatFolderTree, getRootFolder } from "src/utils/vaultStructure";
 
 export class PromptTemplateManager {
     async getSimplePromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string) {

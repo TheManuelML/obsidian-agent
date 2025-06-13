@@ -2,7 +2,7 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { Notice } from 'obsidian';
 import { getApp } from "src/plugin";
-import { getNextAvailableFolderName } from 'src/utils/rename';
+import { getNextAvailableFolderName } from 'src/utils/renaming';
 import { findMatchingFolder } from 'src/utils/searching'
 import { getFolderStructure } from 'src/utils/vaultStructure';
 

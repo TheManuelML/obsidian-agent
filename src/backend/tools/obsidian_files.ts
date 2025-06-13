@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { Notice } from 'obsidian';
 import { getApp } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
-import { getNextAvailableFileName } from "src/utils/rename";
+import { getNextAvailableFileName } from "src/utils/renaming";
 import { formatTags } from 'src/utils/formating';
+import { parseImageFromNote } from "src/utils/parsing";
 import { ModelManager } from 'src/backend/managers/modelManager';
 import { PromptTemplateManager } from 'src/backend/managers/prompts/promptManager';
 
@@ -237,9 +238,11 @@ export const readNote = tool(async (input) => {
     // Read the file
     try {
         const content = await app.vault.read(matchedFile);
+        const cleanedContent = await parseImageFromNote(content);
+        
         return {
             success: true,
-            content: content,
+            content: cleanedContent.content,
             path: matchedFile.path
         };
     } catch (err) {

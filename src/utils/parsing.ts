@@ -1,71 +1,18 @@
-// Detects if the content is a code block or inline code snippet
-export function parseCodeSnippets(content: string): { text: string, isCode: boolean }[] {
-    const regex = /```([\s\S]*?)```/g;
-    const result: { text: string, isCode: boolean }[] = [];
-    let lastIndex = 0;
-    let match;
+export async function parseImageFromNote(content: string) {
+    // Detect images ![NAME](data:image/png;base64,...)
+    const imageRegex = /!\[[^\]]*]\((data:image\/[a-zA-Z]+;base64,[^)]+)\)/g;
   
-    while ((match = regex.exec(content)) !== null) {
-      // Texto antes del bloque de código
-      if (match.index > lastIndex) {
-        result.push({
-          text: content.slice(lastIndex, match.index),
-          isCode: false
-        });
-      }
+    const images: string[] = [];
+    let match: RegExpExecArray | null;
+    let cleanedContent = content;
   
-      // Bloque de código (sin los delimitadores ```)
-      result.push({
-        text: match[1],
-        isCode: true
-      });
-  
-      lastIndex = regex.lastIndex;
+    while ((match = imageRegex.exec(content)) !== null) {
+      images.push(match[1]);
+      cleanedContent = cleanedContent.replace(match[0], ""); // Elimina la imagen del contenido
     }
   
-    // Texto restante después del último bloque de código
-    if (lastIndex < content.length) {
-      result.push({
-        text: content.slice(lastIndex),
-        isCode: false
-      });
-    }
-  
-    return result; // Returns: [{ text: string, isCode: boolean }, ...]
-}
-
-// Detects if the content is a link to other page
-export function parseLinkToNote(content: string): {text: string, isLink: boolean}[] {
-    const regex = /\[\[([\w\s/]+)\]\]/g;
-    const result: {text: string, isLink: boolean}[] = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-        // Text before the link
-        if (match.index > lastIndex) {
-            result.push({
-                text: content.slice(lastIndex, match.index),
-                isLink: false
-            });
-        }
-
-        // The link itself (without the [[]] delimiters)
-        result.push({
-            text: match[1],
-            isLink: true
-        });
-
-        lastIndex = regex.lastIndex;
-    }
-
-    // Remaining text after the last link
-    if (lastIndex < content.length) {
-        result.push({
-            text: content.slice(lastIndex),
-            isLink: false
-        });
-    }
-
-    return result;
+    return {
+      content: cleanedContent.trim(),
+      images,
+    };
 }
