@@ -1,7 +1,7 @@
 import { TFile, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { getTime } from "src/utils/time";
-import { exportMessage, getThreadId, getLastNMessages } from "src/utils/chatHistory";
+import { exportMessage, getThreadId, getLastNMessages, removeLastMessage } from "src/utils/chatHistory";
 import { Message, MessageSender } from "src/types/index";
 import { ChainManager } from "src/backend/managers/chainManager";
 import { ChainRunner } from "src/backend/managers/chainRunner";
@@ -18,7 +18,8 @@ export class ChatStreamingService {
     chatFile: TFile,
     updateConversation: (updater: (prev: Message[]) => Message[]) => void,
     notes?: TFile[],
-    images?: File[]
+    images?: File[],
+    isRegeneration: boolean = false
   ) {
     const chain = ChainManager.getInstance().getChain();
     const runner = new ChainRunner();
@@ -32,16 +33,23 @@ export class ChatStreamingService {
         throw new Error(errorMsg);
       }
 
-      // Add user message
-      const userMessage: Message = {
-        sender: MessageSender.USER,
-        content: message,
-        timestamp: getTime(),
-      };
-      updateConversation(prev => [...prev, userMessage]);
+      // If regenerating, remove the last bot message from chat history
+      if (isRegeneration) {
+        await removeLastMessage(chatFile);
+      }
 
-      // Export user message
-      await exportMessage(userMessage, chatFile);
+      // Add user message only if not regenerating
+      if (!isRegeneration) {
+        const userMessage: Message = {
+          sender: MessageSender.USER,
+          content: message,
+          timestamp: getTime(),
+        };
+        updateConversation(prev => [...prev, userMessage]);
+
+        // Export user message
+        await exportMessage(userMessage, chatFile);
+      }
 
       // Add placeholder AI message
       const tempBotMessage: Message = {
@@ -81,7 +89,7 @@ export class ChatStreamingService {
       // Execute streaming
       const threadId = await getThreadId(chatFile);
       try {
-        await runner.run(chain, threadId, userMessage, notes, images, updateAiMessage);
+        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime() }, notes, images, updateAiMessage);
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {

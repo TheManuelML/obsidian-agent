@@ -7,6 +7,7 @@ import { useChatFile } from "src/components/chat/hooks/useChatFile";
 import { useChatFileMonitor } from "src/components/chat/hooks/useChatFileMonitor";
 import { useAutoScroll } from "src/components/chat/hooks/useAutoScroll";
 import { ChatStreamingService } from "src/components/chat/services/chatStreamingService";
+import { MessageSender } from "src/types";
 
 export const Chat: React.FC = () => {
   const streamingService = new ChatStreamingService();
@@ -53,6 +54,36 @@ export const Chat: React.FC = () => {
     );
   };
 
+  const handleRegenerate = async (index: number) => {
+    // Find the last user message before the bot message
+    const lastUserMessage = conversation
+      .slice(0, index)
+      .reverse()
+      .find(msg => msg.sender === MessageSender.USER);
+
+    if (lastUserMessage) {
+      // Remove all messages after and including the bot message
+      const newConversation = conversation.slice(0, index);
+      setConversation(newConversation);
+
+      // Call the streaming service directly with the last user message
+      const activeChatFile = await ensureActiveChat();
+      if (!activeChatFile) {
+        console.error("No se pudo crear o encontrar archivo de chat");
+        return;
+      }
+
+      await streamingService.startStreaming(
+        lastUserMessage.content,
+        activeChatFile,
+        setConversation,
+        undefined,
+        undefined,
+        true // This is a regeneration
+      );
+    }
+  };
+
   return (
     <div style={{
       display: "flex",
@@ -72,6 +103,7 @@ export const Chat: React.FC = () => {
       <ChatMessages 
         conversation={conversation}
         bottomRef={bottomRef}
+        onRegenerate={handleRegenerate}
       />
       <div style={{ marginBottom: "1rem", position: "relative" }}>
         <ChatInput onSend={handleSendMessage}/>

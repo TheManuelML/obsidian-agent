@@ -43,7 +43,7 @@ export class ModelManager {
 
         const baseConfig: ModelConfig = {
             modelName: model.name,
-            temperature: 0.7, // DEFAULT
+            temperature: 1, // DEFAULT
             streaming: true, // DEFAULT
             maxRetries: 3, // DEFAULT
             apiKey: providerApiKey,

@@ -22,6 +22,8 @@ Never return the content of inside a "code block \`\`\`". Just return the conten
 
 When an Obsidian note or a folder is mentioned, and you are asked to work with it, always search for it to have the exact path.
 
+Always return note paths inside [[PATH]] as Obsidian links.
+
 --- 
 
 Take into account the structure of the Obsidian vault:

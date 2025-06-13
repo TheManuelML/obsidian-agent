@@ -1,15 +1,16 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { Bot, User, Copy } from "lucide-react";
+import { Bot, User, Copy, RefreshCw } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element, domToReact } from "html-react-parser";
 import { Component, MarkdownRenderer } from "obsidian";
 import { MessageSender, ChatSingleMessageProps } from "src/types";
+import { parseMarkdownCodeBlock } from "src/utils/parsing";
 
 // Custom components for special tags
 const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (
   <span className={`custom-tag ${tag}`}>{children}</span>
 );
 
-export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
+export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate?: () => void }> = ({ message, onRegenerate }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const componentRef = useRef<Component | null>(null);
 
@@ -45,7 +46,16 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
       return `[${p1.trim()}](obsidian://open?file=${encoded})`;
     }).replace(/`(\[[^\]]+\]\([^)]+\))`/g, '$1'); // Remove backsticks ``
 
-    return linkProcessed;
+    // Replace paths to files to markdown links
+    const pathProcessed = linkProcessed.replace(/(?:[\w\s\-]+\/)*([\w\s\-]+)\.md\b/gi, (_match, fileName) => {
+      const encoded = encodeURIComponent(fileName.trim());
+      return `[${fileName}](obsidian://open?file=${encoded})`;
+    });
+
+    // Removes initial and trailing code block ```markdown ```
+    const removeCodeBlock = parseMarkdownCodeBlock(pathProcessed);
+
+    return removeCodeBlock;
   }, []);
 
   useEffect(() => {
@@ -108,24 +118,46 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message })
             {new Date(message.timestamp).toLocaleTimeString()}
           </span>
         </div>
-        <button
-          onClick={handleCopy}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '4px',
-            borderRadius: '4px',
-            opacity: 0.6,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
-        >
-          <Copy size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {message.sender === MessageSender.BOT && onRegenerate && (
+            <button
+              onClick={onRegenerate}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                borderRadius: '4px',
+                opacity: 0.6,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+              onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
+            >
+              <RefreshCw size={16} />
+            </button>
+          )}
+          <button
+            onClick={handleCopy}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '4px',
+              opacity: 0.6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
+          >
+            <Copy size={16} />
+          </button>
+        </div>
       </div>
 
       {message.sender === MessageSender.USER ? (

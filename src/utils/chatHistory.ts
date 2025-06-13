@@ -55,3 +55,29 @@ export const getLastNMessages = async (chatFile: TFile, n: number): Promise<Mess
   const messages = await importConversation(chatFile);
   return messages.slice(-n);
 };
+
+// Remove the last message from a chat file
+export const removeLastMessage = async (chatFile: TFile) => {
+  const app = getApp();
+  const chat = await app.vault.read(chatFile);
+  if (!chat) return;
+
+  // Find the last message block
+  const messageBlocks = [
+    ...chat.matchAll(
+      /\*\*(user|bot)\*\* - \*(.*?)\*:\s*\n([\s\S]*?)(?=\n\*\*(?:user|bot)\*\* - \*|\n*$)/gi
+    )
+  ];
+
+  if (messageBlocks.length > 0) {
+    // Get the last message block
+    const lastBlock = messageBlocks[messageBlocks.length - 1];
+    const lastBlockIndex = chat.lastIndexOf(lastBlock[0]);
+    
+    // Remove the last message block
+    const newChat = chat.substring(0, lastBlockIndex).trim();
+    
+    // Rewrite the chat file without the last message
+    app.vault.modify(chatFile, newChat);
+  }
+};
