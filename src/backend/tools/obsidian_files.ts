@@ -1,6 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { Notice } from 'obsidian';
+import { Notice, TFile } from 'obsidian';
 import { getApp } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
 import { getNextAvailableFileName } from "src/utils/renaming";
@@ -221,17 +221,38 @@ export const editNote = tool(async (input) => {
 // Obsidian tool to read notes
 export const readNote = tool(async (input) => {
     const app = getApp();
-    const { fileName } = input;
+    const { fileName, activeNote } = input;
+    let matchedFile: TFile | null;
 
-    // Find the closest file
-    const matchedFile = findClosestFile(fileName);
-    
-    // Check if the file exists
-    if (!matchedFile) {
-        console.error(`Could not find any note with the name or similar to "${fileName}".`);
+    if (!fileName && activeNote) {
+        // Detect the current note
+        matchedFile = app.workspace.getActiveFile()
+        if (!matchedFile) {
+            const errorMsg = "There is not an opened file"
+            new Notice(errorMsg);
+            return {
+                success: false,
+                error: errorMsg
+            }
+        }
+    } else if (fileName) {
+        // Find the closest file
+        matchedFile = findClosestFile(fileName);
+        
+        // Check if the file exists
+        if (!matchedFile) {
+            console.error(`Could not find any note with the name or similar to "${fileName}".`);
+            return {
+                success: false,
+                error: `Could not find any note similar to "${fileName}".`
+            };
+        }
+    } else {
+        const errorMsg = "No file name provided and 'Active Note' is not set to true.";
+        new Notice(errorMsg);
         return {
             success: false,
-            error: `Could not find any note similar to "${fileName}".`
+            error: errorMsg
         };
     }
 
@@ -246,7 +267,7 @@ export const readNote = tool(async (input) => {
             path: matchedFile.path
         };
     } catch (err) {
-        const errorMsg = 'Error reading file: ' + err;  
+        const errorMsg = 'Error reading file: ' + (err instanceof Error ? err.message : String(err));  
         new Notice(errorMsg, 5000);
         return {
             success: false,
@@ -256,8 +277,9 @@ export const readNote = tool(async (input) => {
 }, {
     // Tool schema and metadata
     name: 'read_note',
-    description: 'Reads and acess the content of a note in Obsidian. You DO NOT NEED the content of the note, just the path or name.',
+    description: 'Reads the content of a note in Obsidian by name or by detecting the currently active note. The content itself is not needed as input.',
     schema: z.object({
-        fileName: z.string().describe('The name or path (can be fuzzy) of the note to read'),
+        fileName: z.string().optional().describe('The name or path (can be fuzzy) of the note to read'),
+        activeNote: z.boolean().default(false).optional().describe('If no filename provded read the active note') 
     })
 });

@@ -1,3 +1,4 @@
+import mammoth from "mammoth";
 import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
@@ -18,10 +19,11 @@ export class ChainRunner {
         threadId: string, 
         message: Message, 
         notes: TFile[] | undefined,
-        images: File[] | undefined, 
+        files: File[] | undefined, 
         updateAiMessage: (chunk: string) => void
     ) {
         let fullMessage = message.content;
+        let attachedImages: File[] = [];
 
         // If there are attached notes append the paths to the message
         if (notes && notes.length > 0) {
@@ -32,11 +34,23 @@ export class ChainRunner {
             }
         }
 
+        // Process files
+        if (files && files.length > 0) {
+            for (const f of files) {
+                if (f.type.startsWith("image/")) {
+                    attachedImages.push(f);
+                } else {
+                    const content = await this.extractTextFromFile(f);
+                    fullMessage += `\n###\nAttached file name: ${f.name}\nContent: ${content}`
+                }
+            }
+        }
+
         // Switch depending on the modality: (simple | multimodal)
-        if (!images) {
-            await this.simpleRun(chain, threadId, fullMessage, updateAiMessage);
+        if (attachedImages && attachedImages.length > 0) {
+            await this.multimodalRun(chain, threadId, fullMessage, attachedImages, updateAiMessage);
         } else {
-            await this.multimodalRun(chain, threadId, fullMessage, images, updateAiMessage)
+            await this.simpleRun(chain, threadId, fullMessage, updateAiMessage);
         }
     }
 
@@ -136,5 +150,28 @@ export class ChainRunner {
             };
             reader.readAsDataURL(image);
         });
+    }
+
+    // Return text from binary files (método actualizado)
+    async extractTextFromFile(file: File): Promise<string> {
+        try {
+            const ext = file.name.split(".").pop()?.toLowerCase();
+            if (!ext) throw new Error("Archivo sin extensión");
+
+            const arrayBuffer = await file.arrayBuffer();
+            
+            if (ext === "docx") {
+                const buffer = Buffer.from(arrayBuffer);
+                const result = await mammoth.extractRawText({ buffer });
+                return result.value;
+            }
+
+            throw new Error("Formato no soportado: solo DOCX");
+        } catch (err: any) {
+            const errorMsg = `Error procesando archivo ${file.name}: ${err.message}`;
+            new Notice(errorMsg, 5000);
+            console.error('Error en extractTextFromFile:', err);
+            return `[Error: No se pudo procesar el archivo ${file.name}]`;
+        }   
     }
 }

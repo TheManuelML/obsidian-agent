@@ -115,7 +115,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
             {message.sender === MessageSender.USER ? <User size={28} /> : <Bot size={28} />}
           </div>
           <span style={{ opacity: "0.8", color: 'var(--text-muted)', fontSize: 'var(--font-ui-smaller)', fontWeight: 600 }}>
-            {new Date(message.timestamp).toLocaleTimeString()}
+            {message.timestamp}
           </span>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>

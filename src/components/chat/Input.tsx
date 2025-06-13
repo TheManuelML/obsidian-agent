@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
+import { AtSign, X, CircleArrowRight, Image, FileText } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getPlugin, getSettings } from "src/plugin";
 import { AddContextModal } from "src/components/modal/AddContextModal";
@@ -16,16 +16,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [message, setMessage] = useState("");
   const [selectedModel, setSelectedModel] = useState(settings.model)
   const [selectedNotes, setselectedNotes] = useState<TFile[]>([]);
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedFiles, setselectedFiles] = useState<File[]>([]);
 
   // Function to handle the message sending to the Chat
   const handleSend = async () => {
     if (message.trim()) {
-      onSend(message.trim(), selectedNotes, selectedImages); // Call the parent function to handle the message
+      onSend(message.trim(), selectedNotes, selectedFiles); // Call the parent function to handle the message
 
       // Clear the input fields
       setMessage("");
-      setSelectedImages([]);
+      setselectedFiles([]);
       setselectedNotes([]);
 
       // Reset height of the textarea
@@ -33,22 +33,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     }
   };
 
-  // Function to handle image selection
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const images = event.target.files;
-    if (images) {
-      const newImages = Array.from(images);
-      setSelectedImages(prev => [...prev, ...newImages]);
+  // Function to handle file selection
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newfiles = Array.from(files);
+      setselectedFiles(prev => [...prev, ...newfiles]);
     }
     // Reset the input value so the same image can be selected again
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
   };
-  
-  // Function to remove a image from the selected images
+  // Function to remove a image from the selected files
   const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setselectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Function to open the AddContextModal
@@ -67,7 +66,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       });
     }).open();
   }
-  
   // Removes a note from the selected notes
   const removeNote = (toRemove: TFile) => {
     setselectedNotes((prev) => {
@@ -177,8 +175,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                 </button>
               </div>
             ))}
-            {/* Show selected images below textarea */}
-            {selectedImages.map((img, index) => {
+            {/* Show selected files below textarea */}
+            {selectedFiles.map((img, index) => {
               const isImage = img.type.startsWith("image/");
               const previewUrl = isImage ? URL.createObjectURL(img) : null;
 
@@ -195,18 +193,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                     height: "1.5rem",
                   }}
                 >
-                  <img
-                    src={previewUrl!}
-                    alt={img.name}
-                    style={{
-                      width: "1rem",
-                      height: "1rem",
-                      objectFit: "cover",
-                      borderRadius: "2px",
-                      marginRight: "0.25rem",
-                    }}
-                  />
-                  <span>Image</span>
+                  {isImage ? (
+                    <img
+                      src={previewUrl!}
+                      alt={img.name}
+                      style={{
+                        width: "1rem",
+                        height: "1rem",
+                        objectFit: "cover",
+                        borderRadius: "2px",
+                        marginRight: "0.25rem",
+                      }}
+                    />
+                  ) : (
+                    <FileText
+                      size={14}
+                      style={{
+                        marginRight: "0.25rem",
+                        color: "var(--text-muted)",
+                      }}
+                    />
+                  )}
+                  <span>{img.name}</span>
                   <button
                     onClick={() => removeImage(index)}
                     style={{
@@ -278,16 +286,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                     gap: "0.25rem",
                     cursor: "pointer",
                   }}
-                  title="Images/Plain text"
+                  title="files/Plain text"
                 >
                   <Image size={18} style={{ stroke: "var(--text-muted)" }} />
                 </button>
                 <input
                   type="file"
                   ref={imageInputRef}
-                  onChange={handleImageSelect}
+                  onChange={handleFileSelect}
                   style={{ display: "none" }}
-                  accept=".jpg,.jpeg,.png"
+                  accept=".jpg,.jpeg,.png,.docx" // Add plain text files: HTML, TXT, MD, CSV // Add binary files: PDF
                   multiple
                 />
               </div>
