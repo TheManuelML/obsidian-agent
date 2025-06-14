@@ -51,6 +51,7 @@ export const createNote = tool(async (input) => {
                 if (!llm) {
                     const errorMsg = "Failed to initialize LLM" 
                     new Notice(errorMsg, 5000);
+                    console.error(errorMsg);
                     throw new Error(errorMsg);
                 }
 
@@ -64,6 +65,7 @@ export const createNote = tool(async (input) => {
             } catch (err) {
                 const errorMsg = 'Error invoking LLM: ' + err;  
                 new Notice(errorMsg, 5000);
+                console.error(errorMsg);
                 return {
                     success: false,
                     error: err instanceof Error ? err.message : 'Unknown error'
@@ -89,6 +91,7 @@ export const createNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error creating file in Obsidian: ' + err;  
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -131,7 +134,8 @@ export const editNote = tool(async (input) => {
         matchedFile = app.workspace.getActiveFile()
         if (!matchedFile) {
             const errorMsg = "There is not an opened file"
-            new Notice(errorMsg);
+            new Notice(errorMsg, 5000);
+            console.error(errorMsg);
             return {
                 success: false,
                 error: errorMsg
@@ -151,7 +155,8 @@ export const editNote = tool(async (input) => {
         }
     } else {
         const errorMsg = "No file name provided and 'Active Note' is not set to true.";
-        new Notice(errorMsg);
+        new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: errorMsg
@@ -175,6 +180,7 @@ export const editNote = tool(async (input) => {
             if (!llm) {
                 const errorMsg = "Failed to initialize LLM" 
                 new Notice(errorMsg, 5000);
+                console.error(errorMsg);
                 throw new Error(errorMsg);
             }
 
@@ -198,6 +204,7 @@ export const editNote = tool(async (input) => {
         } catch (err) {
             const errorMsg = 'Error invoking LLM: ' + err;  
             new Notice(errorMsg, 5000);
+            console.error(errorMsg);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'
@@ -211,6 +218,7 @@ export const editNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error updating file: ' + err;  
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -250,7 +258,8 @@ export const readNote = tool(async (input) => {
         matchedFile = app.workspace.getActiveFile()
         if (!matchedFile) {
             const errorMsg = "There is not an opened file"
-            new Notice(errorMsg);
+            new Notice(errorMsg, 5000);
+            console.error(errorMsg);
             return {
                 success: false,
                 error: errorMsg
@@ -270,7 +279,8 @@ export const readNote = tool(async (input) => {
         }
     } else {
         const errorMsg = "No file name provided and 'Active Note' is not set to true.";
-        new Notice(errorMsg);
+        new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: errorMsg
@@ -290,6 +300,7 @@ export const readNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error reading file: ' + (err instanceof Error ? err.message : String(err));  
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'

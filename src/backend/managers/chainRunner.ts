@@ -72,6 +72,7 @@ export class ChainRunner {
         } catch (err) {
             const errorMsg = "Streaming error: " + err;
             new Notice(errorMsg, 5000);
+            console.error(errorMsg);
         }
     }
 
@@ -107,6 +108,7 @@ export class ChainRunner {
         } catch (err) {
             const errorMsg = "Streaming error: " + err;
             new Notice(errorMsg, 5000);
+            console.error(errorMsg);
         }
     }
 
@@ -170,7 +172,7 @@ export class ChainRunner {
         } catch (err: any) {
             const errorMsg = `Error procesando archivo ${file.name}: ${err.message}`;
             new Notice(errorMsg, 5000);
-            console.error('Error en extractTextFromFile:', err);
+            console.error(errorMsg);
             return `[Error: No se pudo procesar el archivo ${file.name}]`;
         }   
     }

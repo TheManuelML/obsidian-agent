@@ -30,6 +30,7 @@ export class ChatStreamingService {
       if (!fileExists) {
         const errorMsg = "Chat file was deleted, please create a new chat";
         new Notice(errorMsg, 5000); 
+        console.error(errorMsg);
         throw new Error(errorMsg);
       }
 
@@ -100,7 +101,9 @@ export class ChatStreamingService {
           };
           await exportMessage(finalBotMessage, chatFile);
         } else {
-          new Notice("No response received from the AI", 5000);
+          const errorMsg = 'No response received from the AI' 
+          new Notice(errorMsg, 5000);
+          console.error(errorMsg);
 
           // Export an empty message
           const finalBotMessage: Message = {
@@ -111,13 +114,16 @@ export class ChatStreamingService {
           await exportMessage(finalBotMessage, chatFile);
         }
       } catch (err) {
-        const errorMsg = "Error during streaming: " + err;
+        const errorMsg = `Error during streaming: ${err}`;
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         throw new Error(errorMsg);
       }
 
     } catch (err) {
-      new Notice(err as string, 5000);
+      const errorMsg = `Error during streaming: ${err}`
+      new Notice(errorMsg, 5000);
+      console.error(errorMsg);
     }
   }
 }

@@ -27,6 +27,7 @@ export const rename = tool(async (input) => {
             if (!matchedFile.parent) {
                 const errorMsg = 'File has no parent directory';
                 new Notice(errorMsg, 5000);
+                console.error(errorMsg);
                 throw new Error(errorMsg); 
             }
             newName = getNextAvailableFileName(newName, matchedFile.parent.path);
@@ -43,6 +44,7 @@ export const rename = tool(async (input) => {
         } catch (err) {
             const errorMsg = 'Error renaming file: ' + err;  
             new Notice(errorMsg, 5000);
+            console.error(errorMsg);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'
@@ -84,6 +86,7 @@ export const rename = tool(async (input) => {
         } catch (err) {
             const errorMsg = 'Error renaming directory in Obsidian: ' + err;  
             new Notice(errorMsg, 5000);
+            console.error(errorMsg);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'

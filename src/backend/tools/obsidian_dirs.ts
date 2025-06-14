@@ -32,6 +32,7 @@ export const createDir = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error creating directory in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -81,6 +82,7 @@ export const listFiles = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error listing files in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
+        console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
