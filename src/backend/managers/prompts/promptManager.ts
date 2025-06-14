@@ -37,12 +37,11 @@ export class PromptTemplateManager {
 
     formatPromptsForCompiledGraph(systemPrompt: string, userMessage: string, images?: string[]) {
         const unifiedPrompt = `
-            Instructions:
-            ${systemPrompt}
+Instructions:
+${systemPrompt}
 
-            User Input:
-            ${userMessage}
-        `;
+User Input:
+${userMessage}`.trim();
         
         const inputs: { messages: Array<{"role": string, "content": string | Array<{"type": string, "text": string} | {"type": string, "image_url": {"url": string}}>}> } = { 
             messages: [
@@ -52,7 +51,7 @@ export class PromptTemplateManager {
 
         if (images && images.length > 0) {
             for (const img of images) {
-                (inputs.messages[1].content as Array<any>).push({"type": "image_url", "image_url": { "url": img }})
+                (inputs.messages[0].content as Array<any>).push({"type": "image_url", "image_url": { "url": img }});
             }
         } 
         

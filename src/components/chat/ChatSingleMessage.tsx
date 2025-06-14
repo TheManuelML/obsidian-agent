@@ -46,14 +46,8 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
       return `[${p1.trim()}](obsidian://open?file=${encoded})`;
     }).replace(/`(\[[^\]]+\]\([^)]+\))`/g, '$1'); // Remove backsticks ``
 
-    // Replace paths to files to markdown links
-    const pathProcessed = linkProcessed.replace(/(?:[\w\s\-]+\/)*([\w\s\-]+)\.md\b/gi, (_match, fileName) => {
-      const encoded = encodeURIComponent(fileName.trim());
-      return `[${fileName}](obsidian://open?file=${encoded})`;
-    });
-
     // Removes initial and trailing code block ```markdown ```
-    const removeCodeBlock = parseMarkdownCodeBlock(pathProcessed);
+    const removeCodeBlock = parseMarkdownCodeBlock(linkProcessed);
 
     return removeCodeBlock;
   }, []);
