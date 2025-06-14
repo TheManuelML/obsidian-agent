@@ -123,18 +123,38 @@ export const createNote = tool(async (input) => {
 // Obsidian tool to update or write on existing notes
 export const editNote = tool(async (input) => {
     const app = getApp();
-    let { fileName, newContent, useLLM = true, tags = [], context } = input;
+    const { fileName, activeNote, newContent, useLLM = true, tags = [], context } = input;
+    let matchedFile: TFile | null;
 
-    // Find the closest file
-    const matchedFile = findClosestFile(fileName);
-    
-    // Check if the file exists
-    if (!matchedFile) {
-        const errorMsg = `Could not find any note with the name or similar to "${fileName}".`
-        console.error(errorMsg);
+    if (activeNote) {
+        // Detect the current note
+        matchedFile = app.workspace.getActiveFile()
+        if (!matchedFile) {
+            const errorMsg = "There is not an opened file"
+            new Notice(errorMsg);
+            return {
+                success: false,
+                error: errorMsg
+            }
+        }
+    } else if (fileName && !activeNote) {
+        // Find the closest file
+        matchedFile = findClosestFile(fileName);
+        // Check if the file exists
+        if (!matchedFile) {
+            const errorMsg = `Could not find any note with the name or similar to "${fileName}".`
+            console.error(errorMsg);
+            return {
+                success: false,
+                error: errorMsg,
+            };
+        }
+    } else {
+        const errorMsg = "No file name provided and 'Active Note' is not set to true.";
+        new Notice(errorMsg);
         return {
             success: false,
-            error: errorMsg,
+            error: errorMsg
         };
     }
 
@@ -207,9 +227,10 @@ export const editNote = tool(async (input) => {
     };
 }, {
     name: 'update_note',
-    description: 'Replaces or edits a note content. Can use LLM or not, supports tags and context.',
+    description: 'Writes, replace and edit content of a note. Can use LLM or not, supports tags and context. Specify the note name or detect the active note if no name provided.',
     schema: z.object({
-        fileName: z.string().describe('The name or path of the note to update'),
+        fileName: z.string().optional().describe('The name or path of the note to edit'),
+        activeNote: z.boolean().default(false).optional().describe('If no filename provided read the active note'),
         newContent: z.string().optional().describe('New content or instructions to apply to the note'),
         useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the updated note'),
         tags: z.array(z.string()).optional().describe('Tags to add or update in the note'),
@@ -280,6 +301,6 @@ export const readNote = tool(async (input) => {
     description: 'Reads the content of a note in Obsidian by name or by detecting the currently active note. The content itself is not needed as input.',
     schema: z.object({
         fileName: z.string().optional().describe('The name or path (can be fuzzy) of the note to read'),
-        activeNote: z.boolean().default(false).optional().describe('If no filename provded read the active note') 
+        activeNote: z.boolean().default(false).optional().describe('If no filename provided read the active note') 
     })
 });

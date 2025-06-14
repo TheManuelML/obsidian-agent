@@ -26,7 +26,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       // Clear the input fields
       setMessage("");
       setselectedFiles([]);
-      setselectedNotes([]);
 
       // Reset height of the textarea
       if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
