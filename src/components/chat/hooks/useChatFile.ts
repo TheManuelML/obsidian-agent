@@ -34,7 +34,7 @@ export const useChatFile = () => {
     } catch (err) {
       const errorMsg = "Error creating chat folder: " + err;
       new Notice(errorMsg, 5000);
-      console.error(errorMsg);
+      if (settings.debug) console.error(errorMsg);
       
       return null;
     }
@@ -53,7 +53,7 @@ export const useChatFile = () => {
     } catch (err) {
       const errorMsg = "Error creating chat file: " + err;
       new Notice(errorMsg, 5000);
-      console.error(errorMsg);
+      if (settings.debug) console.error(errorMsg);
 
       return null;
     }

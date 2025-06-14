@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { Notice } from 'obsidian';
-import { getApp } from "src/plugin";
+import { getApp, getSettings } from "src/plugin";
 import { getNextAvailableFolderName } from 'src/utils/renaming';
 import { findMatchingFolder } from 'src/utils/searching'
 import { getFolderStructure } from 'src/utils/vaultStructure';
@@ -10,6 +10,7 @@ import { getFolderStructure } from 'src/utils/vaultStructure';
 export const createDir = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
+    const settings = getSettings();
     let { name = 'New Directory', dir_path = '/' } = input;
 
     // Sanitize the path
@@ -32,7 +33,7 @@ export const createDir = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error creating directory in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -52,6 +53,7 @@ export const createDir = tool(async (input) => {
 // List a tree of files and directories in a directory
 export const listFiles = tool(async (input) => {
     // Declaring the app and inputs
+    const settings = getSettings();
     let { dir_path = '/' } = input;
 
     // Find the matching folder if the path is not absolute    
@@ -82,7 +84,7 @@ export const listFiles = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error listing files in Obsidian: ' + err;
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'

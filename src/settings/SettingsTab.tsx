@@ -12,6 +12,7 @@ export interface AgentSettings {
   rules: string;
   chatsFolder: string;
   amountOfMessagesInMemory: number;
+  debug: boolean;
 }
 
 // Settings tab class
@@ -145,5 +146,20 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
+
+    containerEl.createEl('h1', { text: 'Developer Settings' });
+
+    new Setting(containerEl)
+      .setName("Debug Mode")
+      .setDesc("Enable debug mode to see detailed logs and information about the plugin's operation.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.debug)
+          .onChange(async (value) => {
+            this.plugin.settings.debug = value;
+            await this.plugin.saveSettings();
+          })
+      );
+    
   }
 }

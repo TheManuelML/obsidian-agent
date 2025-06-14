@@ -4,6 +4,7 @@ import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { PromptTemplateManager } from "src/backend/managers/prompts/promptManager";
 import { Message } from "src/types";
+import { getSettings } from "src/plugin";
 
 // Class that contains the methods to run a chain
 export class ChainRunner {
@@ -60,6 +61,7 @@ export class ChainRunner {
         messageContent: string,
         updateAiMessage: (chunk: string) => void
     ) {
+        const settings = getSettings();
         const inputs = await this.promptManager.getSimplePromptTemplate('agent', messageContent);
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
@@ -72,7 +74,7 @@ export class ChainRunner {
         } catch (err) {
             const errorMsg = "Streaming error: " + err;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
         }
     }
 
@@ -84,6 +86,7 @@ export class ChainRunner {
         images: File[] | undefined, 
         updateAiMessage: (chunk: string) => void
     ) {
+        const settings = getSettings();
         const encodedImages: string[] = [];
         
         // Process images
@@ -108,7 +111,7 @@ export class ChainRunner {
         } catch (err) {
             const errorMsg = "Streaming error: " + err;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
         }
     }
 
@@ -156,6 +159,7 @@ export class ChainRunner {
 
     // Return text from binary files (método actualizado)
     async extractTextFromFile(file: File): Promise<string> {
+        const settings = getSettings();
         try {
             const ext = file.name.split(".").pop()?.toLowerCase();
             if (!ext) throw new Error("Archivo sin extensión");
@@ -172,7 +176,7 @@ export class ChainRunner {
         } catch (err: any) {
             const errorMsg = `Error procesando archivo ${file.name}: ${err.message}`;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             return `[Error: No se pudo procesar el archivo ${file.name}]`;
         }   
     }

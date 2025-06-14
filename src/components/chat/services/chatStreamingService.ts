@@ -21,7 +21,17 @@ export class ChatStreamingService {
     files?: File[],
     isRegeneration: boolean = false
   ) {
-    const chain = ChainManager.getInstance().getChain();
+    const settings = getSettings();
+    let chain;
+    try {
+      chain = ChainManager.getInstance().getChain();
+    } catch (err) {
+      const errorMsg = `Error initializing chat: ${err}`;
+      new Notice(errorMsg, 5000);
+      if (settings.debug) console.error(errorMsg);
+      return;
+    }
+
     const runner = new ChainRunner();
 
     try {
@@ -30,7 +40,7 @@ export class ChatStreamingService {
       if (!fileExists) {
         const errorMsg = "Chat file was deleted, please create a new chat";
         new Notice(errorMsg, 5000); 
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         throw new Error(errorMsg);
       }
 
@@ -107,7 +117,7 @@ export class ChatStreamingService {
         } else {
           const errorMsg = 'No response received from the AI' 
           new Notice(errorMsg, 5000);
-          console.error(errorMsg);
+          if (settings.debug) console.error(errorMsg);
 
           // Export an empty message
           const finalBotMessage: Message = {
@@ -120,14 +130,14 @@ export class ChatStreamingService {
       } catch (err) {
         const errorMsg = `Error during streaming: ${err}`;
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         throw new Error(errorMsg);
       }
 
     } catch (err) {
       const errorMsg = `Error during streaming: ${err}`
       new Notice(errorMsg, 5000);
-      console.error(errorMsg);
+      if (settings.debug) console.error(errorMsg);
     }
   }
 }

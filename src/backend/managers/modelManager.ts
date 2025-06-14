@@ -34,11 +34,12 @@ export class ModelManager {
 
     // Gets the model configuration depending on the provider
     public getModelConfig(model: Model): ModelConfig {
+        const settings = getSettings();
         const providerApiKey = this.providerApiKeyMap[model.provider]();
         if (!providerApiKey) {
             const errorMsg = `API key for provider ${model.provider}, is not set.`;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             throw new Error(errorMsg);
         }
 
@@ -77,7 +78,7 @@ export class ModelManager {
             default:
                 const errorMsg = `Unsupported provider: ${model.provider}`;
                 new Notice(errorMsg, 5000);
-                console.error(errorMsg);
+                if (settings.debug) console.error(errorMsg);
                 throw new Error(errorMsg);
         }
     }
@@ -91,7 +92,7 @@ export class ModelManager {
         if (!model) {
             const errorMsg = "No model was provided in the settings";
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             throw new Error (errorMsg);
         }
         

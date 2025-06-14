@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { Notice, TFile } from 'obsidian';
-import { getApp } from "src/plugin";
+import { getApp, getSettings } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
 import { getNextAvailableFileName } from "src/utils/renaming";
 import { formatTags } from 'src/utils/formating';
@@ -13,6 +13,7 @@ import { PromptTemplateManager } from 'src/backend/managers/prompts/promptManage
 export const createNote = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
+    const settings = getSettings();
     let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
 
     // Find the closest folder
@@ -51,7 +52,7 @@ export const createNote = tool(async (input) => {
                 if (!llm) {
                     const errorMsg = "Failed to initialize LLM" 
                     new Notice(errorMsg, 5000);
-                    console.error(errorMsg);
+                    if (settings.debug) console.error(errorMsg);
                     throw new Error(errorMsg);
                 }
 
@@ -65,7 +66,7 @@ export const createNote = tool(async (input) => {
             } catch (err) {
                 const errorMsg = 'Error invoking LLM: ' + err;  
                 new Notice(errorMsg, 5000);
-                console.error(errorMsg);
+                if (settings.debug) console.error(errorMsg);
                 return {
                     success: false,
                     error: err instanceof Error ? err.message : 'Unknown error'
@@ -91,7 +92,7 @@ export const createNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error creating file in Obsidian: ' + err;  
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -126,6 +127,7 @@ export const createNote = tool(async (input) => {
 // Obsidian tool to update or write on existing notes
 export const editNote = tool(async (input) => {
     const app = getApp();
+    const settings = getSettings();
     const { fileName, activeNote, newContent, useLLM = true, tags = [], context } = input;
     let matchedFile: TFile | null;
 
@@ -135,7 +137,7 @@ export const editNote = tool(async (input) => {
         if (!matchedFile) {
             const errorMsg = "There is not an opened file"
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             return {
                 success: false,
                 error: errorMsg
@@ -147,7 +149,7 @@ export const editNote = tool(async (input) => {
         // Check if the file exists
         if (!matchedFile) {
             const errorMsg = `Could not find any note with the name or similar to "${fileName}".`
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             return {
                 success: false,
                 error: errorMsg,
@@ -156,7 +158,7 @@ export const editNote = tool(async (input) => {
     } else {
         const errorMsg = "No file name provided and 'Active Note' is not set to true.";
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: errorMsg
@@ -180,7 +182,7 @@ export const editNote = tool(async (input) => {
             if (!llm) {
                 const errorMsg = "Failed to initialize LLM" 
                 new Notice(errorMsg, 5000);
-                console.error(errorMsg);
+                if (settings.debug) console.error(errorMsg);
                 throw new Error(errorMsg);
             }
 
@@ -204,7 +206,7 @@ export const editNote = tool(async (input) => {
         } catch (err) {
             const errorMsg = 'Error invoking LLM: ' + err;  
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'Unknown error'
@@ -218,7 +220,7 @@ export const editNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error updating file: ' + err;  
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'
@@ -250,6 +252,7 @@ export const editNote = tool(async (input) => {
 // Obsidian tool to read notes
 export const readNote = tool(async (input) => {
     const app = getApp();
+    const settings = getSettings();
     const { fileName, activeNote } = input;
     let matchedFile: TFile | null;
 
@@ -259,7 +262,7 @@ export const readNote = tool(async (input) => {
         if (!matchedFile) {
             const errorMsg = "There is not an opened file"
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             return {
                 success: false,
                 error: errorMsg
@@ -280,7 +283,7 @@ export const readNote = tool(async (input) => {
     } else {
         const errorMsg = "No file name provided and 'Active Note' is not set to true.";
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: errorMsg
@@ -300,7 +303,7 @@ export const readNote = tool(async (input) => {
     } catch (err) {
         const errorMsg = 'Error reading file: ' + (err instanceof Error ? err.message : String(err));  
         new Notice(errorMsg, 5000);
-        console.error(errorMsg);
+        if (settings.debug) console.error(errorMsg);
         return {
             success: false,
             error: err instanceof Error ? err.message : 'Unknown error'

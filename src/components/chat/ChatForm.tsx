@@ -47,7 +47,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
         } catch (err) {
             const errorMsg = 'Error selecting chat: ' + err;  
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
 
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
@@ -73,7 +73,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
         } catch (err) {
             const errorMsg = "Error renaming chat file: " + err;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
         }
     };
     // Cancel the rename of a chat
@@ -116,7 +116,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
         } catch (err) {
             const errorMsg = "Error deleting chat file: " + err;
             new Notice(errorMsg, 5000);
-            console.error(errorMsg);
+            if (settings.debug) console.error(errorMsg);
             
             const updatedChats = await loadChatFiles();
             if (updatedChats.length > 0) {
