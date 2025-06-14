@@ -66,7 +66,7 @@ export const Chat: React.FC = () => {
       const newConversation = conversation.slice(0, index);
       setConversation(newConversation);
 
-      // Call the streaming service directly with the last user message
+      // Call the streaming service directly with the last user message and its attachments
       const activeChatFile = await ensureActiveChat();
       if (!activeChatFile) {
         console.error("No se pudo crear o encontrar archivo de chat");
@@ -77,8 +77,8 @@ export const Chat: React.FC = () => {
         lastUserMessage.content,
         activeChatFile,
         setConversation,
-        undefined,
-        undefined,
+        lastUserMessage.attachments?.notes,
+        lastUserMessage.attachments?.files,
         true // This is a regeneration
       );
     }

@@ -18,7 +18,7 @@ export class ChatStreamingService {
     chatFile: TFile,
     updateConversation: (updater: (prev: Message[]) => Message[]) => void,
     notes?: TFile[],
-    images?: File[],
+    files?: File[],
     isRegeneration: boolean = false
   ) {
     const chain = ChainManager.getInstance().getChain();
@@ -45,6 +45,10 @@ export class ChatStreamingService {
           sender: MessageSender.USER,
           content: message,
           timestamp: getTime(),
+          attachments: notes || files ? {
+            notes,
+            files
+          } : undefined
         };
         updateConversation(prev => [...prev, userMessage]);
 
@@ -90,7 +94,7 @@ export class ChatStreamingService {
       // Execute streaming
       const threadId = await getThreadId(chatFile);
       try {
-        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime() }, notes, images, updateAiMessage);
+        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime() }, notes, files, updateAiMessage);
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {
