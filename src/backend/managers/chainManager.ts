@@ -2,10 +2,10 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
 import { LanguageModelLike } from "@langchain/core/language_models/base";
 import { Runnable } from "@langchain/core/runnables";
-import { createNote, editNote, readNote } from "src/backend/tools/obsidian_files";
-import { createDir, listFiles } from "src/backend/tools/obsidian_dirs";
-import { search } from "src/backend/tools/obsidian_search";
-import { rename } from "src/backend/tools/obsidian_rename";
+import { createNote, editNote, readNote } from "src/backend/tools/obsidianFiles";
+import { createDir, listFiles } from "src/backend/tools/obsidianDirs";
+import { search } from "src/backend/tools/obsidianSearch";
+import { rename } from "src/backend/tools/obsidianRename";
 import { MemoryManager } from "src/backend/managers/memoryManager";
 import { ModelManager } from "src/backend/managers/modelManager";
 
