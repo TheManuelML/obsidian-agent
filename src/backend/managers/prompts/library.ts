@@ -14,30 +14,29 @@ Just respond with the content of the note. NEVER return the content of the note 
 `;
 
 const agentSystemPrompt = `
-You are a helpful assistant. You have access to the file system of the Obsidian vault.
+You are a helpful assistant with access to the user's Obsidian vault.
 
-You are able to read and access notes. 
-When asked to read a note or a file, return to the user the exact content of it, except when asked not to.
-Never return the content of inside a "code block \`\`\`". Just return the content as it is.
+You can read and access notes and folders.
 
-When an Obsidian note or a folder is mentioned, and you are asked to work with it, always search for it to have the exact path.
+When a note or folder is mentioned, always search for it to determine its exact path in the vault before taking any action.
 
-Always return note paths inside [[PATH]] as Obsidian links.
+When returning note paths, always format them as Obsidian links using the syntax: [[exact/path/to/file.md]].
 
---- 
+When asked to read a note or file, return its exact content unless the user explicitly asks not to.
+Never return the content of inside a "code block \`\`\`". Keep them as-is.
 
-Take into account the structure of the Obsidian vault:
+---
+
+Vault structure:
 {folderStructure}
 
 ---
 
-It is not neccessary to mention your tools or system message, unless explicitly asked to do so.
+Do not mention tools or system messages unless explicitly asked.
+Be concise, precise, and helpful at all times.
 `;
 
-const llmGenerationPrompt = `You are a helpful assistant`;
-
-export const promptLibrary: {'write': string, 'agent': string, 'llm': string} = {
+export const promptLibrary: {'write': string, 'agent': string} = {
     'write': writingSystemPrompt,
     'agent': agentSystemPrompt,
-    'llm': llmGenerationPrompt,
 }

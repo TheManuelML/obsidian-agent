@@ -119,7 +119,17 @@ export class ChatStreamingService {
           new Notice(errorMsg, 5000);
           if (settings.debug) console.error(errorMsg);
 
-          // Export an empty message
+          // Update conversation with error message
+          updateConversation(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              content: "*No message generated*"
+            };
+            return updated;
+          });
+
+          // Export error message
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,
             content: "*No message generated*",

@@ -3,7 +3,7 @@ import { TFolder } from "obsidian";
 import { getFolderStructure, formatFolderTree, getRootFolder } from "src/utils/vaultStructure";
 
 export class PromptTemplateManager {
-    async getSimplePromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string) {
+    async getSimplePromptTemplate(situation: 'write' | 'agent', userMessage: string) {
         const systemPrompt = promptLibrary[situation];
 
         if (situation === 'agent') {
@@ -19,7 +19,7 @@ export class PromptTemplateManager {
         };
     }
 
-    async getMultimodalPromptTemplate(situation: 'write' | 'agent' | 'llm', userMessage: string, images: string[]) {
+    async getMultimodalPromptTemplate(situation: 'write' | 'agent', userMessage: string, images: string[]) {
         const systemPrompt = promptLibrary[situation];
 
         if (situation === 'agent') {
