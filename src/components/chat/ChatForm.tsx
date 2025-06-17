@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { Plus, Edit2, Trash2, X, ChevronDown } from "lucide-react";
 import { Notice, TFile } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { importConversation } from "src/utils/chatHistory";
@@ -18,7 +18,9 @@ export const ChatForm: React.FC<ChatFormProps> = ({
 
     const [isRenaming, setIsRenaming] = useState(false);
     const [newChatName, setNewChatName] = useState("");
+    const [isSelectOpen, setIsSelectOpen] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const selectRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isRenaming && inputRef.current) {
@@ -27,6 +29,18 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             setNewChatName(chatFile?.basename || "");
         }
     }, [isRenaming, chatFile]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+                setIsSelectOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Select a chat
     const handleChatSelect = async (filePath: string) => {
@@ -133,24 +147,69 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             marginBottom: "1rem",
             alignItems: "center"
         }}>
-            <select
-                value={chatFile?.path || ""}
-                onChange={(e) => handleChatSelect(e.target.value)}
+            <div 
+                ref={selectRef}
                 style={{
                     flex: 1,
-                    padding: "0.5rem",
-                    borderRadius: "var(--radius-s)",
-                    backgroundColor: "var(--background-primary)",
-                    border: "1px solid var(--background-modifier-border)",
-                    color: "var(--text-normal)"
+                    position: "relative"
                 }}
             >
-                {chatFiles.map((file: TFile) => (
-                    <option key={file.path} value={file.path}>
-                        {file.basename}
-                    </option>
-                ))}
-            </select>
+                <div
+                    onClick={() => setIsSelectOpen(!isSelectOpen)}
+                    style={{
+                        padding: "0.4rem 0.5rem",
+                        borderRadius: "var(--radius-s)",
+                        backgroundColor: "var(--background-primary)",
+                        border: "1px solid var(--background-modifier-border)",
+                        color: "var(--text-normal)",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        fontSize: "var(--font-ui-small)"
+                    }}
+                >
+                    <span>{chatFile?.basename}</span>
+                    <ChevronDown size={14} style={{
+                        transform: isSelectOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.2s ease"
+                    }} />
+                </div>
+                {isSelectOpen && (
+                    <div style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "var(--background-primary)",
+                        border: "1px solid var(--background-modifier-border)",
+                        borderRadius: "var(--radius-s)",
+                        marginTop: "0.25rem",
+                        zIndex: 1000,
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        fontSize: "var(--font-ui-small)"
+                    }}>
+                        {chatFiles.map((file: TFile) => (
+                            <div
+                                key={file.path}
+                                onClick={() => {
+                                    handleChatSelect(file.path);
+                                    setIsSelectOpen(false);
+                                }}
+                                style={{
+                                    padding: "0.4rem 0.5rem",
+                                    cursor: "pointer",
+                                    backgroundColor: file.path === chatFile?.path ? "var(--background-modifier-hover)" : "transparent",
+                                    color: "var(--text-normal)"
+                                }}
+                            >
+                                {file.basename}{file.path === chatFile?.path ? " (current)" : ""}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {isRenaming ? (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
