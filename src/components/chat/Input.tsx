@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { AtSign, X, CircleArrowRight, Image, FileText } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getPlugin, getSettings } from "src/plugin";
@@ -21,6 +21,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     const modelObject = allAvailableModels.find(m => m.name === settings.model);
     return modelObject?.capabilities?.includes(ModelCapability.VISION) ?? false;
   });
+
+  // Poll settings changes every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentSettings = getSettings();
+      if (currentSettings.model !== selectedModel) {
+        setSelectedModel(currentSettings.model);
+        // Update image upload capability
+        const modelObject = allAvailableModels.find(m => m.name === currentSettings.model);
+        if (modelObject?.capabilities) {
+          setCanUploadImages(modelObject.capabilities.includes(ModelCapability.VISION));
+          // Clean file list if model doesn't support images
+          if (!modelObject.capabilities.includes(ModelCapability.VISION)) {
+            setselectedFiles([]);
+          }
+        }
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [selectedModel]);
 
   // Function to handle the message sending to the Chat
   const handleSend = async () => {
@@ -302,12 +323,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                     padding: 0,
                     gap: "0.25rem",
                     cursor: canUploadImages ? "pointer" : "not-allowed",
-                    opacity: canUploadImages ? 1 : 0.5,
                   }}
                   title={canUploadImages ? "Images" : "Image upload not supported by current model"}
                   disabled={!canUploadImages}
                 >
-                  <Image size={18} style={{ stroke: "var(--text-muted)" }} />
+                  <Image size={18} style={{
+                     stroke: canUploadImages ? "var(--text-muted)" : "var(--text-error)", 
+                    }} 
+                  />
                 </button>
                 <input
                   type="file"
