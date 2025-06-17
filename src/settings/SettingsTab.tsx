@@ -77,7 +77,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Google API Key")
-      .setDesc("Enter your Google API key. Not required if you are not using Google as provider.")
+      .setDesc("Enter your Google API key. Not required if you are not using Google models.")
       .addText((text) =>
         text
           .setPlaceholder("Enter your API key.")
@@ -90,7 +90,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("OpenAI API Key")
-      .setDesc("Enter your OpenAI API key. Not required if you are not using OpenAI as provider.")
+      .setDesc("Enter your OpenAI API key. Not required if you are not using OpenAI models.")
       .addText((text) =>
         text
           .setPlaceholder("Enter your API key")
@@ -103,7 +103,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Anthropic API Key")
-      .setDesc("Enter your Anthropic API key. Not required if you are not using Anthropic as provider.")
+      .setDesc("Enter your Anthropic API key. Not required if you are not using Anthropic models.")
       .addText((text) =>
         text
           .setPlaceholder("Enter your API key")

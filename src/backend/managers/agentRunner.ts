@@ -1,4 +1,3 @@
-import mammoth from "mammoth";
 import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
@@ -6,17 +5,17 @@ import { PromptTemplateManager } from "src/backend/managers/prompts/promptManage
 import { Message } from "src/types";
 import { getSettings } from "src/plugin";
 
-// Class that contains the methods to run a chain
-export class ChainRunner {
+// Class that contains the methods to run a agent
+export class AgentRunner {
     private promptManager: PromptTemplateManager;
 
     constructor() {
         this.promptManager = new PromptTemplateManager();
     }
 
-    // Run the chain using a streaming call
+    // Run the agent using a streaming call
     async run(
-        chain: Runnable,
+        agent: Runnable,
         threadId: string, 
         message: Message, 
         notes: TFile[] | undefined,
@@ -35,28 +34,23 @@ export class ChainRunner {
             }
         }
 
-        // Process files
+        // Process attached images
         if (files && files.length > 0) {
             for (const f of files) {
-                if (f.type.startsWith("image/")) {
-                    attachedImages.push(f);
-                } else {
-                    const content = await this.extractTextFromFile(f);
-                    fullMessage += `\n###\nAttached file name: ${f.name}\nContent: ${content}`
-                }
+                attachedImages.push(f);
             }
         }
 
         // Switch depending on the modality: (simple | multimodal)
         if (attachedImages && attachedImages.length > 0) {
-            await this.multimodalRun(chain, threadId, fullMessage, attachedImages, updateAiMessage);
+            await this.multimodalRun(agent, threadId, fullMessage, attachedImages, updateAiMessage);
         } else {
-            await this.simpleRun(chain, threadId, fullMessage, updateAiMessage);
+            await this.simpleRun(agent, threadId, fullMessage, updateAiMessage);
         }
     }
 
-    // Run the chain using a simple streaming call
-    async simpleRun(chain: Runnable,
+    // Run the agent using a simple streaming call
+    async simpleRun(agent: Runnable,
         threadId: string, 
         messageContent: string,
         updateAiMessage: (chunk: string) => void
@@ -66,7 +60,7 @@ export class ChainRunner {
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
 
         try {
-            const stream = await chain.stream(inputs, config);
+            const stream = await agent.stream(inputs, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
@@ -78,9 +72,9 @@ export class ChainRunner {
         }
     }
 
-    // Run the chain using a multimodal streaming call
+    // Run the agent using a multimodal streaming call
     async multimodalRun(
-        chain: Runnable,
+        agent: Runnable,
         threadId: string, 
         messageContent: string,
         images: File[] | undefined, 
@@ -103,7 +97,7 @@ export class ChainRunner {
         const config = {"configurable": {"thread_id": threadId}, "streamMode": "messages"}
         
         try {
-            const stream = await chain.stream(inputs, config);
+            const stream = await agent.stream(inputs, config);
             
             for await (const chunk of stream) {
                 this.processChunk(chunk, updateAiMessage);
@@ -116,16 +110,7 @@ export class ChainRunner {
     }
 
     // Process the chunk depending on the structure
-    private processChunk(chunk: AIMessageChunk, updateAiMessage: (chunk: string) => void) {
-        if (Array.isArray(chunk)) {
-            this.processStandartChunk(chunk, updateAiMessage)
-        } else {
-            return;
-        }
-    }
-
-    // Base chunk structure processing
-    private processStandartChunk(chunk: AIMessageChunk[] | any[], updateAiMessage: (chunk: string) => void) {
+    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string) => void) {
         for (const item of chunk) {
             if (item instanceof AIMessageChunk) {
                 updateAiMessage(item.content.toString());
@@ -155,29 +140,5 @@ export class ChainRunner {
             };
             reader.readAsDataURL(image);
         });
-    }
-
-    // Return text from binary files (método actualizado)
-    async extractTextFromFile(file: File): Promise<string> {
-        const settings = getSettings();
-        try {
-            const ext = file.name.split(".").pop()?.toLowerCase();
-            if (!ext) throw new Error("Archivo sin extensión");
-
-            const arrayBuffer = await file.arrayBuffer();
-            
-            if (ext === "docx") {
-                const buffer = Buffer.from(arrayBuffer);
-                const result = await mammoth.extractRawText({ buffer });
-                return result.value;
-            }
-
-            throw new Error("Formato no soportado: solo DOCX");
-        } catch (err: any) {
-            const errorMsg = `Error procesando archivo ${file.name}: ${err.message}`;
-            new Notice(errorMsg, 5000);
-            if (settings.debug) console.error(errorMsg);
-            return `[Error: No se pudo procesar el archivo ${file.name}]`;
-        }   
     }
 }

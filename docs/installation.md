@@ -18,16 +18,13 @@
 ### Method 2: Manual Installation
 1. Download the latest release from the [GitHub repository](https://github.com/TheManuelML/obsidian-agent/releases)
 2. Extract the downloaded zip file
-3. Copy the extracted folder to your Obsidian plugins directory:
-   - Windows: `%APPDATA%\Obsidian\plugins\`
-   - macOS: `~/Library/Application Support/obsidian/plugins/`
-   - Linux: `~/.config/obsidian/plugins/`
+3. Copy the extracted folder to your Obsidian plugins directory
 4. Restart Obsidian
 5. Enable the plugin in Settings > Community Plugins
 
 ## Initial Setup
 1. After installation, the plugin will be available in your Obsidian settings
-2. Configure any necessary settings in the plugin options
+2. Configure API keys in the plugin options
 3. Restart Obsidian to ensure all features are properly initialized
 
 ## Troubleshooting
@@ -35,4 +32,5 @@ If you encounter any issues during installation:
 1. Ensure you have the correct Obsidian version
 2. Try disabling and re-enabling the plugin
 3. Check the plugin's GitHub repository for known issues
-4. Clear Obsidian's cache if problems persist 
+   3.1. Enable debug mode and see the error in console
+   3.2. Publish the issue in the Github repository

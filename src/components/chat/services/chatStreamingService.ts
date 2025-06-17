@@ -3,8 +3,8 @@ import { getApp, getSettings } from "src/plugin";
 import { getTime } from "src/utils/time";
 import { exportMessage, getThreadId, getLastNMessages, removeLastMessage } from "src/utils/chatHistory";
 import { Message, MessageSender } from "src/types/index";
-import { ChainManager } from "src/backend/managers/chainManager";
-import { ChainRunner } from "src/backend/managers/chainRunner";
+import { AgentManager } from "src/backend/managers/agentManager";
+import { AgentRunner } from "src/backend/managers/agentRunner";
 
 // Class that manage the streaming calls using chains
 export class ChatStreamingService {
@@ -24,7 +24,7 @@ export class ChatStreamingService {
     const settings = getSettings();
     let chain;
     try {
-      chain = ChainManager.getInstance().getChain();
+      chain = AgentManager.getInstance().getAgent();
     } catch (err) {
       const errorMsg = `Error initializing chat: ${err}`;
       new Notice(errorMsg, 5000);
@@ -32,7 +32,7 @@ export class ChatStreamingService {
       return;
     }
 
-    const runner = new ChainRunner();
+    const runner = new AgentRunner();
 
     try {
       // Verify chat file exists

@@ -10,7 +10,7 @@ export enum ModelProvider {
   DEFAULT = 'google',
   OPENAI = 'openai',
   GOOGLE = 'google',
-  ANTHROPIC = 'anthropic'
+  ANTHROPIC = 'anthropic',
 }
 
 export enum ModelName {
@@ -20,7 +20,7 @@ export enum ModelName {
   GPT_4O = "gpt-4o",
   GPT_4O_MINI = "gpt-4o-mini",
   CLAUDE_35_SONNET = "claude-3-5-sonnet",
-  CLAUDE_4_SONNET = "claude-4-sonnet"
+  CLAUDE_4_SONNET = "claude-4-sonnet",
 }
 
 export enum ModelCapability {
@@ -35,7 +35,7 @@ export interface ModelConfig {
   streaming: boolean;
   maxRetries: number;
   apiKey?: string;
-  safetySettings?: SafetySetting[] // For google and vertexAI models
+  safetySettings?: SafetySetting[]; // For google and vertexAI models
 }
 
 // Available models
@@ -43,31 +43,31 @@ export const allAvailableModels: Model[] = [
   { 
     provider: ModelProvider.GOOGLE, 
     name: ModelName.GEMINI_20_FLASH,
-    capabilities: [ModelCapability.VISION, ModelCapability.REASONING]
+    capabilities: [ModelCapability.VISION]
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_41,
-    capabilities: [ModelCapability.REASONING, ModelCapability.VISION]
+    capabilities: [ModelCapability.VISION]
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_4O,
-    capabilities: [ModelCapability.REASONING, ModelCapability.VISION, ModelCapability.WEB_SEARCH]
+    capabilities: [ModelCapability.VISION, ModelCapability.WEB_SEARCH]
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_4O_MINI,
-    capabilities: [ModelCapability.REASONING]
+    capabilities: [ModelCapability.VISION]
   },
   { 
     provider: ModelProvider.ANTHROPIC, 
     name: ModelName.CLAUDE_35_SONNET,
-    capabilities: [ModelCapability.REASONING]
+    capabilities: []
   },
-  { 
+  {
     provider: ModelProvider.ANTHROPIC, 
     name: ModelName.CLAUDE_4_SONNET,
-    capabilities: [ModelCapability.REASONING]
-  }
+    capabilities: []
+  },
 ];

@@ -14,25 +14,26 @@ export const createNote = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const settings = getSettings();
-    let { topic, name = 'Generated note', tags = [], context, dir_path = '/', content, useLLM = true } = input; 
+    let { topic, name = 'Generated note', tags = [], context, dirPath = '', content, useLLM = true } = input; 
 
     // Find the closest folder
-    const matchedFolder = findMatchingFolder(dir_path);
+    const matchedFolder = findMatchingFolder(dirPath);
     // Check if the folder exists
     if (!matchedFolder) {
-        console.error(`Could not find any folder with the path "${dir_path}"`);
+        console.error(`Could not find any folder with the path "${dirPath}"`);
         return {
             success: false,
-            error: `Could not find any folder with the path "${dir_path}"`
+            error: `Could not find any folder with the path "${dirPath}"`
         };
     }
 
     // Sanitize the directory path
-    dir_path = matchedFolder.path;
+    dirPath = matchedFolder.path;
     // Adding extension to name
     name = name + '.md';
     // Full path with the directory path and the name of the file
-    let full_path = dir_path + '/' + name;
+    let fullPath = dirPath + '/' + name; // -> Dir/Name.md
+    if (!dirPath || dirPath === '/') fullPath = name; // -> Name.md
 
     // Content generation
     if (!content) {
@@ -80,15 +81,23 @@ export const createNote = tool(async (input) => {
     }
 
     // Check if the note already exists
-    if (app.vault.getAbstractFileByPath(full_path)) {
+    if (app.vault.getAbstractFileByPath(fullPath)) {
         // Append a number to the file name if it already exists
-        name = getNextAvailableFileName(name, dir_path);
-        full_path = dir_path + '/' + name;
+        console.log(name, dirPath);
+        const newName = getNextAvailableFileName(name, dirPath);
+        console.log(newName);
+        
+        name = newName;
+
+        fullPath = dirPath + '/' + name;
+        if (!dirPath || dirPath === '/') fullPath = name; // -> Name.md
+
     }
 
     try {
+        console.log(fullPath);
         // Write the note in Obsidian
-        await app.vault.create(full_path, content);
+        await app.vault.create(fullPath, content);
     } catch (err) {
         const errorMsg = 'Error creating file in Obsidian: ' + err;  
         new Notice(errorMsg, 5000);
@@ -105,8 +114,8 @@ export const createNote = tool(async (input) => {
         name,
         tags,
         content,
-        fullPath: full_path,
-        parentDir: dir_path
+        fullPath: fullPath,
+        parentDir: dirPath
     };
 }, {
     // Tool schema and metadata
@@ -117,7 +126,7 @@ export const createNote = tool(async (input) => {
         name: z.string().optional().describe('The name the user provided'),
         tags: z.array(z.string()).optional().describe('The tags the user wants to add to the note'),
         context: z.string().optional().describe('Context the user provided to write the note'),
-        dir_path: z.string().optional().describe('The path of the directory where the note is going to be stored'),
+        dirPath: z.string().optional().describe('The path of the directory where the note is going to be stored'),
         content: z.string().optional().describe('Custom markdown content to use instead of generating'),
         useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the content.')
     })

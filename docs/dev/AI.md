@@ -3,7 +3,7 @@
 ## Table of Contents
 1. [Adding a New LLM Provider](#adding-a-new-llm-provider)
 2. [Message Flow](#message-flow)
-3. [Agent/Chain Architecture](#agentchain-architecture)
+3. [Agent Architecture](#agent-architecture)
 4. [Prompt Management](#prompt-management)
 5. [Tools](#tools)
 
@@ -40,24 +40,24 @@
   - Manages streaming state
   - Updates UI with response chunks
 
-### 4. Chain Execution
-- `src/backend/managers/chainRunner.ts`
+### 4. Agent Execution
+- `src/backend/managers/agentRunner.ts`
   - Processes message and attachments
   - Manages streaming response
   - Handles multimodal inputs (text + images)
 
-## Agent/Chain Architecture
+## Agent Architecture
 
 ### Core Components
-1. `src/backend/managers/chainManager.ts`
-   - Creates and configures the agent/chain
-   - Manages chain lifecycle
+1. `src/backend/managers/agentManager.ts`
+   - Creates and configures the agent
+   - Manages agent lifecycle
    - Integrates with model, memory and tools
 
 2. `src/backend/managers/modelManager.ts`
    - Handles model initialization
    - Manages API keys and configuration
-   - Provides model interface to chain
+   - Provides model interface to agent
 
 ### Tools Integration
 The agent has access to the following tools:
@@ -72,7 +72,7 @@ The agent has access to the following tools:
 ## Prompt Management
 
 ### Components
-1. `src/backend/managers/chainRunner.ts`
+1. `src/backend/managers/agentRunner.ts`
    - Calls appropriate prompt template
    - Handles different input types (text/multimodal)
 
@@ -95,5 +95,5 @@ The agent has access to the following tools:
         - Directory related
         - Search related
         - Renaming related
-2. `src/backend/managers/chainManager.ts`
-    - Attach the tools to the agent/chain with createChain()
+2. `src/backend/managers/agentManager.ts`
+    - Attach the tools to the agent with createAgent()

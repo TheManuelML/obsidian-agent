@@ -9,10 +9,10 @@ import { rename } from "src/backend/tools/obsidianRename";
 import { MemoryManager } from "src/backend/managers/memoryManager";
 import { ModelManager } from "src/backend/managers/modelManager";
 
-// Manage the creation and update of the chain
-export class ChainManager {
-    private static instance: ChainManager;
-    private chain?: Runnable;
+// Manage the creation and update of the agent
+export class AgentManager {
+    private static instance: AgentManager;
+    private agent?: Runnable;
     private model?: LanguageModelLike;
     private memorySaver?: MemorySaver;
     
@@ -21,14 +21,14 @@ export class ChainManager {
         this.setModel()
         this.setMemory()
         // Creates the chain
-        this.chain = this.createChain();
+        this.agent = this.createAgent();
     }
 
-    static getInstance(): ChainManager {
-        if (!ChainManager.instance) {
-            ChainManager.instance = new ChainManager;
+    static getInstance(): AgentManager {
+        if (!AgentManager.instance) {
+            AgentManager.instance = new AgentManager;
         }
-        return ChainManager.instance;
+        return AgentManager.instance;
     }
 
     // Set the model of the actual settings
@@ -41,8 +41,8 @@ export class ChainManager {
         this.memorySaver = MemoryManager.getInstance().getMemorySaver();
     }
 
-    // Create the agent/chain
-    private createChain(): Runnable {
+    // Create the agent
+    private createAgent(): Runnable {
         if (!this.model || !this.memorySaver) {
             throw new Error("Model or memory not set");
         }
@@ -62,11 +62,11 @@ export class ChainManager {
         });
     }
 
-    public getChain(): Runnable {
+    public getAgent(): Runnable {
         // Update the model (it might have chaged)
         this.setModel()
-        // Create the chain, a new one per call
-        this.chain = this.createChain()
-        return this.chain;
+        // Create the agent, a new one per call
+        this.agent = this.createAgent()
+        return this.agent;
     }
 }

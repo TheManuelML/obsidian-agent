@@ -4,7 +4,7 @@ import { TFile } from "obsidian";
 import { getApp, getPlugin, getSettings } from "src/plugin";
 import { AddContextModal } from "src/components/modal/AddContextModal";
 import { ChooseModelModal } from "src/components/modal/ChooseModelModal";
-import { Model } from "src/settings/models";
+import { Model, allAvailableModels, ModelCapability } from "src/settings/models";
 import { ChatInputProps } from "src/types/index";
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
@@ -17,6 +17,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [selectedModel, setSelectedModel] = useState(settings.model)
   const [selectedNotes, setselectedNotes] = useState<TFile[]>([]);
   const [selectedFiles, setselectedFiles] = useState<File[]>([]);
+  const [canUploadImages, setCanUploadImages] = useState(() => {
+    const modelObject = allAvailableModels.find(m => m.name === settings.model);
+    return modelObject?.capabilities?.includes(ModelCapability.VISION) ?? false;
+  });
 
   // Function to handle the message sending to the Chat
   const handleSend = async () => {
@@ -78,6 +82,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   // Function to open the ChooseModelModal
   const openModelPicker = () => {
     const plugin = getPlugin();
+    const settings = getSettings();
 
     new ChooseModelModal(app, (model: Model) => {
       // Change model in the settings and save changes
@@ -85,9 +90,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       plugin.saveSettings();
       // Change the state
       setSelectedModel(model.name); 
+      
+      // Search the selected model in the model list
+      const modelObject = allAvailableModels.find(m => m.name === settings.model);
+      if (modelObject?.capabilities) {
+        // Update image upload capability
+        setCanUploadImages(modelObject.capabilities.includes(ModelCapability.VISION));
+        // Clean file list if model doesn't support images
+        if (!modelObject.capabilities.includes(ModelCapability.VISION)) {
+          setselectedFiles([]);
+        }
+      }
       return;
     }).open();
   }
+
+  
 
   return (
     <div style={{ width: "100%" }}>
@@ -283,9 +301,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                     justifyContent: "center",
                     padding: 0,
                     gap: "0.25rem",
-                    cursor: "pointer",
+                    cursor: canUploadImages ? "pointer" : "not-allowed",
+                    opacity: canUploadImages ? 1 : 0.5,
                   }}
-                  title="files/Plain text"
+                  title={canUploadImages ? "Images" : "Image upload not supported by current model"}
+                  disabled={!canUploadImages}
                 >
                   <Image size={18} style={{ stroke: "var(--text-muted)" }} />
                 </button>
@@ -294,7 +314,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                   ref={imageInputRef}
                   onChange={handleFileSelect}
                   style={{ display: "none" }}
-                  accept=".jpg,.jpeg,.png,.docx" // Add plain text files: HTML, TXT, MD, CSV // Add binary files: PDF
+                  accept=".jpg,.jpeg,.png"
                   multiple
                 />
               </div>

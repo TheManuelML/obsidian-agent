@@ -11,24 +11,29 @@ export const createDir = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const settings = getSettings();
-    let { name = 'New Directory', dir_path = '/' } = input;
+    let { name = 'New Directory', dirPath = '' } = input;
 
     // Sanitize the path
-    dir_path = dir_path.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
+    dirPath = dirPath.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
+    let fullPath = dirPath + '/' + name;
+    if (!dirPath || dirPath === '/') fullPath = name;
 
     // Create the directory
     try {
         // Check if the directory already exists
-        if (app.vault.getAbstractFileByPath(dir_path + '/' + name)) {
+        if (app.vault.getFolderByPath(fullPath)) {
             // Append a number to the name if it already exists
-            name = getNextAvailableFolderName(name, dir_path);
+            const newName = getNextAvailableFolderName(name, dirPath);
+            
+            fullPath = dirPath + '/' + newName;
+            if (!dirPath || dirPath === '/') fullPath = newName;
         }
 
-        await app.vault.createFolder(dir_path + '/' + name);
+        await app.vault.createFolder(fullPath);
 
         return {
             success: true,
-            directory: dir_path + name
+            directory: fullPath
         };
     } catch (err) {
         const errorMsg = 'Error creating directory in Obsidian: ' + err;
@@ -45,7 +50,7 @@ export const createDir = tool(async (input) => {
     description: 'Create a directory in Obsidian. No parameters are needed.',
     schema: z.object({
         name: z.string().optional().describe('The name of the directory'),
-        dir_path: z.string().optional().describe('The path of the directory where is going to be placed'),
+        dirPath: z.string().optional().describe('The path of the directory where is going to be placed'),
     })
 })
 
@@ -54,14 +59,14 @@ export const createDir = tool(async (input) => {
 export const listFiles = tool(async (input) => {
     // Declaring the app and inputs
     const settings = getSettings();
-    let { dir_path = '/' } = input;
+    let { dirPath = '/' } = input;
 
     // Find the matching folder if the path is not absolute    
-    const matchingFolder = findMatchingFolder(dir_path);
+    const matchingFolder = findMatchingFolder(dirPath);
 
     // Check if the directory exists
     if (!matchingFolder) {
-        console.error('Directory not found:', dir_path);
+        console.error('Directory not found:', dirPath);
         return {
             success: false,
             error: 'Directory not found'
@@ -95,6 +100,6 @@ export const listFiles = tool(async (input) => {
     name: 'list_files',
     description: 'List files and directories of a directory.',
     schema: z.object({
-        dir_path: z.string().optional().describe('The path of the directory to list files from'),
+        dirPath: z.string().optional().describe('The path of the directory to list files from'),
     })
 })
