@@ -1,4 +1,4 @@
-import { FuzzySuggestModal, App } from 'obsidian';
+import { FuzzySuggestModal, App, FuzzyMatch } from 'obsidian';
 import { getSettings } from 'src/plugin';
 import { Model, allAvailableModels } from 'src/settings/models';
 
@@ -26,12 +26,94 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
   }
 
   getItemText(item: Model): string {
-    const isActive = item.name === this.activeModel;
-    return this.formatModelName(item, isActive);
+    return item.name;
   }
 
   onChooseItem(item: Model): void {
     this.onChoose(item);
     this.close();
+  }
+
+  renderSuggestion(modelMatch: FuzzyMatch<Model>, el: HTMLElement): void {
+    const { item: model } = modelMatch;
+    el.empty();
+  
+    // Color per provider
+    const providerColorMap: Record<string, string> = {
+      google: "#4285F4",
+      openai: "#10A37F",
+      anthropic: "#E87C5C",
+      mistral: "#F39C12",
+      ollama: "#FF6B6B"
+    };
+    const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
+  
+    const wrapper = el.createDiv({
+      attr: {
+        style: `
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px;
+        `
+      }
+    });
+  
+    // Color circle
+    const colorCircle = wrapper.createDiv({
+      attr: {
+        style: `
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background-color: ${color};
+          flex-shrink: 0;
+        `
+      }
+    });
+  
+    // Text container
+    const textContainer = wrapper.createDiv({
+      attr: {
+        style: `
+          display: flex;
+          flex-direction: column;
+        `
+      }
+    });
+  
+    const nameEl = textContainer.createDiv({
+      attr: {
+        style: `
+          font-weight: bold;
+          margin-bottom: 2px;
+        `
+      }
+    });
+    nameEl.setText(model.name + (model.name === this.activeModel ? " (current)" : ""));
+  
+    const providerEl = textContainer.createDiv({
+      attr: {
+        style: `
+          font-size: 0.85em;
+          color: var(--text-muted);
+        `
+      }
+    });
+    providerEl.setText(`Provider: ${model.provider}`);
+
+    let capabilities = "text, " + model.capabilities.join(", ")
+    if (!model.capabilities || model.capabilities.length < 1) {
+      capabilities = "text-only"
+    } 
+    const capsEl = textContainer.createDiv({
+      attr: {
+        style: `
+          font-size: 0.85em;
+          color: var(--text-muted);
+        `
+      }
+    });
+    capsEl.setText(`Capabilities: ${capabilities}`);
   }
 }

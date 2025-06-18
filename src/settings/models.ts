@@ -3,7 +3,7 @@ import { SafetySetting } from "@google/generative-ai";
 export interface Model {
   provider: ModelProvider,
   name: string,
-  capabilities: ModelCapability[]
+  capabilities: ModelCapability[],
 }
 
 export enum ModelProvider {
@@ -16,6 +16,8 @@ export enum ModelProvider {
 export enum ModelName {
   DEFAULT = "gemini-2.0-flash",
   GEMINI_20_FLASH = "gemini-2.0-flash",
+  GEMINI_25_FLASH = "gemini-2.5-flash",
+  GEMINI_25_PRO = "gemini-2.5-pro",
   GPT_41 = "gpt-4.1",
   GPT_4O = "gpt-4o",
   GPT_4O_MINI = "gpt-4o-mini",
@@ -43,31 +45,41 @@ export const allAvailableModels: Model[] = [
   { 
     provider: ModelProvider.GOOGLE, 
     name: ModelName.GEMINI_20_FLASH,
-    capabilities: [ModelCapability.VISION]
+    capabilities: [ModelCapability.VISION],
+  },
+  {
+    provider: ModelProvider.GOOGLE, 
+    name: ModelName.GEMINI_25_FLASH,
+    capabilities: [ModelCapability.VISION],
+  },
+  {
+    provider: ModelProvider.GOOGLE, 
+    name: ModelName.GEMINI_25_PRO,
+    capabilities: [ModelCapability.VISION],
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_41,
-    capabilities: [ModelCapability.VISION]
+    capabilities: [ModelCapability.VISION],
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_4O,
-    capabilities: [ModelCapability.VISION, ModelCapability.WEB_SEARCH]
+    capabilities: [ModelCapability.VISION],
   },
   { 
     provider: ModelProvider.OPENAI, 
     name: ModelName.GPT_4O_MINI,
-    capabilities: [ModelCapability.VISION]
+    capabilities: [ModelCapability.VISION],
   },
   { 
     provider: ModelProvider.ANTHROPIC, 
     name: ModelName.CLAUDE_35_SONNET,
-    capabilities: []
+    capabilities: [],
   },
   {
     provider: ModelProvider.ANTHROPIC, 
     name: ModelName.CLAUDE_4_SONNET,
-    capabilities: []
+    capabilities: [],
   },
 ];
