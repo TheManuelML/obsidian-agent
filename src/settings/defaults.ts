@@ -10,6 +10,5 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
     anthropicApiKey: '',
     rules: '',
     chatsFolder: 'Chats',
-    amountOfMessagesInMemory: 3,
     debug: false
   };

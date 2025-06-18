@@ -67,7 +67,6 @@ The agent has access to the following tools:
 - `createDir`: Create directories
 - `listFiles`: List directory contents
 - `search`: Search through vault
-- `rename`: Rename files/directories
 
 ## Prompt Management
 
@@ -94,6 +93,5 @@ The agent has access to the following tools:
         - File related
         - Directory related
         - Search related
-        - Renaming related
 2. `src/backend/managers/agentManager.ts`
     - Attach the tools to the agent with createAgent()

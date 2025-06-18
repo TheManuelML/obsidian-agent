@@ -95,12 +95,6 @@ export const getThreadId = async (chatFile: TFile): Promise<string> => {
   return match ? match[1] : '';
 };
 
-// Get the last n messages from a chat file
-export const getLastNMessages = async (chatFile: TFile, n: number): Promise<Message[]> => {
-  const messages = await importConversation(chatFile);
-  return messages.slice(-n);
-};
-
 // Remove the last message from a chat file
 export const removeLastMessage = async (chatFile: TFile) => {
   const app = getApp();

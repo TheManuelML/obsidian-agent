@@ -1,7 +1,7 @@
 import { TFile, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { getTime } from "src/utils/time";
-import { exportMessage, getThreadId, getLastNMessages, removeLastMessage } from "src/utils/chatHistory";
+import { exportMessage, getThreadId, removeLastMessage } from "src/utils/chatHistory";
 import { Message, MessageSender } from "src/types/index";
 import { AgentManager } from "src/backend/managers/agentManager";
 import { AgentRunner } from "src/backend/managers/agentRunner";
@@ -73,12 +73,6 @@ export class ChatStreamingService {
         timestamp: getTime(),
       };
       updateConversation(prev => [...prev, tempBotMessage]);
-
-      // Get context if first message
-      if (!this.hasSentFirst) {
-        await getLastNMessages(chatFile, this.settings.amountOfMessagesInMemory * 2);
-        this.hasSentFirst = true;
-      }
 
       // Setup streaming
       let accumulated = "";
