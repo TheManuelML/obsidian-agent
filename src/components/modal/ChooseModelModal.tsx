@@ -43,8 +43,7 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
       google: "#4285F4",
       openai: "#10A37F",
       anthropic: "#E87C5C",
-      mistral: "#F39C12",
-      ollama: "#FF6B6B"
+      mistral: "#EA1C0C",
     };
     const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
   

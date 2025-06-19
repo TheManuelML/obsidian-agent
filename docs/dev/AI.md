@@ -20,6 +20,14 @@
    - Configure provider-specific settings in `getModelConfig`
    - Handle provider-specific API requirements
 
+3. `src/settings/SettingsTab.tsx`
+   - Add the new input for the api key of that provider
+   - Modify the settings type to add the api key
+   - Add api key to default settings: `src/settings/default.ts`
+
+4. `src/components/modal/ChooseModelModal.tsx`
+   - Add the color of the provider
+
 ## Message Flow
 
 ### 1. User Input

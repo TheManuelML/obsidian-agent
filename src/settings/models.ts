@@ -11,6 +11,7 @@ export enum ModelProvider {
   OPENAI = 'openai',
   GOOGLE = 'google',
   ANTHROPIC = 'anthropic',
+  MISTRAL = 'mistral'
 }
 
 export enum ModelName {
@@ -23,6 +24,8 @@ export enum ModelName {
   GPT_4O_MINI = "gpt-4o-mini",
   CLAUDE_35_SONNET = "claude-3-5-sonnet",
   CLAUDE_4_SONNET = "claude-4-sonnet",
+  MISTRAL_SMALL = "mistral-small",
+  MISTRAL_LARGE = "mistral-large"
 }
 
 export enum ModelCapability {
@@ -80,6 +83,16 @@ export const allAvailableModels: Model[] = [
   {
     provider: ModelProvider.ANTHROPIC, 
     name: ModelName.CLAUDE_4_SONNET,
+    capabilities: [],
+  },
+  {
+    provider: ModelProvider.MISTRAL, 
+    name: ModelName.MISTRAL_SMALL,
+    capabilities: [],
+  },
+  {
+    provider: ModelProvider.MISTRAL, 
+    name: ModelName.MISTRAL_LARGE,
     capabilities: [],
   },
 ];

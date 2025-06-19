@@ -2,6 +2,7 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatMistralAI } from "@langchain/mistralai";
 import { Notice } from "obsidian";
 import { getSettings } from "src/plugin";
 import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
@@ -11,6 +12,7 @@ const ChatModelTypeMap = {
     [ModelProvider.OPENAI]: ChatOpenAI,
     [ModelProvider.GOOGLE]: ChatGoogleGenerativeAI,
     [ModelProvider.ANTHROPIC]: ChatAnthropic,
+    [ModelProvider.MISTRAL]: ChatMistralAI,
 } as const;
 
 // Class that creates the model based on the provider
@@ -22,6 +24,7 @@ export class ModelManager {
         [ModelProvider.OPENAI]: () => getSettings().openaiApiKey,
         [ModelProvider.GOOGLE]: () => getSettings().googleApiKey,
         [ModelProvider.ANTHROPIC]: () => getSettings().anthropicApiKey,
+        [ModelProvider.MISTRAL]: () => getSettings().mistralApiKey,
     }
 
     // Function to get the ModelManager instance
@@ -74,6 +77,11 @@ export class ModelManager {
                 return {
                     ...baseConfig
                 }
+
+            case ModelProvider.MISTRAL:
+                return {
+                    ...baseConfig
+                }
             
             default:
                 const errorMsg = `Unsupported provider: ${model.provider}`;
@@ -102,14 +110,14 @@ export class ModelManager {
         const ChatModelClass = ChatModelTypeMap[model.provider];
 
         // Create the chat model
-        const chatModel = new ChatModelClass({
+        const chatModel = new (ChatModelClass as any)({
             model: config.modelName,
             temperature: config.temperature,
             maxRetries: config.maxRetries,
             apiKey: config.apiKey,
             streaming: config.streaming,
             safetySettings: config.safetySettings,
-        })
+        });
 
         return chatModel;
     }
