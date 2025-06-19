@@ -24,7 +24,7 @@ export enum ModelName {
   GPT_4O_MINI = "gpt-4o-mini",
   CLAUDE_35_SONNET = "claude-3-5-sonnet",
   CLAUDE_4_SONNET = "claude-4-sonnet",
-  MISTRAL_SMALL = "mistral-small",
+  MISTRAL_MEDIUM = "mistral-medium",
   MISTRAL_LARGE = "mistral-large"
 }
 
@@ -87,7 +87,7 @@ export const allAvailableModels: Model[] = [
   },
   {
     provider: ModelProvider.MISTRAL, 
-    name: ModelName.MISTRAL_SMALL,
+    name: ModelName.MISTRAL_MEDIUM,
     capabilities: [],
   },
   {
