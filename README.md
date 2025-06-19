@@ -1,7 +1,7 @@
 <h1 align="center">Obsidian Agent</h1>
 
 <p align="center">
-  Lend your Obsidian vault to an AI agent. Read, write, and search your notes with AI.<br/>
+  Lend your vault to an AI agent. Read, write, and search your notes with AI.<br/>
 </p>
 
 <p align="center">

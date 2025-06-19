@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-agent",
-	"name": "Obsidian Agent",
+	"id": "ai-agent",
+	"name": "AI Agent",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Lend your Obsidian vault to an AI agent. It can read, write, and search your notes.",
+	"description": "Lend your vault to an AI agent. It can read, write, and search your notes.",
 	"author": "Manuel Magaña López",
 	"authorUrl": "https://github.com/TheManuelML",
 	"fundingUrl": "",
