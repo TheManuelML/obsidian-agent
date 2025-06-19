@@ -1,6 +1,8 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
 import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/View";
+import { ChooseModelModal } from 'src/components/modal/ChooseModelModal';
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
+import { Model } from 'src/settings/models';
 import { DEFAULT_SETTINGS } from "src/settings/defaults";
 
 let pluginInstance: ObsidianAgentPlugin;
@@ -27,6 +29,24 @@ export class ObsidianAgentPlugin extends Plugin {
     // Add sidebar ribon icon that shows the view
     this.addRibbonIcon('brain-cog', 'Chat with Agent', () => {
       this.activateAgentChatView();
+    });
+
+    // Hotkeys
+    this.addCommand({
+      id: "switch-model",
+      name: "Switch model",
+      callback: () => {
+        const app = getApp();
+        const plugin = getPlugin();
+        const settings = getSettings();
+        
+        new ChooseModelModal(app, (model: Model) => {
+          // Change model in the settings and save changes
+          settings.model = model.name; 
+          plugin.saveSettings();
+          return;
+        }).open();
+      },
     });
   }
 
