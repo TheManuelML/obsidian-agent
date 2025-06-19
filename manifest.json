@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-agent",
 	"name": "Obsidian Agent",
-	"version": "0.0.1",
+	"version": "0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Lend your Obsidian vault to an AI agent. It can read, write, and search your notes.",
 	"author": "Manuel Magaña López",
