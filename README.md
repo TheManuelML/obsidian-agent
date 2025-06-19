@@ -1,32 +1,46 @@
-src/backend/agent.ts
-Agent and LLM configuration
-- Dinamically chages the LLM choosed in the settings tab
+<h1 align="center">Obsidian Agent</h1>
 
-src/backend/tools/obsidian.ts
-Obsidian related tools
-- Write note
-- Read note
+<p align="center">
+  Lend your Obsidian vault to an AI agent. Read, write, and search your notes with AI.<br/>
+</p>
 
-src/components/Chat.tsx
-Chat component.
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-0.1-blueviolet" alt="Version">
+</p>
 
-src/components/Input.tsx
-Input component to communicate with the agent.
+---
 
-src/components/ui/Dropdown.tsx
-Dropdown component used in the Input.tsx component
+## 🚀 Overview
+A simple and lightweight AI extension for Obsidian. Delegate basic tasks to an agent that can write, edit, and create notes and folders within your vault.
 
-src/layout/ChatView.tsx
-Sidebar where the Chat and the Input components are shown
+It features a user-friendly UI, inspired by other agentic apps.
 
-src/layout/SettingsTab.tsx
-Settings tab for the plugin
+<p align="center">
+  <img src="imgs/chat-overview.png" alt="Obsidian Agent Chat Overview" width="500"/>
+</p>
 
-src/utils/files.ts
-Functions to list files, directories, and search files by name
+---
 
-src/plugin.ts
-The plugin class, it import everything above (SettingsTab and ChatView)
+## 🧠 Getting Started
 
-src/main.ts
-The file that it is going to be compiled
+1. Download the plugin.
+2. Enable it from Obsidian's settings panel.
+3. Add the corresponding API keys.
+
+> Make sure you have an API key from one of the supported providers: **OpenAI**, **Google**, **Anthropic** and **Mistral**.
+
+---
+
+## ✨ Core Features
+<ul>
+  <li><b>Note Reading:</b> Understands and edit your notes.</li>
+  <li><b>Customizable:</b> Tweak settings and agent rules to fit your workflow.</li>
+  <li><b>Different providers:</b> Work with your favorite LLM provider: OpenAI, Google, Anthropic and Mistral.</li>
+</ul>
+
+---
+
+## 🤝 Contributing & Support
+
+- Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues)
+- Want to contribute? Create a new pull request.
