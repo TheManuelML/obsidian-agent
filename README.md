@@ -47,6 +47,17 @@ It features a user-friendly UI, inspired by other agentic apps.
 </ul>
 
 
+## 🛠️ Tools
+
+The agent can use the following tools to interact with your vault:
+
+- **Create note**: Create a new note in your vault, e.g: *Create a note titled 'Project Ideas'*
+- **Read note**: Read the content of a note, e.g: *Read the active note*
+- **Edit note**: Edit an existing note, e.g: *Add a summary of this text: [...] to the note 'Book Review'*
+- **Create folder**: Create a new directory/folder, e.g: *Create a folder called '2024 Plans'*
+- **List files**: List files in a directory, e.g: *List all files in the folder 'Research'*
+- **Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
+
 ## 🫱🏼‍🫲🏼 Contributing & Support
 
 - Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues)
