@@ -36,7 +36,10 @@ It features a user-friendly UI, inspired by other agentic apps.
 </ul>
 
 
-## 🤝 Contributing & Support
+## 🫱🏼‍🫲🏼 Contributing & Support
 
 - Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues)
 - Want to contribute? Create a new pull request.
+
+## 🟡 Disclosures
+Read the required Obsidian disclosures [here](./disclosures.md)
