@@ -1,6 +1,6 @@
-# Modelos Disponibles
+# Supported providers
 
-| Proveedor   | Nombre del Modelo         | ¿Visión? |
+| Provider    | Model name               | Vision   |
 |-------------|--------------------------|:--------:|
 | Google      | gemini-2.0-flash         |    ✔️    |
 | Google      | gemini-2.5-flash         |    ✔️    |

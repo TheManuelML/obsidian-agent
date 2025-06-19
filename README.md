@@ -36,7 +36,7 @@ It features a user-friendly UI, inspired by other agentic apps.
 2. Enable the plugin from Obsidian's settings panel.
 3. Add the corresponding API keys in the plugin's settings panel.
 
-> Make sure you have an API key from one of the supported providers: [supported providers](./providers.md).
+> Make sure you have an API key from one of the supported providers: [supported providers](./docs/providers.md).
 
 
 ## ✨ Core Features
@@ -58,10 +58,17 @@ The agent can use the following tools to interact with your vault:
 - **List files**: List files in a directory, e.g: *List all files in the folder 'Research'*
 - **Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
 
+
+## 🟡 Disclosures
+This plugin connects to remote AI services to process your requests.
+
+> **Why is this needed?**  
+> The AI models that power these features run on external servers and require an internet connection. Your notes or queries are sent securely to the selected provider for processing, and the results are only returned to your vault.
+
+To use these AI services, you must provide an API key for your chosen provider: [supported providers](./docs/providers.md). You can choose which provider to use, and you are responsible for obtaining and managing your API keys.
+
+
 ## 🫱🏼‍🫲🏼 Contributing & Support
 
 - Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues)
 - Want to contribute? Create a new pull request.
-
-## 🟡 Disclosures
-Read the required Obsidian disclosures [here](./disclosures.md)
