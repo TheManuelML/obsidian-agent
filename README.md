@@ -8,7 +8,6 @@
   <img src="https://img.shields.io/badge/Version-0.1-blueviolet" alt="Version">
 </p>
 
----
 
 ## 🚀 Overview
 A simple and lightweight AI extension for Obsidian. Delegate basic tasks to an agent that can write, edit, and create notes and folders within your vault.
@@ -19,7 +18,6 @@ It features a user-friendly UI, inspired by other agentic apps.
   <img src="imgs/chat-overview.png" alt="Obsidian Agent Chat Overview" width="500"/>
 </p>
 
----
 
 ## 🧠 Getting Started
 
@@ -29,7 +27,6 @@ It features a user-friendly UI, inspired by other agentic apps.
 
 > Make sure you have an API key from one of the supported providers: **OpenAI**, **Google**, **Anthropic** and **Mistral**.
 
----
 
 ## ✨ Core Features
 <ul>
@@ -38,7 +35,6 @@ It features a user-friendly UI, inspired by other agentic apps.
   <li><b>Different providers:</b> Work with your favorite LLM provider: OpenAI, Google, Anthropic and Mistral.</li>
 </ul>
 
----
 
 ## 🤝 Contributing & Support
 
