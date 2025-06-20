@@ -45,9 +45,9 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     // Select a chat
     const handleChatSelect = async (filePath: string) => {
         try {
-            const file = app.vault.getAbstractFileByPath(filePath) as TFile;
-            if (!file) {
-                console.error("Selected chat file no longer exists");
+            const file = app.vault.getAbstractFileByPath(filePath);
+            if (!(file instanceof TFile)) {
+                console.error("Selected chat file no longer exists or is not a TFile");
                 const updatedChats = await loadChatFiles();
                 if (updatedChats.length > 0) {
                     setChatFile(updatedChats[0]);
@@ -82,8 +82,8 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             setIsRenaming(false);
             setNewChatName("");
 
-            const rename = app.vault.getAbstractFileByPath(newPath) as TFile;
-            if (rename) setChatFile(rename);
+            const rename = app.vault.getAbstractFileByPath(newPath);
+            if (rename instanceof TFile) setChatFile(rename);
         } catch (err) {
             const errorMsg = "Error renaming chat file: " + err;
             new Notice(errorMsg, 5000);

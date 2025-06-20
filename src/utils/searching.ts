@@ -20,7 +20,7 @@ export function findMatchingFolder(dirName: string): TFolder | null {
     if (exactMatch) return exactMatch;
 
     // Only if it does not finds an exact match it tries fuzzy match
-    const allFolders = app.vault.getAllLoadedFiles().filter(f => f instanceof TFolder) as TFolder[];
+    const allFolders = app.vault.getAllLoadedFiles().filter((f): f is TFolder => f instanceof TFolder);
     const lowerDir = dirName.toLowerCase();
     return allFolders.find(folder => folder.path.toLowerCase().includes(lowerDir)) || null; // return e.g: TFolder or null if no match found
 }

@@ -64,7 +64,9 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
     if (attachmentsMatch) {
       const notesContent = attachmentsMatch[1].trim();
       const notePaths = notesContent.split('\n').map(line => line.replace('- [[', '').replace(']]', ''));
-      attachments.notes = notePaths.map(path => app.vault.getAbstractFileByPath(path) as TFile).filter(Boolean);
+      attachments.notes = notePaths
+        .map(path => app.vault.getAbstractFileByPath(path))
+        .filter((file): file is TFile => file instanceof TFile);
       content = content.replace(attachmentsMatch[0], '').trim();
     }
     
