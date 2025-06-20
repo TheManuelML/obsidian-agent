@@ -2,6 +2,9 @@
 a {
   text-decoration: none;
 }
+a:hoover {
+  text-decoration: none;
+}
 </style>
 
 <h1 align="center">Obsidian Agent</h1>
@@ -20,9 +23,11 @@ a {
     </a>
   </div>
   <div>
-    <img src="https://img.shields.io/github/stars/TheManuelML/obsidian-agent?style=social" alt="GitHub stars">
-    <img src="https://img.shields.io/badge/Release-1.0.0-blueviolet" alt="Release">
-    <img src="https://img.shields.io/badge/Licence-MIT-D93192" alt="Release">
+    <a href="https://github.com/TheManuelML/obsidian-agent">
+      <img src="https://img.shields.io/github/stars/TheManuelML/obsidian-agent?style=social" alt="GitHub stars">
+      <img src="https://img.shields.io/badge/Release-1.0.0-blueviolet" alt="Release">
+      <img src="https://img.shields.io/badge/Licence-MIT-D93192" alt="Release">
+    </a>
   </div>
 </div>
 
@@ -76,5 +81,6 @@ To use these AI services, you must provide an API key for your chosen provider: 
 
 ## 🫱🏼‍🫲🏼 Contributing & Support
 
-- Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues)
+- Found a bug? Open an issue [here](https://github.com/TheManuelML/obsidian-agent/issues).  
 - Want to contribute? Create a new pull request.
+> *Note: Not all models were tested. Bugs may occur*

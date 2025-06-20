@@ -12,3 +12,5 @@
 | Anthropic   | claude-4-sonnet          |    ❌    |
 | Mistral     | mistral-medium           |    ❌    |
 | Mistral     | mistral-large            |    ❌    | 
+| DeepSeek    | deepseek-chat            |    ✔️    |  
+| DeepSeek    | deepseek-reasoner        |    ✔️    |
