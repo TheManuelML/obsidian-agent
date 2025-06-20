@@ -40,10 +40,11 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
   
     // Color per provider
     const providerColorMap: Record<string, string> = {
-      google: "#4285F4",
+      google: "#7895F9",
       openai: "#10A37F",
       anthropic: "#E87C5C",
       mistral: "#EA1C0C",
+      deepseek: "#476CF9",
     };
     const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
   

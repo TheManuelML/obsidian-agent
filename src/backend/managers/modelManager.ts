@@ -3,6 +3,7 @@ import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatMistralAI } from "@langchain/mistralai";
+import { ChatDeepSeek } from "@langchain/deepseek";
 import { Notice } from "obsidian";
 import { getSettings } from "src/plugin";
 import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
@@ -13,6 +14,7 @@ const ChatModelTypeMap = {
     [ModelProvider.GOOGLE]: ChatGoogleGenerativeAI,
     [ModelProvider.ANTHROPIC]: ChatAnthropic,
     [ModelProvider.MISTRAL]: ChatMistralAI,
+    [ModelProvider.DEEPSEEK]: ChatDeepSeek,
 } as const;
 
 // Class that creates the model based on the provider
@@ -25,6 +27,7 @@ export class ModelManager {
         [ModelProvider.GOOGLE]: () => getSettings().googleApiKey,
         [ModelProvider.ANTHROPIC]: () => getSettings().anthropicApiKey,
         [ModelProvider.MISTRAL]: () => getSettings().mistralApiKey,
+        [ModelProvider.DEEPSEEK]: () => getSettings().deepseekApiKey,
     }
 
     // Function to get the ModelManager instance
@@ -79,6 +82,11 @@ export class ModelManager {
                 }
 
             case ModelProvider.MISTRAL:
+                return {
+                    ...baseConfig
+                }
+
+            case ModelProvider.DEEPSEEK:
                 return {
                     ...baseConfig
                 }

@@ -11,7 +11,8 @@ export enum ModelProvider {
   OPENAI = 'openai',
   GOOGLE = 'google',
   ANTHROPIC = 'anthropic',
-  MISTRAL = 'mistral'
+  MISTRAL = 'mistral',
+  DEEPSEEK = 'deepseek',
 }
 
 export enum ModelName {
@@ -25,7 +26,9 @@ export enum ModelName {
   CLAUDE_35_SONNET = "claude-3-5-sonnet",
   CLAUDE_4_SONNET = "claude-4-sonnet",
   MISTRAL_MEDIUM = "mistral-medium",
-  MISTRAL_LARGE = "mistral-large"
+  MISTRAL_LARGE = "mistral-large",
+  DEEPSEEK_CHAT = "deepseek-chat",
+  DEEPSEEK_REASONER = "deepseek-reasoner",
 }
 
 export enum ModelCapability {
@@ -93,6 +96,16 @@ export const allAvailableModels: Model[] = [
   {
     provider: ModelProvider.MISTRAL, 
     name: ModelName.MISTRAL_LARGE,
+    capabilities: [],
+  },
+  {
+    provider: ModelProvider.DEEPSEEK, 
+    name: ModelName.DEEPSEEK_CHAT,
+    capabilities: [],
+  },
+  {
+    provider: ModelProvider.DEEPSEEK, 
+    name: ModelName.DEEPSEEK_REASONER,
     capabilities: [],
   },
 ];

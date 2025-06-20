@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
     openaiApiKey: '',
     anthropicApiKey: '',
     mistralApiKey: '',
+    deepseekApiKey: '',
     rules: '',
     chatsFolder: 'Chats',
     debug: false

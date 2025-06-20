@@ -10,6 +10,7 @@ export interface AgentSettings {
   openaiApiKey: string;
   anthropicApiKey: string;
   mistralApiKey: string;
+  deepseekApiKey: string;
   rules: string;
   chatsFolder: string;
   debug: boolean;
@@ -155,6 +156,32 @@ export class AgentSettingsTab extends PluginSettingTab {
           btn.setIcon(mistralRevealed ? "eye-off" : "eye");
         });
     });
+
+      // DEEPSEEK
+      const deepseekSetting = new Setting(containerEl)
+        .setName("Deepseek key")
+        .setDesc("Enter your Deepseek API key. Not required if you are not using Deepseek models.");
+      let deepseekRevealed = false;
+      deepseekSetting.addText((text) => {
+        text
+          .setPlaceholder("Enter your API key")
+          .setValue(this.plugin.settings.deepseekApiKey)
+          .onChange(async (value) => {
+            this.plugin.settings.deepseekApiKey = value;
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.type = "password";
+      });
+      deepseekSetting.addExtraButton((btn) => {
+        btn.setIcon("eye")
+          .setTooltip("Show/Hide API Key")
+          .onClick(() => {
+            deepseekRevealed = !deepseekRevealed;
+            const input = deepseekSetting.controlEl.querySelector("input");
+            if (input) input.type = deepseekRevealed ? "text" : "password";
+            btn.setIcon(deepseekRevealed ? "eye-off" : "eye");
+          });
+      });
 
     containerEl.createEl('h1', { text: 'Agent settings' });
 
