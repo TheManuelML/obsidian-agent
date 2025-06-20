@@ -1,12 +1,3 @@
-<style>
-a {
-  text-decoration: none;
-}
-a:hoover {
-  text-decoration: none;
-}
-</style>
-
 <h1 align="center">Obsidian Agent</h1>
 
 <p align="center">
