@@ -15,13 +15,13 @@
   </div>
   <div>
     <a href="https://github.com/TheManuelML/obsidian-agent" style="text-decoration: none">
-      <img src="https://img.shields.io/github/stars/TheManuelML/obsidian-agent?style=social" alt="GitHub stars">
-    </a>
-    <a href="https://github.com/TheManuelML/obsidian-agent" style="text-decoration: none">
       <img src="https://img.shields.io/badge/Release-1.0.0-blueviolet" alt="Release">
     </a>
     <a href="https://github.com/TheManuelML/obsidian-agent" style="text-decoration: none">
       <img src="https://img.shields.io/badge/Licence-MIT-D93192" alt="Release">
+    </a>
+    <a href="https://github.com/TheManuelML/obsidian-agent" style="text-decoration: none">
+      <img src="https://img.shields.io/github/stars/TheManuelML/obsidian-agent?style=social" alt="GitHub stars">
     </a>
   </div>
 </div>
