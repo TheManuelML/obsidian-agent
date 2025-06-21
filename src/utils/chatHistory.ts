@@ -28,7 +28,14 @@ export const exportMessage = async (message: Message, chatFile: TFile) => {
 
   // Add the new message with attachments
   const attachmentsStr = serializeAttachments(message.attachments);
-  chat += `\n**${message.sender.toUpperCase()}** - *${message.timestamp}*:\n${message.content}${attachmentsStr}`;
+
+  // Serialize tool calls if present
+  let toolCallsStr = '';
+  if (message.toolCalls && message.toolCalls.length > 0) {
+    toolCallsStr = `\n**Tool Calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
+  }
+
+  chat += `\n**${message.sender.toUpperCase()}** - *${message.timestamp}*:\n${toolCallsStr}${toolCallsStr ? '\n' : ''}${message.content}${attachmentsStr}`;
   
   // Rewrite the chat file with the new message
   app.vault.modify(chatFile, chat);
@@ -51,8 +58,24 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
   for (const match of messageBlocks) {
     const sender = match[1].toLowerCase() === 'user' ? MessageSender.USER : MessageSender.BOT;
     const timestamp = match[2].trim();
-    const fullContent = match[3].trim();
+    let fullContent = match[3].trim();
     
+// Parse tool calls block
+let toolCalls: any[] | undefined = undefined;
+const toolCallsBlockMatch = fullContent.match(/\*\*Tool Calls:\*\*[\r\n]+((?:- .*\n?)*)/);
+if (toolCallsBlockMatch) {
+  const toolCallsBlock = toolCallsBlockMatch[1];
+  toolCalls = toolCallsBlock
+    .split('\n')
+    .map(line => line.replace(/^- /, '').trim())
+    .filter(Boolean)
+    .map(str => {
+      try { return JSON.parse(str); } catch { return undefined; }
+    })
+    .filter(Boolean);
+  // Elimina el bloque de tool calls y el encabezado
+  fullContent = fullContent.replace(toolCallsBlockMatch[0], '').replace(/^\n+/, '').trim();
+}
     // Split content and attachments
     const attachmentsMatch = fullContent.match(/\*\*Attached Notes:\*\*\n([\s\S]*?)(?=\*\*Attached Files:\*\*|\n*$)/);
     const filesMatch = fullContent.match(/\*\*Attached Files:\*\*\n([\s\S]*?)(?=\n*$)/);
@@ -82,7 +105,8 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
       sender, 
       content, 
       timestamp,
-      attachments: Object.keys(attachments).length > 0 ? attachments : undefined
+      attachments: Object.keys(attachments).length > 0 ? attachments : undefined,
+      toolCalls
     });
   }  
 

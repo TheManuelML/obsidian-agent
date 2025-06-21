@@ -9,8 +9,6 @@ import { AgentRunner } from "src/backend/managers/agentRunner";
 // Class that manage the streaming calls using chains
 export class ChatStreamingService {
   private app = getApp();
-  private settings = getSettings();
-  private hasSentFirst = false; // Flag if it is the first time interacting with a chat after a reset
 
   // Gets and runs a chain
   async startStreaming(
@@ -77,19 +75,26 @@ export class ChatStreamingService {
       // Setup streaming
       let accumulated = "";
       let hasReceivedFirstChunk = false;
+      let accumulatedToolCalls: any[] = [];
 
-      const updateAiMessage = (chunk: string) => {
+      const updateAiMessage = (chunk: string, toolCalls?: any[]) => {
         if (!hasReceivedFirstChunk) {
           hasReceivedFirstChunk = true;
         }
         
         accumulated += chunk;
         
+        // Accumulate tool calls
+        if (toolCalls && toolCalls.length > 0) {
+          accumulatedToolCalls = [...accumulatedToolCalls, ...toolCalls];
+        }
+        
         updateConversation(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             ...updated[updated.length - 1],
-            content: accumulated
+            content: accumulated,
+            toolCalls: accumulatedToolCalls.length > 0 ? accumulatedToolCalls : []
           };
           return updated;
         });
@@ -106,6 +111,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: accumulated,
             timestamp: getTime(),
+            toolCalls: accumulatedToolCalls.length > 0 ? accumulatedToolCalls : []
           };
           await exportMessage(finalBotMessage, chatFile);
         } else {
@@ -128,6 +134,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: "*No message generated*",
             timestamp: getTime(),
+            toolCalls: []
           };
           await exportMessage(finalBotMessage, chatFile);
         }

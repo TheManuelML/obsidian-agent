@@ -110,10 +110,13 @@ export class AgentRunner {
     }
 
     // Process the chunk depending on the structure
-    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string) => void) {
+    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string, toolCalls?: any[]) => void) {
         for (const item of chunk) {
             if (item instanceof AIMessageChunk) {
-                updateAiMessage(item.content.toString());
+                // Check if the chunk contains tool calls
+                // Models like Google ones do not support streaming tool calls
+                const toolCalls = item.tool_calls;
+                updateAiMessage(item.content.toString(), toolCalls);
             }
         }
     }

@@ -6,6 +6,14 @@ export enum MessageSender {
     BOT = 'bot'
 }
 
+export interface ToolCall {
+    id: string;
+    name: string;
+    args: Record<string, any>;
+    result?: string;
+    status: 'pending' | 'success' | 'error';
+}
+
 export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
@@ -14,6 +22,7 @@ export interface Message {
         notes?: TFile[];
         files?: File[];
     };
+    toolCalls?: ToolCall[];
 }
 
 export interface ChatInputProps {

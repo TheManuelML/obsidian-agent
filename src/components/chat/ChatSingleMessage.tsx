@@ -1,14 +1,61 @@
-import React, { useRef, useEffect, useCallback } from "react";
-import { Bot, User, Copy, RefreshCw } from "lucide-react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
+import { Bot, User, Copy, RefreshCw, Wrench, ChevronRight } from "lucide-react";
 import parse, { HTMLReactParserOptions, Element, domToReact } from "html-react-parser";
 import { Component, MarkdownRenderer } from "obsidian";
-import { MessageSender, ChatSingleMessageProps } from "src/types";
+import { MessageSender, ChatSingleMessageProps, ToolCall } from "src/types";
 import { parseMarkdownCodeBlock } from "src/utils/parsing";
 
 // Custom components for special tags
 const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, children }) => (
   <span className={`custom-tag ${tag}`}>{children}</span>
 );
+
+// Component to render tool calls as dropdowns
+const ToolCallRenderer: React.FC<{ toolCalls: ToolCall[] }> = ({ toolCalls }) => {
+  const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+
+  const toggleIndex = (idx: number) => {
+    setOpenIndexes(prev =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
+  };
+
+  return (
+    <div className="tool-calls-container">
+      {toolCalls.map((toolCall, index) => {
+        const isOpen = openIndexes.includes(index);
+        return (
+          <div key={toolCall.id || index} className={`tool-call tool-call-${toolCall.status}` + (isOpen ? ' open' : '')}>
+            <div className="tool-call-header tool-call-dropdown-header" onClick={() => toggleIndex(index)} style={{cursor: 'pointer'}}>
+              <Wrench size={16} />
+              <span className="tool-call-name">{toolCall.name}</span>
+              <span className={`tool-call-status tool-call-status-${toolCall.status}`}>{toolCall.status}</span>
+              <span className="tool-call-dropdown-arrow" style={{marginLeft: 'auto', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'}}>
+                <ChevronRight size={14} />
+              </span>
+            </div>
+            {isOpen && (
+              <div className="tool-call-dropdown-content">
+                {toolCall.args && Object.keys(toolCall.args).length > 0 && (
+                  <div className="tool-call-args">
+                    <strong>Arguments:</strong>
+                    <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
+                  </div>
+                )}
+                {toolCall.result && (
+                  <div className="tool-call-result">
+                    <strong>Result:</strong>
+                    <pre>{toolCall.result}</pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate?: () => void }> = ({ message, onRegenerate }) => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -141,7 +188,12 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
           {parse(message.content, options)}
         </div>
       ) : (
-        <div ref={contentRef} className="chat-bot-content" />
+        <>
+          {message.toolCalls && message.toolCalls.length > 0 && (
+            <ToolCallRenderer toolCalls={message.toolCalls} />
+          )}
+          <div ref={contentRef} className="chat-bot-content" />
+        </>
       )}
     </div>
   );
