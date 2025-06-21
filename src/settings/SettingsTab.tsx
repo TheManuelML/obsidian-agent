@@ -189,9 +189,10 @@ export class AgentSettingsTab extends PluginSettingTab {
     const rulesSetting = new Setting(containerEl)
       .setName("Agent rules")
       .setDesc("Add rules to change the agent behaviour and responses. For example: 'Always answer in English'");
-    rulesSetting.settingEl.style.flexDirection = "column";
-    rulesSetting.settingEl.style.alignItems = "stretch";
-    rulesSetting.controlEl.style.width = "100%";
+    
+    rulesSetting.settingEl.classList.add("settings-rules-container");
+    rulesSetting.controlEl.classList.add("settings-rules-control");
+    
     rulesSetting.addTextArea((text) => {
       text
         .setValue(this.plugin.settings.rules)
@@ -200,11 +201,7 @@ export class AgentSettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       text.inputEl.rows = 6;
-      text.inputEl.style.width = "100%";
-      text.inputEl.style.minHeight = "120px";
-      text.inputEl.style.fontSize = "1em";
-      text.inputEl.style.resize = "vertical";
-      text.inputEl.style.marginTop = "0.5em";
+      text.inputEl.classList.add("settings-rules-textarea");
     });
       
     containerEl.createEl('h1', { text: 'Chat history folder' });

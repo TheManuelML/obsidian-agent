@@ -141,55 +141,23 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     };
 
     return (
-        <div style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginBottom: "1rem",
-            alignItems: "center"
-        }}>
-            <div 
-                ref={selectRef}
-                style={{
-                    flex: 1,
-                    position: "relative"
-                }}
-            >
+        <div className="chat-form">
+            <div ref={selectRef} className="chat-select-container">
                 <div
                     onClick={() => setIsSelectOpen(!isSelectOpen)}
-                    style={{
-                        padding: "0.4rem 0.5rem",
-                        borderRadius: "var(--radius-s)",
-                        backgroundColor: "var(--background-primary)",
-                        border: "1px solid var(--background-modifier-border)",
-                        color: "var(--text-normal)",
-                        cursor: "pointer",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        fontSize: "var(--font-ui-small)"
-                    }}
+                    className="chat-select-button"
                 >
                     <span>{chatFile?.basename}</span>
-                    <ChevronDown size={14} style={{
-                        transform: isSelectOpen ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 0.2s ease"
-                    }} />
+                    <ChevronDown 
+                        size={14} 
+                        style={{
+                            transform: isSelectOpen ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.2s ease"
+                        }} 
+                    />
                 </div>
                 {isSelectOpen && (
-                    <div style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        right: 0,
-                        backgroundColor: "var(--background-primary)",
-                        border: "1px solid var(--background-modifier-border)",
-                        borderRadius: "var(--radius-s)",
-                        marginTop: "0.25rem",
-                        zIndex: 1000,
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                        fontSize: "var(--font-ui-small)"
-                    }}>
+                    <div className="chat-select-dropdown">
                         {chatFiles.map((file: TFile) => (
                             <div
                                 key={file.path}
@@ -197,12 +165,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                                     handleChatSelect(file.path);
                                     setIsSelectOpen(false);
                                 }}
-                                style={{
-                                    padding: "0.4rem 0.5rem",
-                                    cursor: "pointer",
-                                    backgroundColor: file.path === chatFile?.path ? "var(--background-modifier-hover)" : "transparent",
-                                    color: "var(--text-normal)"
-                                }}
+                                className={`chat-select-option ${file.path === chatFile?.path ? 'current' : ''}`}
                             >
                                 {file.basename}{file.path === chatFile?.path ? " (current)" : ""}
                             </div>
@@ -212,7 +175,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
             </div>
 
             {isRenaming ? (
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div className="chat-rename-container">
                     <input
                         ref={inputRef}
                         type="text"
@@ -226,87 +189,33 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                             }
                         }}
                         placeholder="New chat name"
-                        style={{
-                            padding: "0.5rem",
-                            borderRadius: "var(--radius-s)",
-                            backgroundColor: "var(--background-primary)",
-                            border: "1px solid var(--background-modifier-border)",
-                            color: "var(--text-normal)"
-                        }}
+                        className="chat-rename-input"
                     />
-                    <button
-                        onClick={handleRenameChat}
-                        style={{
-                            padding: "0.5rem",
-                            borderRadius: "var(--radius-s)",
-                            backgroundColor: "var(--background-modifier-hover)",
-                            border: "none",
-                            color: "var(--text-muted)",
-                            cursor: "pointer"
-                        }}
-                    >
+                    <button onClick={handleRenameChat} className="chat-button">
                         Save
                     </button>
-                    <button
-                        onClick={cancelRename}
-                        style={{
-                            padding: "0.5rem",
-                            borderRadius: "var(--radius-s)",
-                            backgroundColor: "var(--background-modifier-hover)",
-                            border: "none",
-                            color: "var(--text-muted)",
-                            cursor: "pointer"
-                        }}
-                    >
+                    <button onClick={cancelRename} className="chat-button">
                         <X size={16} />
                     </button>
                 </div>
             ) : (
                 <>
-                    <button
-                        onClick={() => setIsRenaming(true)}
-                        style={{
-                            padding: "0.5rem",
-                            borderRadius: "var(--radius-s)",
-                            backgroundColor: "var(--background-modifier-hover)",
-                            border: "none",
-                            color: "var(--text-muted)",
-                            cursor: "pointer"
-                        }}
-                    >
+                    <button onClick={() => setIsRenaming(true)} className="chat-button">
                         <Edit2 size={16} />
                     </button>
 
                     <button
                         onClick={handleDeleteChat}
                         disabled={chatFiles.length <= 1}
-                        style={{
-                            padding: "0.5rem",
-                            borderRadius: "var(--radius-s)",
-                            backgroundColor: "var(--background-modifier-hover)",
-                            border: "none",
-                            color: chatFiles.length <= 1 ? "var(--text-faint)" : "var(--text-muted)",
-                            cursor: chatFiles.length <= 1 ? "not-allowed" : "pointer",
-                            opacity: chatFiles.length <= 1 ? 0.5 : 1
-                        }}
+                        className="chat-button"
                     >
                         <Trash2 size={16} />
                     </button>
                 </>
             )}
 
-            <button
-                onClick={handleCreateChat}
-                style={{
-                    padding: "0.5rem",
-                    borderRadius: "var(--radius-s)",
-                    backgroundColor: "var(--interactive-accent)",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    cursor: "pointer"
-                }}
-            >
-                <Plus size={16} style={{ stroke: "var(--text-normal)" }}/>
+            <button onClick={handleCreateChat} className="chat-button chat-button-primary">
+                <Plus size={16} className="chat-icon"/>
             </button>
         </div>
     );

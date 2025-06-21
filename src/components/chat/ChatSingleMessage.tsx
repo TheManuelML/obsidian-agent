@@ -29,7 +29,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
         if (customTags.includes(domNode.name)) {
           return (
             <CustomTag tag={domNode.name}>
-              {domToReact(domNode.children, options)}
+              {domToReact(domNode.children as any, options)}
             </CustomTag>
           );
         }
@@ -114,83 +114,34 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
   }, []);
 
   return (
-    <div className="chat-single-message" style={{ marginTop: "0.5rem", borderBottom: "1px solid var(--background-secondary-alt)" }}>
-      <div className="header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ opacity: message.sender === MessageSender.USER ? 0.8 : 1, color: message.sender === MessageSender.USER ? 'var(--interactive-accent)' : 'var(--interactive-accent-hover)' }}>
+    <div className="chat-single-message">
+      <div className="chat-message-header">
+        <div className="chat-message-info">
+          <div className={`chat-message-avatar ${message.sender === MessageSender.BOT ? 'bot' : ''}`}>
             {message.sender === MessageSender.USER ? <User size={28} /> : <Bot size={28} />}
           </div>
-          <span style={{ opacity: "0.8", color: 'var(--text-muted)', fontSize: 'var(--font-ui-smaller)', fontWeight: 600 }}>
+          <span className="chat-message-timestamp">
             {message.timestamp}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="chat-message-actions">
           {message.sender === MessageSender.BOT && onRegenerate && (
-            <button
-              onClick={onRegenerate}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px',
-                borderRadius: '4px',
-                opacity: 0.6,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-              onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
-            >
+            <button onClick={onRegenerate} className="chat-action-button">
               <RefreshCw size={16} />
             </button>
           )}
-          <button
-            onClick={handleCopy}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              borderRadius: '4px',
-              opacity: 0.6,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '0.6'}
-          >
+          <button onClick={handleCopy} className="chat-action-button">
             <Copy size={16} />
           </button>
         </div>
       </div>
 
       {message.sender === MessageSender.USER ? (
-        <div
-          className="user-content"
-          style={{
-            marginTop: '0.25rem',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            color: 'var(--text-normal)',
-            marginBottom: '1rem'
-          }}>
+        <div className="chat-user-content">
           {parse(message.content, options)}
         </div>
       ) : (
-        <div
-          ref={contentRef}
-          className="bot-content"
-          style={{
-            marginTop: '0.25rem',
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            color: 'var(--text-normal)',
-            overflowX: 'auto',
-            paddingBottom: '0.5rem'
-          }}
-        />
+        <div ref={contentRef} className="chat-bot-content" />
       )}
     </div>
   );

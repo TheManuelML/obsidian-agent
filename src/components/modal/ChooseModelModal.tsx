@@ -48,72 +48,25 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     };
     const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
   
-    const wrapper = el.createDiv({
-      attr: {
-        style: `
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 6px;
-        `
-      }
-    });
+    const wrapper = el.createDiv({ cls: "model-suggestion-wrapper" });
   
     // Color circle
-    const colorCircle = wrapper.createDiv({
-      attr: {
-        style: `
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background-color: ${color};
-          flex-shrink: 0;
-        `
-      }
-    });
-  
+    const colorCircle = wrapper.createDiv({ cls: "model-color-circle", attr: { style: `background: ${color}` } });
+
     // Text container
-    const textContainer = wrapper.createDiv({
-      attr: {
-        style: `
-          display: flex;
-          flex-direction: column;
-        `
-      }
-    });
+    const textContainer = wrapper.createDiv({ cls: "model-text-container" });
   
-    const nameEl = textContainer.createDiv({
-      attr: {
-        style: `
-          font-weight: bold;
-          margin-bottom: 2px;
-        `
-      }
-    });
+    const nameEl = textContainer.createDiv({ cls: "model-name" });
     nameEl.setText(model.name + (model.name === this.activeModel ? " (current)" : ""));
   
-    const providerEl = textContainer.createDiv({
-      attr: {
-        style: `
-          font-size: 0.85em;
-          color: var(--text-muted);
-        `
-      }
-    });
+    const providerEl = textContainer.createDiv({ cls: "model-provider" });
     providerEl.setText(`Provider: ${model.provider}`);
 
     let capabilities = "text, " + model.capabilities.join(", ")
     if (!model.capabilities || model.capabilities.length < 1) {
       capabilities = "text-only"
     } 
-    const capsEl = textContainer.createDiv({
-      attr: {
-        style: `
-          font-size: 0.85em;
-          color: var(--text-muted);
-        `
-      }
-    });
+    const capsEl = textContainer.createDiv({ cls: "model-capabilities" });
     capsEl.setText(`Capabilities: ${capabilities}`);
   }
 }

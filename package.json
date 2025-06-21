@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-agent",
-	"version": "0.0.1",
-	"description": "Lend your Obsidian vault to an AI agent. It can read, write, and search your notes.",
+	"name": "ai-agent",
+	"version": "1.0.0",
+	"description": "Lend your vault to an AI agent. It can read, write, and search your notes.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -35,12 +35,7 @@
 		"@langchain/mistralai": "^0.2.1",
 		"@langchain/openai": "^0.5.7",
 		"html-react-parser": "^5.2.5",
-		"js-levenshtein": "^1.1.6",
 		"lucide-react": "^0.503.0",
-		"mammoth": "^1.9.1",
-		"marked": "^15.0.12",
-		"pdf-parse": "^1.1.1",
-		"pdfjs-dist": "^5.3.31",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"react-markdown": "^10.1.0"

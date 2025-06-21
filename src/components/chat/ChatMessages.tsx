@@ -15,15 +15,7 @@ export const ChatMessages: React.FC<ChatMessagesProps & { onRegenerate?: (index:
     };
 
     return (
-        <div style={{
-            flex: 1,
-            overflowY: "auto",
-            border: "none",
-            borderRadius: "var(--radius-s)",
-            padding: "0",
-            backgroundColor: "var(--background-secondary)",
-            marginBottom: "1rem",
-        }}>
+        <div className="chat-messages">
             {conversation.map((msg, i) => (
                 <ChatSingleMessage 
                     key={i} 

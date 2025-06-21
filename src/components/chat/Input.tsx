@@ -51,9 +51,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       // Clear the input fields
       setMessage("");
       setselectedFiles([]);
-
-      // Reset height of the textarea
-      if (textAreaRef.current) textAreaRef.current.style.height = "2.5rem";
     }
   };
 
@@ -126,89 +123,29 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     }).open();
   }
 
-  
-
   return (
-    <div style={{ width: "100%" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-end",
-          backgroundColor: "var(--background-secondary)",
-          border: "1px solid var(--background-secondary-alt)",
-          borderRadius: "var(--radius-s)",
-          gap: "0.5rem",
-          padding: "0.5rem",
-          width: "100%",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div className="chat-input-wrapper">
+      <div className="chat-input-container">
+        <div className="chat-input-textarea-container">
           <textarea
             ref={textAreaRef}
             placeholder="Send a message..."
             value={message}
-            onChange={(e) => {
-              setMessage(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
+            onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
               }
             }}
-            style={{
-              flex: "1",
-              padding: "0.5rem",
-              fontSize: "var(--font-ui-medium)",
-              border: "none",
-              backgroundColor: "transparent",
-              borderRadius: "var(--radius-s)",
-              outline: "none",
-              boxShadow: "none",
-              color: "var(--text-normal)",
-              resize: "none",
-              overflow: "auto",
-              minHeight: "2.5rem",
-              maxHeight: "10rem",
-            }}
+            className="chat-input-textarea"
           />
-          { /* Show selected notes below textarea */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "0.25rem",
-              marginTop: "0.25rem",
-            }}
-          >
+          {/* Show selected notes below textarea */}
+          <div className="chat-input-attachments">
             {selectedNotes?.map((note) => (
-              <div
-                key={note.path}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  backgroundColor: "var(--background-modifier-hover)",
-                  borderRadius: "var(--radius-s)",
-                  padding: "0rem 0.5rem",
-                  fontSize: "var(--font-ui-small)",
-                  height: "1.5rem",
-                }}
-              >
-                <span style={{ marginRight: "0.25rem" }}>{note.name.slice(0, -3)}</span>
-                <button
-                  onClick={() => removeNote(note)}
-                  style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-muted)",
-                    padding: 0,
-                  }}
-                >
+              <div key={note.path} className="chat-attachment-tag">
+                <span className="chat-attachment-text">{note.name.slice(0, -3)}</span>
+                <button onClick={() => removeNote(note)} className="chat-attachment-remove">
                   <X size={12} />
                 </button>
               </div>
@@ -219,51 +156,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
               const previewUrl = isImage ? URL.createObjectURL(img) : null;
 
               return (
-                <div
-                  key={index}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    backgroundColor: "var(--background-modifier-hover)",
-                    borderRadius: "var(--radius-s)",
-                    padding: "0rem 0.5rem",
-                    fontSize: "var(--font-ui-small)",
-                    height: "1.5rem",
-                  }}
-                >
+                <div key={index} className="chat-attachment-tag">
                   {isImage ? (
                     <img
                       src={previewUrl!}
                       alt={img.name}
-                      style={{
-                        width: "1rem",
-                        height: "1rem",
-                        objectFit: "cover",
-                        borderRadius: "2px",
-                        marginRight: "0.25rem",
-                      }}
+                      className="chat-attachment-image"
                     />
                   ) : (
-                    <FileText
-                      size={14}
-                      style={{
-                        marginRight: "0.25rem",
-                        color: "var(--text-muted)",
-                      }}
-                    />
+                    <FileText size={14} className="chat-attachment-icon" />
                   )}
                   <span>{img.name}</span>
                   <button
                     onClick={() => removeImage(index)}
-                    style={{
-                      backgroundColor: "transparent",
-                      boxShadow: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "var(--text-muted)",
-                      padding: 0,
-                      marginLeft: "0.25rem",
-                    }}
+                    className="chat-attachment-remove chat-attachment-remove-with-margin"
                   >
                     <X size={12} />
                   </button>
@@ -271,110 +177,51 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
               );
             })}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.25rem", gap: "0.5rem" }}>
-            <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
-              <button
-                onClick={openNotePicker}
-                style={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                  borderRadius: "100%",
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 0,
-                  gap: "0.25rem",
-                  cursor: "pointer",
-                }}
-              >
-                <AtSign size={16} style={{ stroke: "var(--text-muted)" }} />
-                <p style={{ fontSize: "var(--font-ui-small)", color: "var(--text-muted)" }}>Add context</p>
+          <div className="chat-input-actions">
+            <div className="chat-input-left-actions">
+              <button onClick={openNotePicker} className="chat-context-button">
+                <AtSign size={16} className="chat-context-icon" />
+                <p className="chat-context-text">Add context</p>
               </button>
             </div>
-            <div style={{ marginBottom: "0.4rem", display: "flex", gap: "0.5rem" }}>
-              <button
-                  onClick={openModelPicker}
-                  style={{
-                    backgroundColor: "var(--background-secondary-alt)",
-                    border: "none",
-                    borderRadius: "var(--radius-s)",
-                    padding: "0.5rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  {selectedModel}
-                </button>
+            <div className="chat-input-left-actions">
+              <button onClick={openModelPicker} className="chat-model-button">
+                {selectedModel}
+              </button>
             </div>
-            <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
+            <div className="chat-input-right-actions">
               <div>
                 <button
                   onClick={() => imageInputRef.current?.click()}
-                  style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    border: "none",
-                    borderRadius: "100%",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 0,
-                    gap: "0.25rem",
-                    cursor: canUploadImages ? "pointer" : "not-allowed",
-                  }}
+                  className="chat-upload-button"
                   title={canUploadImages ? "Images" : "Image upload not supported by current model"}
                   disabled={!canUploadImages}
                 >
-                  <Image size={18} style={{
-                     stroke: canUploadImages ? "var(--text-muted)" : "var(--text-error)", 
-                    }} 
+                  <Image 
+                    size={18} 
+                    className={`chat-upload-icon ${!canUploadImages ? 'disabled' : ''}`}
                   />
                 </button>
                 <input
                   type="file"
                   ref={imageInputRef}
                   onChange={handleFileSelect}
-                  style={{ display: "none" }}
+                  className="chat-file-input"
                   accept=".jpg,.jpeg,.png"
                   multiple
                 />
               </div>
               <button
-                style={{
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                  borderRadius: "100%",
-                  width: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: message.trim() ? "pointer" : "not-allowed",
-                  padding: 0
-                }}
+                className="chat-send-button"
                 onClick={handleSend}
                 disabled={!message.trim()}
                 title="Send message"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <CircleArrowRight size={22} style={{
-                    stroke: message.trim()
-                      ? "var(--interactive-accent-hover)"
-                      : "var(--text-muted)",
-                    transform: message.trim()
-                      ? "scale(1.1)"
-                      : "scale(1)",
-                    transition: "color 0.5s ease",
-
-                  }} />
+                <div className="chat-send-button-inner">
+                  <CircleArrowRight 
+                    size={22} 
+                    className={`chat-send-icon ${message.trim() ? 'active' : ''}`}
+                  />
                 </div>
               </button>
             </div>

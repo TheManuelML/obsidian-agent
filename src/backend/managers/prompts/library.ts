@@ -10,7 +10,7 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
         - ...
         ---
 
-Just respond with the content of the note. NEVER return the content of the note inside a "code block \`\`\`".
+Just respond with the content of the note. NEVER return the content of the note inside a markdow "code block \`\`\`".
 `;
 
 const agentSystemPrompt = `
@@ -23,7 +23,7 @@ When a note or folder is mentioned, always search for it to determine its exact 
 When returning note paths, always format them as Obsidian links using the syntax: [[exact/path/to/file.md]].
 
 When asked to read a note or file, return its exact content unless the user explicitly asks not to.
-Never return the content of inside a "code block \`\`\`". Keep them as-is.
+Never return the content of inside a markdown "code block \`\`\`". Keep them as-is.
 
 ---
 

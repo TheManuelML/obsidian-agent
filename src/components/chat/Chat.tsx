@@ -85,14 +85,8 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      padding: "1rem",
-      position: "relative",
-    }}>
-      <ChatForm 
+    <div className="chat-container">
+      <ChatForm
         chatFile={chatFile}
         chatFiles={chatFiles}
         setChatFile={setChatFile}
@@ -105,7 +99,7 @@ export const Chat: React.FC = () => {
         bottomRef={bottomRef}
         onRegenerate={handleRegenerate}
       />
-      <div style={{ marginBottom: "1rem", position: "relative" }}>
+      <div className="chat-file-input-container">
         <ChatInput onSend={handleSendMessage}/>
       </div>  
     </div>
