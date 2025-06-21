@@ -54,22 +54,34 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
 
   useEffect(() => {
     // If its a bot message, render markdown via Obsidian after preprocessing
-    if (contentRef.current && message.sender !== MessageSender.USER) {
-      contentRef.current.innerHTML = "";
-      if (!componentRef.current) {
-        componentRef.current = new Component();
-      }
-      const processed = preprocess(message.content);
-      MarkdownRenderer.renderMarkdown(
-        processed,
-        contentRef.current,
-        '',
-        componentRef.current
-      );
+    if (!contentRef.current || message.sender === MessageSender.USER) return;
+
+    if (componentRef.current !== null) {
+      componentRef.current.unload();
+      componentRef.current = null;
     }
+    
+    while (contentRef.current.firstChild) {
+      contentRef.current.removeChild(contentRef.current.firstChild);
+    }
+    
+    const container = document.createElement("div");
+    contentRef.current.appendChild(container);
+
+    const newComponent = new Component();
+    componentRef.current = newComponent;
+
+    const processed = preprocess(message.content);
+    MarkdownRenderer.renderMarkdown(
+      processed,
+      container,
+      '',
+      newComponent
+    );
+
     return () => {
-      if (componentRef.current) {
-        componentRef.current.unload();
+      if (componentRef.current === newComponent) {
+        newComponent.unload();
         componentRef.current = null;
       }
     };
