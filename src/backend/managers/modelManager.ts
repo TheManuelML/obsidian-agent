@@ -8,15 +8,6 @@ import { Notice } from "obsidian";
 import { getSettings } from "src/plugin";
 import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/settings/models";
 
-// Map the model provider with its type in Langchain
-const ChatModelTypeMap = {
-    [ModelProvider.OPENAI]: ChatOpenAI,
-    [ModelProvider.GOOGLE]: ChatGoogleGenerativeAI,
-    [ModelProvider.ANTHROPIC]: ChatAnthropic,
-    [ModelProvider.MISTRAL]: ChatMistralAI,
-    [ModelProvider.DEEPSEEK]: ChatDeepSeek,
-} as const;
-
 // Class that creates the model based on the provider
 export class ModelManager {
     private static instance: ModelManager;
@@ -114,19 +105,60 @@ export class ModelManager {
         
         // Configure the model depending on the provider
         const config: ModelConfig = this.getModelConfig(model);
-        // Map the langchain class
-        const ChatModelClass = ChatModelTypeMap[model.provider];
 
-        // Create the chat model
-        const chatModel = new (ChatModelClass as any)({
-            model: config.modelName,
-            temperature: config.temperature,
-            maxRetries: config.maxRetries,
-            apiKey: config.apiKey,
-            streaming: config.streaming,
-            safetySettings: config.safetySettings,
-        });
+        // Create the chat model based on provider
+        switch (model.provider) {
+            case ModelProvider.OPENAI:
+                return new ChatOpenAI({
+                    model: config.modelName,
+                    temperature: config.temperature,
+                    maxRetries: config.maxRetries,
+                    apiKey: config.apiKey,
+                    streaming: config.streaming,
+                });
 
-        return chatModel;
+            case ModelProvider.GOOGLE:
+                return new ChatGoogleGenerativeAI({
+                    model: config.modelName,
+                    temperature: config.temperature,
+                    maxRetries: config.maxRetries,
+                    apiKey: config.apiKey,
+                    streaming: config.streaming,
+                    safetySettings: config.safetySettings,
+                });
+
+            case ModelProvider.ANTHROPIC:
+                return new ChatAnthropic({
+                    model: config.modelName,
+                    temperature: config.temperature,
+                    maxRetries: config.maxRetries,
+                    apiKey: config.apiKey,
+                    streaming: config.streaming,
+                });
+
+            case ModelProvider.MISTRAL:
+                return new ChatMistralAI({
+                    model: config.modelName,
+                    temperature: config.temperature,
+                    maxRetries: config.maxRetries,
+                    apiKey: config.apiKey,
+                    streaming: config.streaming,
+                });
+
+            case ModelProvider.DEEPSEEK:
+                return new ChatDeepSeek({
+                    model: config.modelName,
+                    temperature: config.temperature,
+                    maxRetries: config.maxRetries,
+                    apiKey: config.apiKey,
+                    streaming: config.streaming,
+                });
+
+            default:
+                const errorMsg = `Unsupported provider: ${model.provider}`;
+                new Notice(errorMsg, 5000);
+                if (settings.debug) console.error(errorMsg);
+                throw new Error(errorMsg);
+        }
     }
 }
