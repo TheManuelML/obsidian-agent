@@ -117,7 +117,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 return;
             }
 
-            await app.vault.delete(chatFile);
+            await app.fileManager.trashFile(chatFile);
 
             // Get updated chat files after deletion
             const updatedChats = await loadChatFiles();
