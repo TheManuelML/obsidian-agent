@@ -506,8 +506,6 @@
 
 /* Tool Calls Styling */
 .tool-calls-container {
-  margin-top: 1rem;
-  border-top: 1px solid var(--background-modifier-border);
   padding-top: 1rem;
 }
 

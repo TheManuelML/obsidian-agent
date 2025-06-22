@@ -1,5 +1,5 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
-import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/View";
+import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/ChatView";
 import { ChooseModelModal } from 'src/components/modal/ChooseModelModal';
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
 import { Model } from 'src/settings/models';
