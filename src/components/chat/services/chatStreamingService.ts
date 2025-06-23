@@ -3,36 +3,24 @@ import { getApp, getSettings } from "src/plugin";
 import { getTime } from "src/utils/time";
 import { exportMessage, getThreadId, removeLastMessage } from "src/utils/chatHistory";
 import { Message, MessageSender } from "src/types/index";
-import { AgentManager } from "src/backend/managers/agentManager";
-import { AgentRunner } from "src/backend/managers/agentRunner";
+import { Agent } from "src/backend/managers/agentManager";
+import { getStructuredSysPrompt } from "src/utils/vaultStructure";
 
 // Class that manage the streaming calls using chains
 export class ChatStreamingService {
   private app = getApp();
-  private settings = getSettings();
-  private hasSentFirst = false; // Flag if it is the first time interacting with a chat after a reset
-
+  
   // Gets and runs a chain
   async startStreaming(
     message: string,
     chatFile: TFile,
     updateConversation: (updater: (prev: Message[]) => Message[]) => void,
-    notes?: TFile[],
-    files?: File[],
+    notes: TFile[],
+    images: File[],
     isRegeneration: boolean = false
   ) {
     const settings = getSettings();
-    let chain;
-    try {
-      chain = AgentManager.getInstance().getAgent();
-    } catch (err) {
-      const errorMsg = `Error initializing chat: ${err}`;
-      new Notice(errorMsg, 5000);
-      if (settings.debug) console.error(errorMsg);
-      return;
-    }
-
-    const runner = new AgentRunner();
+    const agent = new Agent()
 
     try {
       // Verify chat file exists
@@ -55,10 +43,7 @@ export class ChatStreamingService {
           sender: MessageSender.USER,
           content: message,
           timestamp: getTime(),
-          attachments: notes || files ? {
-            notes,
-            files
-          } : undefined
+          attachments: notes,
         };
         updateConversation(prev => [...prev, userMessage]);
 
@@ -71,6 +56,7 @@ export class ChatStreamingService {
         sender: MessageSender.BOT,
         content: "",
         timestamp: getTime(),
+        attachments: [],
       };
       updateConversation(prev => [...prev, tempBotMessage]);
 
@@ -95,10 +81,13 @@ export class ChatStreamingService {
         });
       };
 
-      // Execute streaming
+      
+      const systemMessage = getStructuredSysPrompt();
+      const humanMessage = message;
       const threadId = await getThreadId(chatFile);
+      // Execute streaming
       try {
-        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime() }, notes, files, updateAiMessage);
+        await agent.generateContent(systemMessage, humanMessage, notes, images, threadId, updateAiMessage);
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {
@@ -106,6 +95,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: accumulated,
             timestamp: getTime(),
+            attachments: [],
           };
           await exportMessage(finalBotMessage, chatFile);
         } else {
@@ -128,6 +118,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: "*No message generated*",
             timestamp: getTime(),
+            attachments: [],
           };
           await exportMessage(finalBotMessage, chatFile);
         }

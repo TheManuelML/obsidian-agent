@@ -126,11 +126,11 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageProps & { onRegenerate
         </div>
         <div className="chat-message-actions">
           {message.sender === MessageSender.BOT && onRegenerate && (
-            <button onClick={onRegenerate} className="chat-action-button">
+            <button onClick={onRegenerate} className="button-icon">
               <RefreshCw size={16} />
             </button>
           )}
-          <button onClick={handleCopy} className="chat-action-button">
+          <button onClick={handleCopy} className="button-icon">
             <Copy size={16} />
           </button>
         </div>

@@ -10,8 +10,6 @@ import { Model, ModelProvider, ModelConfig, allAvailableModels } from "src/setti
 
 // Class that creates the model based on the provider
 export class ModelManager {
-    private static instance: ModelManager;
-
     // Maps the api key in the settings with its provider
     private readonly providerApiKeyMap: Record<ModelProvider, () => string> = {
         [ModelProvider.OPENAI]: () => getSettings().openaiApiKey,
@@ -19,14 +17,6 @@ export class ModelManager {
         [ModelProvider.ANTHROPIC]: () => getSettings().anthropicApiKey,
         [ModelProvider.MISTRAL]: () => getSettings().mistralApiKey,
         [ModelProvider.DEEPSEEK]: () => getSettings().deepseekApiKey,
-    }
-
-    // Function to get the ModelManager instance
-    static getInstance(): ModelManager {
-        if (!ModelManager.instance) {
-            ModelManager.instance = new ModelManager;
-        }
-        return ModelManager.instance;
     }
 
     // Gets the model configuration depending on the provider
@@ -49,11 +39,6 @@ export class ModelManager {
         };
 
         switch (model.provider) {
-            case ModelProvider.OPENAI:
-                return {
-                    ...baseConfig,
-                };
-
             case ModelProvider.GOOGLE:
                 const safetySettings = [
                     {category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE},
@@ -67,26 +52,10 @@ export class ModelManager {
                     safetySettings
                 }
 
-            case ModelProvider.ANTHROPIC:
-                return {
-                    ...baseConfig
-                }
-
-            case ModelProvider.MISTRAL:
-                return {
-                    ...baseConfig
-                }
-
-            case ModelProvider.DEEPSEEK:
-                return {
-                    ...baseConfig
-                }
-            
             default:
-                const errorMsg = `Unsupported provider: ${model.provider}`;
-                new Notice(errorMsg, 5000);
-                if (settings.debug) console.error(errorMsg);
-                throw new Error(errorMsg);
+                return {
+                    ...baseConfig
+                }
         }
     }
 

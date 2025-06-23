@@ -43,7 +43,9 @@ export class AgentSettingsTab extends PluginSettingTab {
           new ChooseModelModal(app, (model) => {
             this.plugin.settings.model = model.name;
             this.plugin.settings.provider = model.provider;
+            
             plugin.saveSettings();
+            
             button.setButtonText(model.name);
           }).open();
         });

@@ -1,3 +1,58 @@
+/* Global */
+.button-icon {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+}
+
+.button-icon:hover {
+    background-color: transparent !important;
+    color: var(--interactive-accent-hover);
+    transition: 0.2s ease;
+}
+
+.button-icon:disabled {
+    cursor: not-allowed;
+    color: var(--text-error);
+}
+
+.button-icon-primary {
+    color: var(--interactive-accent) !important;
+}
+
+.button-icon-primary:hover {
+    color: var(--interactive-accent-hover) !important;
+    transition: 0.2s ease;
+}
+
+.button-background {
+    background-color: var(--background-primary) !important;
+    border-radius: var(--radius-s);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-background:hover {
+    background-color: var(--background-modifier-hover) !important;
+    transition: 0.2s ease;
+}
+
+.button-background-primary {
+    background-color: var(--interactive-accent) !important;
+    color: var(--text-muted);
+}
+
+.button-background-primary:hover {
+    background-color: var(--interactive-accent-hover) !important;
+    color: var(--text-normal);
+    transition: 0.2s ease;
+}
+
 /* Chat.tsx */
 .chat-container {
     display: flex;
@@ -17,6 +72,13 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-form-actions {
+    display: flex;
+    gap: 0.5rem;
     align-items: center;
 }
 

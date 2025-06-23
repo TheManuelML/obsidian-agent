@@ -1,5 +1,16 @@
 import { TFile, TFolder } from "obsidian";
 import { getApp } from "src/plugin";
+import { promptLibrary } from "src/backend/managers/prompts/library";
+
+export function getStructuredSysPrompt(): string {
+    const systemPrompt = promptLibrary['agent'];
+    
+    // Get the root folder structure
+    const rootFolder: TFolder = getRootFolder();
+    const folderStructure: string = formatFolderTree(getFolderStructure(rootFolder));
+
+    return systemPrompt.replace("{folderStructure}", folderStructure);
+}
 
 // Helper function to build the tree in a JSON format
 export function getFolderStructure(folder: TFolder): any[] {

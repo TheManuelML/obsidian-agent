@@ -104,18 +104,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
 
     new ChooseModelModal(app, (model: Model) => {
       // Change model in the settings and save changes
+      settings.provider = model.provider;
       settings.model = model.name; 
+      
       plugin.saveSettings();
+      
       // Change the state
       setSelectedModel(model.name); 
       
       // Search the selected model in the model list
-      const modelObject = allAvailableModels.find(m => m.name === settings.model);
-      if (modelObject?.capabilities) {
+      if (model.capabilities) {
         // Update image upload capability
-        setCanUploadImages(modelObject.capabilities.includes(ModelCapability.VISION));
+        setCanUploadImages(model.capabilities.includes(ModelCapability.VISION));
         // Clean file list if model doesn't support images
-        if (!modelObject.capabilities.includes(ModelCapability.VISION)) {
+        if (!model.capabilities.includes(ModelCapability.VISION)) {
           setselectedFiles([]);
         }
       }
@@ -193,14 +195,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
               <div>
                 <button
                   onClick={() => imageInputRef.current?.click()}
-                  className="chat-upload-button"
+                  className={`button-icon ${!canUploadImages ? 'disabled' : ''}`}
                   title={canUploadImages ? "Images" : "Image upload not supported by current model"}
                   disabled={!canUploadImages}
                 >
-                  <Image 
-                    size={18} 
-                    className={`chat-upload-icon ${!canUploadImages ? 'disabled' : ''}`}
-                  />
+                  <Image size={18} />
                 </button>
                 <input
                   type="file"
