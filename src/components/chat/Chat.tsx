@@ -84,8 +84,39 @@ export const Chat: React.FC = () => {
     }
   };
 
+  const handleEditUserMessage = async (index: number, newContent: string, attachments: TFile[]) => {
+    // Solo editar si el mensaje es del usuario
+    if (conversation[index]?.sender !== MessageSender.USER) return;
+    // Crea una copia actualizada de la conversación
+    const updatedConversation = [...conversation];
+    updatedConversation[index] = {
+      ...updatedConversation[index],
+      content: newContent,
+      attachments: attachments || [],
+    };
+    // Si el siguiente mensaje es del bot, elimínalo para regenerar
+    if (updatedConversation[index + 1]?.sender === MessageSender.BOT) {
+      updatedConversation.splice(index + 1, 1);
+    }
+    setConversation(updatedConversation);
+
+    // Espera a que React actualice el estado antes de llamar a startStreaming
+    setTimeout(async () => {
+      const activeChatFile = await ensureActiveChat();
+      if (!activeChatFile) return;
+      await streamingService.startStreaming(
+        newContent,
+        activeChatFile,
+        setConversation,
+        attachments,
+        [],
+        true // regeneration
+      );
+    }, 0);
+  };
+
   return (
-    <div className="chat-container">
+    <div className="chat-main-container">
       <ChatForm
         chatFile={chatFile}
         chatFiles={chatFiles}
@@ -98,8 +129,9 @@ export const Chat: React.FC = () => {
         conversation={conversation}
         bottomRef={bottomRef}
         onRegenerate={handleRegenerate}
+        onEditUserMessage={handleEditUserMessage}
       />
-      <div className="chat-file-input-container">
+      <div className="chat-main-input-container">
         <ChatInput onSend={handleSendMessage}/>
       </div>  
     </div>

@@ -15,7 +15,7 @@ import { imageToBase64 } from "src/utils/attachedImages";
 // Types
 type ContentType = Array<
     | {type: "text", text: string} // Text content
-    | {type: "media", mimeType: "image/jpeg", data: string} // Image content
+    | {type: "media", mimeType: string, data: string} // Image content
 >
 type MessageType = { 
     "role": "system" | "user", 
@@ -103,10 +103,18 @@ export class Agent {
         // Add attached images in Base64
         if (images && images.length > 0) {
             for (const img of images) {
-                const base64 = await imageToBase64(img);
-                humanContent.push(
-                    { type: "media", mimeType: "image/jpeg", data: base64 }
-                )
+                try {
+                    const { mimeType, base64 } = await imageToBase64(img);
+                    if (mimeType && base64) {
+                        humanContent.push(
+                            { type: "media", mimeType, data: base64 }
+                        );
+                    } else {
+                        console.error('Image conversion failed for', img.name);
+                    }
+                } catch (e) {
+                    console.error('Error converting image to base64:', e);
+                }
             }
         }
         

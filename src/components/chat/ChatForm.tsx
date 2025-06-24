@@ -71,13 +71,18 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     return (
         <div className="chat-form">
             <div>
-                {chatFile?.basename || "No chat selected"}
+                <button
+                    onClick={openChatHistory}
+                    className="chat-file-title"
+                >
+                    {chatFile?.basename || "No chat selected"}
+                </button>
             </div>
             <div className="chat-form-actions">
                 <button 
                     onClick={handleCreateChat} 
                     title="Create new chat"
-                    className="button-icon button-icon-primary"
+                    className="button-icon-primary"
                 >
                     <Plus size={28} />
                 </button>
