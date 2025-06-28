@@ -37,7 +37,7 @@ export const Chat: React.FC = () => {
   }, []);
 
   // Handle the calls to the agent
-  const handleSendMessage = async (message: string, notes?: TFile[], images?: File[]) => {
+  const handleSendMessage = async (message: string, notes: TFile[] = [], images: File[] = []) => {
     const activeChatFile = await ensureActiveChat();
     if (!activeChatFile) {
       console.error("No se pudo crear o encontrar archivo de chat");
@@ -77,8 +77,8 @@ export const Chat: React.FC = () => {
         lastUserMessage.content,
         activeChatFile,
         setConversation,
-        lastUserMessage.attachments?.notes,
-        lastUserMessage.attachments?.files,
+        lastUserMessage.attachments,
+        [],
         true // This is a regeneration
       );
     }

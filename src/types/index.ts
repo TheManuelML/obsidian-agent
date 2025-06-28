@@ -10,14 +10,11 @@ export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
     timestamp: string;
-    attachments?: {
-        notes?: TFile[];
-        files?: File[];
-    };
+    attachments: TFile[];
 }
 
 export interface ChatInputProps {
-    onSend: (message: string, notes?: TFile[], files?: File[]) => void;
+    onSend: (message: string, notes: TFile[], files: File[]) => void;
 }
 
 export interface ChatFormProps {

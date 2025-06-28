@@ -17,8 +17,8 @@ export class ChatStreamingService {
     message: string,
     chatFile: TFile,
     updateConversation: (updater: (prev: Message[]) => Message[]) => void,
-    notes?: TFile[],
-    files?: File[],
+    notes: TFile[],
+    files: File[],
     isRegeneration: boolean = false
   ) {
     const settings = getSettings();
@@ -55,10 +55,7 @@ export class ChatStreamingService {
           sender: MessageSender.USER,
           content: message,
           timestamp: getTime(),
-          attachments: notes || files ? {
-            notes,
-            files
-          } : undefined
+          attachments: notes,
         };
         updateConversation(prev => [...prev, userMessage]);
 
@@ -71,6 +68,7 @@ export class ChatStreamingService {
         sender: MessageSender.BOT,
         content: "",
         timestamp: getTime(),
+        attachments: [],
       };
       updateConversation(prev => [...prev, tempBotMessage]);
 
@@ -98,7 +96,7 @@ export class ChatStreamingService {
       // Execute streaming
       const threadId = await getThreadId(chatFile);
       try {
-        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime() }, notes, files, updateAiMessage);
+        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime(), attachments: notes }, notes, files, updateAiMessage);
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {
@@ -106,6 +104,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: accumulated,
             timestamp: getTime(),
+            attachments: notes
           };
           await exportMessage(finalBotMessage, chatFile);
         } else {
@@ -128,6 +127,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: "*No message generated*",
             timestamp: getTime(),
+            attachments: [],
           };
           await exportMessage(finalBotMessage, chatFile);
         }

@@ -159,7 +159,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
           </button>
 
           {/* Show selected notes and images */}
-          {selectedNotes?.map((note) => (
+          {selectedNotes.map((note) => (
             <div key={note.path} className="attachment-tag">
               <span className="attachment-text">{note.name.slice(0, -3)}</span>
               <button onClick={() => removeNote(note)} className="button-icon" style={{width: 'auto'}}>
