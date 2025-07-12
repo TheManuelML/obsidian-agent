@@ -1,6 +1,5 @@
 import { TFile, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
-import { getTime } from "src/utils/time";
 import { exportMessage, getThreadId, removeLastMessage } from "src/utils/chatHistory";
 import { Message, MessageSender } from "src/types/index";
 import { AgentManager } from "src/backend/managers/agentManager";
@@ -9,8 +8,6 @@ import { AgentRunner } from "src/backend/managers/agentRunner";
 // Class that manage the streaming calls using chains
 export class ChatStreamingService {
   private app = getApp();
-  private settings = getSettings();
-  private hasSentFirst = false; // Flag if it is the first time interacting with a chat after a reset
 
   // Gets and runs a chain
   async startStreaming(
@@ -54,7 +51,6 @@ export class ChatStreamingService {
         const userMessage: Message = {
           sender: MessageSender.USER,
           content: message,
-          timestamp: getTime(),
           attachments: notes,
         };
         updateConversation(prev => [...prev, userMessage]);
@@ -67,7 +63,6 @@ export class ChatStreamingService {
       const tempBotMessage: Message = {
         sender: MessageSender.BOT,
         content: "",
-        timestamp: getTime(),
         attachments: [],
       };
       updateConversation(prev => [...prev, tempBotMessage]);
@@ -96,14 +91,13 @@ export class ChatStreamingService {
       // Execute streaming
       const threadId = await getThreadId(chatFile);
       try {
-        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, timestamp: getTime(), attachments: notes }, notes, files, updateAiMessage);
+        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, attachments: notes }, notes, files, updateAiMessage);
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,
             content: accumulated,
-            timestamp: getTime(),
             attachments: notes
           };
           await exportMessage(finalBotMessage, chatFile);
@@ -126,7 +120,6 @@ export class ChatStreamingService {
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,
             content: "*No message generated*",
-            timestamp: getTime(),
             attachments: [],
           };
           await exportMessage(finalBotMessage, chatFile);

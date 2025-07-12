@@ -16,13 +16,22 @@ const CustomTag: React.FC<{ tag: string; children: React.ReactNode }> = ({ tag, 
 interface ChatSingleMessageEditableProps extends ChatSingleMessageProps {
   onRegenerate?: () => void;
   onEdit?: (newContent: string, attachments: TFile[]) => void;
+  messageIndex: number;
+  editingMessageIndex: number | null;
+  setEditingMessageIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ message, onRegenerate, onEdit }) => {
+export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ 
+  message, 
+  onRegenerate, 
+  onEdit, 
+  messageIndex, 
+  editingMessageIndex, 
+  setEditingMessageIndex 
+}) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const componentRef = useRef<Component | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(message.content);
   const [editAttachments, setEditAttachments] = useState<TFile[]>(message.attachments || []);
   const [editFiles, setEditFiles] = useState<File[]>([]);
@@ -33,6 +42,9 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ me
   });
   const imageInputRef = useRef<HTMLInputElement>(null);
   const app = getApp();
+
+  // Check if this message is currently being edited
+  const isEditing = editingMessageIndex === messageIndex;
 
   // Poll settings changes every 2 segundos SOLO en edición
   useEffect(() => {
@@ -149,8 +161,8 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ me
 
   // Editing user message
   const handleEditClick = () => {
-    if (message.sender === MessageSender.USER) {
-      setIsEditing(true);
+    if (message.sender === MessageSender.USER && setEditingMessageIndex) {
+      setEditingMessageIndex(messageIndex);
       setEditValue(message.content);
     }
   };
@@ -163,7 +175,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ me
           <button
             className="button-icon"
             style={{position: 'absolute', top: 8, right: 8, zIndex: 2}}
-            onClick={() => setIsEditing(false)}
+            onClick={() => setEditingMessageIndex?.(null)}
             title="Exit edit mode"
           >
             <X size={16} />
@@ -172,12 +184,12 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({ me
             value={editValue}
             onChange={setEditValue}
             onSend={(msg, notes, files) => {
-              setIsEditing(false);
+              setEditingMessageIndex?.(null);
               if (onEdit && msg.trim() !== message.content.trim()) {
                 onEdit(msg.trim(), notes);
               }
             }}
-            onCancel={() => setIsEditing(false)}
+            onCancel={() => setEditingMessageIndex?.(null)}
             selectedNotes={editAttachments}
             setSelectedNotes={setEditAttachments}
             selectedFiles={editFiles}

@@ -1,5 +1,5 @@
 import { TFile } from "obsidian";
-import { RefObject } from "react";
+import { RefObject, Dispatch, SetStateAction } from "react";
 
 export enum MessageSender {    
     USER = 'user',
@@ -9,7 +9,6 @@ export enum MessageSender {
 export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
-    timestamp: string;
     attachments: TFile[];
 }
 
@@ -29,8 +28,13 @@ export interface ChatFormProps {
 export interface ChatMessagesProps {
     conversation: Message[];
     bottomRef: RefObject<HTMLDivElement | null>;
+    editingMessageIndex: number | null;
+    setEditingMessageIndex: Dispatch<SetStateAction<number | null>>;
 }
 
 export interface ChatSingleMessageProps {
     message: Message;
+    editingMessageIndex: number | null;
+    setEditingMessageIndex: Dispatch<SetStateAction<number | null>>;
+    messageIndex: number;
 }
