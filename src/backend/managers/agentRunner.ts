@@ -66,7 +66,7 @@ export class AgentRunner {
                 this.processChunk(chunk, updateAiMessage);
             }
         } catch (err) {
-            const errorMsg = "Streaming error: " + err;
+            const errorMsg = "Simple streaming error: " + err;
             new Notice(errorMsg, 5000);
             if (settings.debug) console.error(errorMsg);
         }
@@ -103,7 +103,7 @@ export class AgentRunner {
                 this.processChunk(chunk, updateAiMessage);
             }
         } catch (err) {
-            const errorMsg = "Streaming error: " + err;
+            const errorMsg = "Multimodal streaming error: " + err;
             new Notice(errorMsg, 5000);
             if (settings.debug) console.error(errorMsg);
         }
