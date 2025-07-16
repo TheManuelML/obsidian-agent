@@ -1,7 +1,7 @@
 import { TFile, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
 import { exportMessage, getThreadId, removeLastMessage } from "src/utils/chatHistory";
-import { Message, MessageSender } from "src/types/index";
+import { Message, MessageSender, ToolCall } from "src/types/index";
 import { AgentManager } from "src/backend/managers/agentManager";
 import { AgentRunner } from "src/backend/managers/agentRunner";
 
@@ -52,6 +52,7 @@ export class ChatStreamingService {
           sender: MessageSender.USER,
           content: message,
           attachments: notes,
+          toolCalls: []
         };
         updateConversation(prev => [...prev, userMessage]);
 
@@ -64,25 +65,33 @@ export class ChatStreamingService {
         sender: MessageSender.BOT,
         content: "",
         attachments: [],
+        toolCalls: []
       };
       updateConversation(prev => [...prev, tempBotMessage]);
 
       // Setup streaming
       let accumulated = "";
       let hasReceivedFirstChunk = false;
+      let acumulatedToolCalls: ToolCall[] = []; 
 
-      const updateAiMessage = (chunk: string) => {
+      const updateAiMessage = (chunk: string, toolCalls?: any[]) => {
         if (!hasReceivedFirstChunk) {
           hasReceivedFirstChunk = true;
         }
         
         accumulated += chunk;
+
+        // Accumulate tool calls
+        if (toolCalls && toolCalls.length > 0) {
+          acumulatedToolCalls = [...acumulatedToolCalls, ...toolCalls];
+        }
         
         updateConversation(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             ...updated[updated.length - 1],
-            content: accumulated
+            content: accumulated,
+            toolCalls: acumulatedToolCalls.length > 0 ? acumulatedToolCalls : []
           };
           return updated;
         });
@@ -91,14 +100,22 @@ export class ChatStreamingService {
       // Execute streaming
       const threadId = await getThreadId(chatFile);
       try {
-        await runner.run(chain, threadId, { content: message, sender: MessageSender.USER, attachments: notes }, notes, files, updateAiMessage);
+        await runner.run(
+          chain, 
+          threadId, 
+          { content: message, sender: MessageSender.USER, attachments: notes, toolCalls: acumulatedToolCalls.length > 0 ? acumulatedToolCalls : [] }, 
+          notes, 
+          files, 
+          updateAiMessage
+        );
 
         // Only export the final message if we received any content
         if (accumulated.trim()) {
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,
             content: accumulated,
-            attachments: notes
+            attachments: notes,
+            toolCalls: acumulatedToolCalls.length > 0 ? acumulatedToolCalls : []
           };
           await exportMessage(finalBotMessage, chatFile);
         } else {
@@ -121,6 +138,7 @@ export class ChatStreamingService {
             sender: MessageSender.BOT,
             content: "*No message generated*",
             attachments: [],
+            toolCalls: []
           };
           await exportMessage(finalBotMessage, chatFile);
         }

@@ -1,6 +1,6 @@
 import { TFile } from "obsidian";
 import { getApp } from "src/plugin";
-import { Message, MessageSender } from "src/types";
+import { Message, MessageSender, ToolCall } from "src/types";
 
 // Helper function to serialize attachments
 const serializeAttachments = (attachments?: TFile[]) => {
@@ -18,8 +18,15 @@ export const exportMessage = async (message: Message, chatFile: TFile) => {
 
   // Add the new message with attachments
   const attachmentsStr = serializeAttachments(message.attachments);
-  chat += `\n\r**${message.sender.toUpperCase()}**:\n${message.content}${attachmentsStr}`;
   
+  // Serialize tool calls if present
+  let toolCallsStr = "";
+  if (message.toolCalls && message.toolCalls.length > 0) {
+    toolCallsStr = `\n\r**Tool Calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
+  }
+
+  chat += `\n\r**${message.sender.toUpperCase()}**:\n${toolCallsStr}${toolCallsStr ? '\n\r' : ''}${message.content}${attachmentsStr}`;
+
   // Rewrite the chat file with the new message
   app.vault.modify(chatFile, chat);
 };
@@ -40,8 +47,24 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
 
   for (const match of messageBlocks) {
     const sender = match[1].toLowerCase() === 'user' ? MessageSender.USER : MessageSender.BOT;
-    const fullContent = match[2].trim();
+    let fullContent = match[2].trim();
     
+    // Extract tool calls if present
+    let toolCalls: ToolCall[] = [];
+    const toolCallsBlockMatch = fullContent.match(/\*\*Tool Calls:\*\*[\r\n]+((?:- .*\n?)*)/);
+    if (toolCallsBlockMatch) {
+      const toolCallsBlock = toolCallsBlockMatch[1];
+      toolCalls = toolCallsBlock
+        .split('\n')
+        .map(line => line.replace(/^- /, '').trim())
+        .filter(Boolean)
+        .map(str => {
+          try { return JSON.parse(str); } catch { return undefined; }
+        })
+        .filter(Boolean);
+      fullContent = fullContent.replace(toolCallsBlockMatch[0], '').replace(/^\n+/, '').trim();
+    }
+
     // Split content and attachments
     const attachmentsMatch = fullContent.match(/\*\*Attached Notes:\*\*\n([\s\S]*?)(?=\*\*Attached Files:\*\*|\n*$)/);
     
@@ -67,7 +90,8 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
     messages.push({ 
       sender, 
       content,
-      attachments
+      attachments,
+      toolCalls
     });
   }  
 
@@ -122,7 +146,14 @@ export const rewriteChatHistory = async (chatFile: TFile, messages: Message[]) =
   // Add all messages
   for (const message of messages) {
     const attachmentsStr = serializeAttachments(message.attachments);
-    newChat += `\n\r**${message.sender.toUpperCase()}**:\n${message.content}${attachmentsStr}`;
+    
+    // Serialize tool calls if present
+    let toolCallsStr = "";
+    if (message.toolCalls && message.toolCalls.length > 0) {
+      toolCallsStr = `\n\r**Tool Calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
+    }
+    
+    newChat += `\n\r**${message.sender.toUpperCase()}**:\n${toolCallsStr}${toolCallsStr ? '\n\r' : ''}${message.content}${attachmentsStr}`;
   }
   
   // Rewrite the chat file

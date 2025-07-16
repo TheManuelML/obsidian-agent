@@ -2,7 +2,7 @@ import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { PromptTemplateManager } from "src/backend/managers/prompts/promptManager";
-import { Message } from "src/types";
+import { Message, ToolCall } from "src/types";
 import { getSettings } from "src/plugin";
 
 // Class that contains the methods to run a agent
@@ -20,7 +20,7 @@ export class AgentRunner {
         message: Message, 
         notes: TFile[] | undefined,
         files: File[] | undefined, 
-        updateAiMessage: (chunk: string) => void
+        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
     ) {
         let fullMessage = message.content;
         let attachedImages: File[] = [];
@@ -53,7 +53,7 @@ export class AgentRunner {
     async simpleRun(agent: Runnable,
         threadId: string, 
         messageContent: string,
-        updateAiMessage: (chunk: string) => void
+        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
     ) {
         const settings = getSettings();
         const inputs = await this.promptManager.getSimplePromptTemplate('agent', messageContent);
@@ -78,7 +78,7 @@ export class AgentRunner {
         threadId: string, 
         messageContent: string,
         images: File[] | undefined, 
-        updateAiMessage: (chunk: string) => void
+        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
     ) {
         const settings = getSettings();
         const encodedImages: string[] = [];
@@ -110,10 +110,11 @@ export class AgentRunner {
     }
 
     // Process the chunk depending on the structure
-    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string) => void) {
+    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string, toolCalls?: any[]) => void) {
         for (const item of chunk) {
             if (item instanceof AIMessageChunk) {
-                updateAiMessage(item.content.toString());
+                const toolCalls = item.tool_calls;
+                updateAiMessage(item.content.toString(), toolCalls);
             }
         }
     }

@@ -1,6 +1,14 @@
 import { TFile } from "obsidian";
 import { RefObject, Dispatch, SetStateAction } from "react";
 
+export interface ToolCall {
+    id: string;
+    name: string;
+    args: Record<string, any>;
+    result?: string;
+    status: "pending" | "success" | "error";
+}
+
 export enum MessageSender {    
     USER = 'user',
     BOT = 'bot'
@@ -10,6 +18,7 @@ export interface Message {
     sender: MessageSender.USER | MessageSender.BOT;
     content: string;
     attachments: TFile[];
+    toolCalls?: ToolCall[];
 }
 
 export interface ChatInputProps {
