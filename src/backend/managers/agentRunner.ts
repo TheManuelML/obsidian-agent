@@ -2,7 +2,7 @@ import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
 import { PromptTemplateManager } from "src/backend/managers/prompts/promptManager";
-import { Message, ToolCall } from "src/types";
+import { Message } from "src/types";
 import { getSettings } from "src/plugin";
 
 // Class that contains the methods to run a agent
