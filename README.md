@@ -65,6 +65,7 @@ This plugin connects to remote AI services to process your requests.
 
 To use these AI services, you must provide an API key for your chosen provider: [supported providers](./docs/providers.md). You can choose which provider to use, and you are responsible for obtaining and managing your API keys.
 
+The plugin hasn't been accepted yet. To used it, download it by cloning the repo inside `/YourVault/.obsidian/plugins/` directory. 
 
 ## 🫱🏼‍🫲🏼 Contributing & Support
 
