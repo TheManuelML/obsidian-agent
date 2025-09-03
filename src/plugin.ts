@@ -96,9 +96,7 @@ export class ObsidianAgentPlugin extends Plugin {
   }
 
   // Method that unloads the plugin
-  async onunload() {
-    this.app.workspace.getLeavesOfType(VIEW_TYPE_AGENT).forEach((leaf) => leaf.detach());
-  }
+  async onunload() {}
 }
 
 // Function that returns the app property of the Plugin class
