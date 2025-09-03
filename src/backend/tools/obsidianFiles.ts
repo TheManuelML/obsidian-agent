@@ -83,9 +83,7 @@ export const createNote = tool(async (input) => {
     // Check if the note already exists
     if (app.vault.getAbstractFileByPath(fullPath)) {
         // Append a number to the file name if it already exists
-        console.log(name, dirPath);
         const newName = getNextAvailableFileName(name, dirPath);
-        console.log(newName);
         
         name = newName;
 
@@ -95,7 +93,6 @@ export const createNote = tool(async (input) => {
     }
 
     try {
-        console.log(fullPath);
         // Write the note in Obsidian
         await app.vault.create(fullPath, content);
     } catch (err) {

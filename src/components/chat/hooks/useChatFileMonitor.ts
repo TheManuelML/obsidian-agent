@@ -20,7 +20,6 @@ export const useChatFileMonitor = (
 
       const fileExists = app.vault.getAbstractFileByPath(chatFile.path);
       if (!fileExists) {
-        console.log("Current chat file no longer exists, updating state...");
         const updatedChats = await loadChatFiles();
         if (updatedChats.length > 0) {
           setChatFile(updatedChats[0]);
