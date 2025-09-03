@@ -5,8 +5,8 @@ function DeleteChatModalContent({
   chatName,
   onConfirm,
   onCancel,
-  confirmButtonText = "Borrar",
-  cancelButtonText = "Cancelar"
+  confirmButtonText = "Delete",
+  cancelButtonText = "Cancel"
 }: {
   chatName?: string;
   onConfirm: () => void;
