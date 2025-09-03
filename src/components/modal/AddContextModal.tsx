@@ -26,11 +26,7 @@ export class AddContextModal extends FuzzySuggestModal<TFile> {
       );
 
     // Get all other files that weren't recently opened
-    const allFiles = this.app.vault
-      .getFiles()
-      .filter(
-        (file) => file.extension === "md"
-      );
+    const allFiles = this.app.vault.getMarkdownFiles();
 
     const otherFiles = allFiles.filter(
       (file) =>
