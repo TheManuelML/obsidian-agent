@@ -167,12 +167,10 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
     const newComponent = new Component();
     componentRef.current = newComponent;
     const processed = preprocess(message.content);
-    MarkdownRenderer.renderMarkdown(
-      processed,
-      container,
-      '',
-      newComponent
-    );
+    
+    // Render the markdown
+    MarkdownRenderer.render(app, processed, container, '', newComponent);
+
     return () => {
       if (componentRef.current === newComponent) {
         newComponent.unload();
