@@ -6,7 +6,7 @@ import { Message, MessageSender, ToolCall } from "src/types";
 const serializeAttachments = (attachments?: TFile[]) => {
   if (!attachments || attachments.length === 0) return '';
   
-  return `\n**Attached Notes:**\n${attachments.map(note => `- [[${note.path}]]`).join('\n')}`;
+  return `\n**Attached notes:**\n${attachments.map(note => `- [[${note.path}]]`).join('\n')}`;
 };
 
 // Export a message to a chat file
@@ -19,7 +19,7 @@ export const exportMessage = async (message: Message, chatFile: TFile) => {
   // Serialize tool calls if present
   let toolCallsStr = "";
   if (message.toolCalls && message.toolCalls.length > 0) {
-    toolCallsStr = `\n\r**Tool Calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
+    toolCallsStr = `\n\r**Tool calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
   }
 
   // Rewrite the chat file with the new message
@@ -48,7 +48,7 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
     
     // Extract tool calls if present
     let toolCalls: ToolCall[] = [];
-    const toolCallsBlockMatch = fullContent.match(/\*\*Tool Calls:\*\*[\r\n]+((?:- .*\n?)*)/);
+    const toolCallsBlockMatch = fullContent.match(/\*\*Tool calls:\*\*[\r\n]+((?:- .*\n?)*)/);
     if (toolCallsBlockMatch) {
       const toolCallsBlock = toolCallsBlockMatch[1];
       toolCalls = toolCallsBlock
@@ -63,7 +63,7 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
     }
 
     // Split content and attachments
-    const attachmentsMatch = fullContent.match(/\*\*Attached Notes:\*\*\n([\s\S]*?)(?=\*\*Attached Files:\*\*|\n*$)/);
+    const attachmentsMatch = fullContent.match(/\*\*Attached notes:\*\*\n([\s\S]*?)(?=\*\*Attached files:\*\*|\n*$)/);
     
     let content = fullContent;
     let attachments: TFile[] = [];
@@ -79,7 +79,7 @@ export const importConversation = async (chatFile: TFile): Promise<Message[]> =>
     }
     
     // Remove files section from content if present (we don't support files in Message type yet)
-    const filesMatch = fullContent.match(/\*\*Attached Files:\*\*\n([\s\S]*?)(?=\n*$)/);
+    const filesMatch = fullContent.match(/\*\*Attached files:\*\*\n([\s\S]*?)(?=\n*$)/);
     if (filesMatch) {
       content = content.replace(filesMatch[0], '').trim();
     }
@@ -151,7 +151,7 @@ export const rewriteChatHistory = async (chatFile: TFile, messages: Message[]) =
       // Serialize tool calls if present
       let toolCallsStr = "";
       if (message.toolCalls && message.toolCalls.length > 0) {
-        toolCallsStr = `\n\r**Tool Calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
+        toolCallsStr = `\n\r**Tool calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
       }
       
       newChat += `\n\r**${message.sender.toUpperCase()}**:\n${toolCallsStr}${toolCallsStr ? '\n\r' : ''}${message.content}${attachmentsStr}`;

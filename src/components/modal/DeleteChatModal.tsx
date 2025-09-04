@@ -47,7 +47,7 @@ export class DeleteChatModal extends Modal {
     this.confirmButtonText = confirmButtonText;
     this.cancelButtonText = cancelButtonText;
     
-    this.setTitle("Delete Chat");
+    this.setTitle("Delete chat");
   }
 
   onOpen() {

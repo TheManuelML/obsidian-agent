@@ -40,7 +40,7 @@ export class PromptTemplateManager {
 Instructions:
 ${systemPrompt}
 
-User Input:
+User input:
 ${userMessage}`.trim();
         
         const inputs: { messages: Array<{"role": string, "content": string | Array<{"type": string, "text": string} | {"type": string, "image_url": {"url": string}}>}> } = { 

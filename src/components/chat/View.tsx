@@ -16,7 +16,7 @@ export class ChatView extends ItemView {
 
   // View characteristics
   getViewType(): string { return VIEW_TYPE_AGENT }
-  getDisplayText(): string { return 'Obsidian Agent' }
+  getDisplayText(): string { return 'Obsidian agent' }
   getIcon(): IconName { return 'brain-cog' }
 
   async onOpen() {

@@ -162,7 +162,7 @@ export const editNote = tool(async (input) => {
             };
         }
     } else {
-        const errorMsg = "No file name provided and 'Active Note' is not set to true.";
+        const errorMsg = "No file name provided and 'active note' is not set as true.";
         new Notice(errorMsg, 5000);
         if (settings.debug) console.error(errorMsg);
         return {
@@ -287,7 +287,7 @@ export const readNote = tool(async (input) => {
             };
         }
     } else {
-        const errorMsg = "No file name provided and 'Active Note' is not set to true.";
+        const errorMsg = "No file name provided and 'active note' is not set as true.";
         new Notice(errorMsg, 5000);
         if (settings.debug) console.error(errorMsg);
         return {

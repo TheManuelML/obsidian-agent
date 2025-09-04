@@ -30,7 +30,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     let { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h1', { text: 'Language Model' });
+    containerEl.createEl('h1', { text: 'Language model' });
 
     new Setting(containerEl)
       .setName("Model")
@@ -69,7 +69,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     });
     googleSetting.addExtraButton((btn) => {
       btn.setIcon("eye")
-        .setTooltip("Show/Hide API Key")
+        .setTooltip("Show/hide api key")
         .onClick(() => {
           googleRevealed = !googleRevealed;
           const input = googleSetting.controlEl.querySelector("input");
@@ -96,7 +96,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     });
     openaiSetting.addExtraButton((btn) => {
       btn.setIcon("eye")
-        .setTooltip("Show/Hide API Key")
+        .setTooltip("Show/hide api key")
         .onClick(() => {
           openaiRevealed = !openaiRevealed;
           const input = openaiSetting.controlEl.querySelector("input");
@@ -122,7 +122,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     });
     anthropicSetting.addExtraButton((btn) => {
       btn.setIcon("eye")
-        .setTooltip("Show/Hide API Key")
+        .setTooltip("Show/hide api key")
         .onClick(() => {
           anthropicRevealed = !anthropicRevealed;
           const input = anthropicSetting.controlEl.querySelector("input");
@@ -148,7 +148,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     });
     mistralSetting.addExtraButton((btn) => {
       btn.setIcon("eye")
-        .setTooltip("Show/Hide API Key")
+        .setTooltip("Show/hide api key")
         .onClick(() => {
           mistralRevealed = !mistralRevealed;
           const input = mistralSetting.controlEl.querySelector("input");
@@ -174,7 +174,7 @@ export class AgentSettingsTab extends PluginSettingTab {
       });
       deepseekSetting.addExtraButton((btn) => {
         btn.setIcon("eye")
-          .setTooltip("Show/Hide API Key")
+          .setTooltip("Show/hide api key")
           .onClick(() => {
             deepseekRevealed = !deepseekRevealed;
             const input = deepseekSetting.controlEl.querySelector("input");

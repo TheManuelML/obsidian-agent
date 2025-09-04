@@ -11,7 +11,7 @@ export const createDir = tool(async (input) => {
     // Declaring the app and inputs
     const app = getApp();
     const settings = getSettings();
-    let { name = 'New Directory', dirPath = '' } = input;
+    let { name = 'New directory', dirPath = '' } = input;
 
     // Sanitize the path
     dirPath = dirPath.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
