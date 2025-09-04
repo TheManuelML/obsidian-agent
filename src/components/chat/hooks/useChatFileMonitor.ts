@@ -32,7 +32,7 @@ export const useChatFileMonitor = (
     };
 
     checkChatFile();
-    const interval = setInterval(checkChatFile, 2000);
-    return () => clearInterval(interval);
+    const interval = window.setInterval(checkChatFile, 2000);
+    return () => window.clearInterval(interval);
   }, [chatFile, setChatFile, setConversation, loadChatFiles]);
 };

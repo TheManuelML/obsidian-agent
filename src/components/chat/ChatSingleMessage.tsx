@@ -97,7 +97,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
   // Poll settings changes every 2 segundos SOLO en edición
   useEffect(() => {
     if (!isEditing) return;
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       const currentSettings = getSettings();
       if (currentSettings.model !== selectedModel) {
         setSelectedModel(currentSettings.model);
@@ -110,7 +110,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
         }
       }
     }, 2000);
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [selectedModel, isEditing]);
 
   const handleCopy = useCallback(() => {
@@ -119,7 +119,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
       : contentRef.current?.innerText || '';
     navigator.clipboard.writeText(content);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1000);
+    window.setTimeout(() => setCopied(false), 1000);
   }, [message.content, message.sender]);
 
   // html-react-parser options with domToReact for nested children

@@ -47,7 +47,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
 }) => {
   // Poll settings changes every 1 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       const currentSettings = getSettings();
       if (currentSettings.model !== selectedModel) {
         setSelectedModel(currentSettings.model);
@@ -63,7 +63,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [selectedModel]);
 
   // Function to handle the message sending to the Chat
