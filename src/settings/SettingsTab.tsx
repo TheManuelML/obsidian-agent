@@ -30,8 +30,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     let { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h1', { text: 'Language model' });
-
+    // Language model settings
     new Setting(containerEl)
       .setName("Model")
       .setDesc("Select the language model to use.")
@@ -50,7 +49,46 @@ export class AgentSettingsTab extends PluginSettingTab {
         return button;
       });
 
-    containerEl.createEl('h1', { text: 'API keys' });
+    // Chat history folder
+    new Setting(containerEl)
+      .setName("Chat history folder")
+      .setDesc("Select the folder where the chat history will be saved.")
+      .addDropdown((dropdown: DropdownComponent) => {
+        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
+        folders.forEach(folder => {
+          dropdown.addOption(folder.path, folder.name);
+        });
+        
+        dropdown
+          .setValue(this.plugin.settings.chatsFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.chatsFolder = value;
+            await this.plugin.saveSettings();
+          });
+      });
+    
+    // Agent rules
+    const rulesSetting = new Setting(containerEl)
+      .setName("Agent rules")
+      .setDesc("Add rules to change the agent behaviour and responses. For example: 'Always answer in English'");
+    
+    rulesSetting.settingEl.classList.add("settings-rules-container");
+    rulesSetting.controlEl.classList.add("settings-rules-control");
+    
+    rulesSetting.addTextArea((text) => {
+      text
+        .setValue(this.plugin.settings.rules)
+        .onChange(async (value) => {
+          this.plugin.settings.rules = value;
+          await this.plugin.saveSettings();
+        });
+      text.inputEl.rows = 6;
+      text.inputEl.classList.add("settings-rules-textarea");
+    });
+
+
+    // API keys settings
+    new Setting(containerEl).setName('Api keys').setHeading();
 
     // GOOGLE
     const googleSetting = new Setting(containerEl)
@@ -77,7 +115,6 @@ export class AgentSettingsTab extends PluginSettingTab {
           btn.setIcon(googleRevealed ? "eye-off" : "eye");
         });
     });
-
 
     // OPENAI
     const openaiSetting = new Setting(containerEl)
@@ -157,73 +194,35 @@ export class AgentSettingsTab extends PluginSettingTab {
         });
     });
 
-      // DEEPSEEK
-      const deepseekSetting = new Setting(containerEl)
-        .setName("Deepseek key")
-        .setDesc("Enter your Deepseek API key. Not required if you are not using Deepseek models.");
-      let deepseekRevealed = false;
-      deepseekSetting.addText((text) => {
-        text
-          .setPlaceholder("Enter your API key")
-          .setValue(this.plugin.settings.deepseekApiKey)
-          .onChange(async (value) => {
-            this.plugin.settings.deepseekApiKey = value;
-            await this.plugin.saveSettings();
-          });
-        text.inputEl.type = "password";
-      });
-      deepseekSetting.addExtraButton((btn) => {
-        btn.setIcon("eye")
-          .setTooltip("Show/hide api key")
-          .onClick(() => {
-            deepseekRevealed = !deepseekRevealed;
-            const input = deepseekSetting.controlEl.querySelector("input");
-            if (input) input.type = deepseekRevealed ? "text" : "password";
-            btn.setIcon(deepseekRevealed ? "eye-off" : "eye");
-          });
-      });
-
-    containerEl.createEl('h1', { text: 'Agent settings' });
-
-    // Agent rules (big textarea)
-    const rulesSetting = new Setting(containerEl)
-      .setName("Agent rules")
-      .setDesc("Add rules to change the agent behaviour and responses. For example: 'Always answer in English'");
-    
-    rulesSetting.settingEl.classList.add("settings-rules-container");
-    rulesSetting.controlEl.classList.add("settings-rules-control");
-    
-    rulesSetting.addTextArea((text) => {
+    // DEEPSEEK
+    const deepseekSetting = new Setting(containerEl)
+      .setName("Deepseek key")
+      .setDesc("Enter your Deepseek API key. Not required if you are not using Deepseek models.");
+    let deepseekRevealed = false;
+    deepseekSetting.addText((text) => {
       text
-        .setValue(this.plugin.settings.rules)
+        .setPlaceholder("Enter your API key")
+        .setValue(this.plugin.settings.deepseekApiKey)
         .onChange(async (value) => {
-          this.plugin.settings.rules = value;
+          this.plugin.settings.deepseekApiKey = value;
           await this.plugin.saveSettings();
         });
-      text.inputEl.rows = 6;
-      text.inputEl.classList.add("settings-rules-textarea");
+      text.inputEl.type = "password";
     });
-      
-    containerEl.createEl('h1', { text: 'Chat history folder' });
-
-    new Setting(containerEl)
-      .setName("Chat history folder")
-      .setDesc("Select the folder where the chat history will be saved.")
-      .addDropdown((dropdown: DropdownComponent) => {
-        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
-        folders.forEach(folder => {
-          dropdown.addOption(folder.path, folder.name);
+    deepseekSetting.addExtraButton((btn) => {
+      btn.setIcon("eye")
+        .setTooltip("Show/hide api key")
+        .onClick(() => {
+          deepseekRevealed = !deepseekRevealed;
+          const input = deepseekSetting.controlEl.querySelector("input");
+          if (input) input.type = deepseekRevealed ? "text" : "password";
+          btn.setIcon(deepseekRevealed ? "eye-off" : "eye");
         });
-        
-        dropdown
-          .setValue(this.plugin.settings.chatsFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.chatsFolder = value;
-            await this.plugin.saveSettings();
-          });
-      });
+    });
 
-    containerEl.createEl('h1', { text: 'Developer settings' });
+    
+    // Developer settings
+    new Setting(containerEl).setName('Developer settings').setHeading();
 
     new Setting(containerEl)
       .setName("Debug mode")
