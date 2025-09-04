@@ -162,7 +162,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
     while (contentRef.current.firstChild) {
       contentRef.current.removeChild(contentRef.current.firstChild);
     }
-    const container = document.createElement("div");
+    const container = createDiv();
     contentRef.current.appendChild(container);
     const newComponent = new Component();
     componentRef.current = newComponent;
@@ -183,7 +183,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
   useEffect(() => {
     const styleId = "chat-table-style";
     if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
+      const style = createEl("style");
       style.id = styleId;
       style.textContent = `
         .bot-content table {
