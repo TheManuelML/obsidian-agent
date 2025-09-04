@@ -115,7 +115,6 @@ export class AgentRunner {
         chunk: AIMessageChunk | Iterable<AIMessageChunk>, 
         updateAiMessage: (chunk: string, toolCalls?: ToolCall[]) => void
     ) {
-        console.log(chunk);
         // Trasnform single chunk into array
         const items = chunk instanceof AIMessageChunk ? [chunk]: chunk;
         for (const item of items) {
