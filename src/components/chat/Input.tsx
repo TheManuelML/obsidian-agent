@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AtSign, X, ArrowRight, Image } from "lucide-react";
-import { TFile } from "obsidian";
+import { TFile, App } from "obsidian";
 import { getApp, getPlugin, getSettings } from "src/plugin";
 import { AddContextModal } from "src/components/modal/AddContextModal";
 import { ChooseModelModal } from "src/components/modal/ChooseModelModal";
@@ -23,7 +23,7 @@ export interface ChatInputBaseProps {
   setCanUploadImages: React.Dispatch<React.SetStateAction<boolean>>;
   imageInputRef: React.RefObject<HTMLInputElement | null>;
   textAreaRef?: React.RefObject<HTMLTextAreaElement | null>;
-  app: any;
+  app: App;
   disabled?: boolean;
 }
 

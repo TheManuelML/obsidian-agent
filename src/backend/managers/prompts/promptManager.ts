@@ -35,7 +35,11 @@ export class PromptTemplateManager {
         };
     }
 
-    formatPromptsForCompiledGraph(systemPrompt: string, userMessage: string, images?: string[]) {
+    formatPromptsForCompiledGraph(
+        systemPrompt: string, 
+        userMessage: string, 
+        images?: string[]
+    ) {
         const unifiedPrompt = `
 Instructions:
 ${systemPrompt}
@@ -43,18 +47,30 @@ ${systemPrompt}
 User input:
 ${userMessage}`.trim();
         
-        const inputs: { messages: Array<{"role": string, "content": string | Array<{"type": string, "text": string} | {"type": string, "image_url": {"url": string}}>}> } = { 
+        // Private types to avoid any typing
+        type TextContent = {"type": "text", "text": string};
+        type ImageContent = {"type": "image_url", "image_url": {"url": string}};
+        type MessageContent = TextContent | ImageContent;
+
+        interface ChatMessage {
+            role: "user" | "assistant" | "system";
+            content: string | MessageContent[];
+        }
+
+        const inputs: { messages: ChatMessage[] } = { 
             messages: [
                 {"role": "user", "content": [{"type": "text", "text": unifiedPrompt}]}
-            ]
+            ],
         };
 
         if (images && images.length > 0) {
-            for (const img of images) {
-                (inputs.messages[0].content as Array<any>).push({"type": "image_url", "image_url": { "url": img }});
+            const content = inputs.messages[0].content;
+            if (Array.isArray(content)) {
+                for (const img of images) {
+                    content.push({ type: "image_url", image_url: { "url": img } });
+                }
             }
-        } 
-        
-        return inputs
+        }
+        return inputs;
     }
 }

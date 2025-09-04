@@ -1,7 +1,8 @@
 import { TFile, Notice } from "obsidian";
+import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { getApp, getSettings } from "src/plugin";
 import { exportMessage, getThreadId, removeLastMessage } from "src/utils/chatHistory";
-import { Message, MessageSender, ToolCall } from "src/types/index";
+import { Message, MessageSender } from "src/types/index";
 import { AgentManager } from "src/backend/managers/agentManager";
 import { AgentRunner } from "src/backend/managers/agentRunner";
 
@@ -74,7 +75,7 @@ export class ChatStreamingService {
       let hasReceivedFirstChunk = false;
       let acumulatedToolCalls: ToolCall[] = []; 
 
-      const updateAiMessage = (chunk: string, toolCalls?: any[]) => {
+      const updateAiMessage = (chunk: string, toolCalls?: ToolCall[]) => {
         if (!hasReceivedFirstChunk) {
           hasReceivedFirstChunk = true;
         }
@@ -109,7 +110,7 @@ export class ChatStreamingService {
           updateAiMessage
         );
 
-        // Only export the final message if we received any content
+        // Export the final message if we received content
         if (accumulated.trim()) {
           const finalBotMessage: Message = {
             sender: MessageSender.BOT,

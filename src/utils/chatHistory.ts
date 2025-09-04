@@ -1,6 +1,7 @@
 import { TFile } from "obsidian";
+import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { getApp } from "src/plugin";
-import { Message, MessageSender, ToolCall } from "src/types";
+import { Message, MessageSender } from "src/types";
 
 // Helper function to serialize attachments
 const serializeAttachments = (attachments?: TFile[]) => {

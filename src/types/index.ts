@@ -1,13 +1,6 @@
 import { TFile } from "obsidian";
+import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { RefObject, Dispatch, SetStateAction } from "react";
-
-export interface ToolCall {
-    id: string;
-    name: string;
-    args: Record<string, any>;
-    result?: string;
-    status: "pending" | "success" | "error";
-}
 
 export enum MessageSender {    
     USER = 'user',
@@ -47,3 +40,17 @@ export interface ChatSingleMessageProps {
     setEditingMessageIndex: Dispatch<SetStateAction<number | null>>;
     messageIndex: number;
 }
+
+// Type used in the folder structure functions
+export type FolderNode =
+  | {
+      type: "folder";
+      name: string;
+      path: string;
+      children: FolderNode[];
+    }
+  | {
+      type: "file";
+      name: string;
+      path: string;
+    };

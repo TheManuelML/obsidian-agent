@@ -1,6 +1,7 @@
 import { Notice, TFile } from "obsidian";
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Runnable } from "@langchain/core/runnables";
+import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { PromptTemplateManager } from "src/backend/managers/prompts/promptManager";
 import { Message } from "src/types";
 import { getSettings } from "src/plugin";
@@ -20,7 +21,7 @@ export class AgentRunner {
         message: Message, 
         notes: TFile[] | undefined,
         files: File[] | undefined, 
-        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
+        updateAiMessage: (chunk: string, toolCalls?: ToolCall[]) => void
     ) {
         let fullMessage = message.content;
         let attachedImages: File[] = [];
@@ -53,7 +54,7 @@ export class AgentRunner {
     async simpleRun(agent: Runnable,
         threadId: string, 
         messageContent: string,
-        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
+        updateAiMessage: (chunk: string, toolCalls?: ToolCall[]) => void
     ) {
         const settings = getSettings();
         const inputs = await this.promptManager.getSimplePromptTemplate('agent', messageContent);
@@ -78,7 +79,7 @@ export class AgentRunner {
         threadId: string, 
         messageContent: string,
         images: File[] | undefined, 
-        updateAiMessage: (chunk: string, toolCalls?: any[]) => void
+        updateAiMessage: (chunk: string, toolCalls?: ToolCall[]) => void
     ) {
         const settings = getSettings();
         const encodedImages: string[] = [];
@@ -110,8 +111,14 @@ export class AgentRunner {
     }
 
     // Process the chunk depending on the structure
-    private processChunk(chunk: AIMessageChunk | any, updateAiMessage: (chunk: string, toolCalls?: any[]) => void) {
-        for (const item of chunk) {
+    private processChunk(
+        chunk: AIMessageChunk | Iterable<AIMessageChunk>, 
+        updateAiMessage: (chunk: string, toolCalls?: ToolCall[]) => void
+    ) {
+        console.log(chunk);
+        // Trasnform single chunk into array
+        const items = chunk instanceof AIMessageChunk ? [chunk]: chunk;
+        for (const item of items) {
             if (item instanceof AIMessageChunk) {
                 const toolCalls = item.tool_calls;
                 updateAiMessage(item.content.toString(), toolCalls);

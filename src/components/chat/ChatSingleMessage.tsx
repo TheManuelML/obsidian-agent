@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Copy, X, Check, Wrench, ChevronRight } from "lucide-react";
-import parse, { HTMLReactParserOptions, Element, domToReact } from "html-react-parser";
+import parse, { HTMLReactParserOptions, Element, domToReact, DOMNode } from "html-react-parser";
 import { Component, MarkdownRenderer, TFile } from "obsidian";
+import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { getApp, getSettings } from "src/plugin";
-import { MessageSender, ChatSingleMessageProps, ToolCall } from "src/types";
+import { MessageSender, ChatSingleMessageProps } from "src/types";
 import { parseMarkdownCodeBlock } from "src/utils/parsing";
 import { allAvailableModels, ModelCapability } from "src/settings/models";
 import { ChatInputBase } from "src/components/chat/Input";
@@ -29,11 +30,10 @@ const ToolCallRenderer: React.FC<{ toolCalls: ToolCall[] }> = ({ toolCalls }) =>
       {toolCalls.map((toolCall, index) => {
         const isOpen = openIndexes.includes(index);
         return (
-          <div key={toolCall.id || index} className={`tool-call tool-call-${toolCall.status}` + (isOpen ? ' open' : '')}>
+          <div key={toolCall.id || index} className={`tool-call` + (isOpen ? ' open' : '')}>
             <div className="tool-call-header tool-call-dropdown-header" onClick={() => toggleIndex(index)} style={{cursor: 'pointer'}}>
               <Wrench size={16} />
               <span className="tool-call-name">{toolCall.name}</span>
-              <span className={`tool-call-status tool-call-status-${toolCall.status}`}>{toolCall.status}</span>
               <span className="tool-call-dropdown-arrow" style={{marginLeft: 'auto', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'}}>
                 <ChevronRight size={14} />
               </span>
@@ -44,12 +44,6 @@ const ToolCallRenderer: React.FC<{ toolCalls: ToolCall[] }> = ({ toolCalls }) =>
                   <div className="tool-call-args">
                     <strong>Arguments:</strong>
                     <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
-                  </div>
-                )}
-                {toolCall.result && (
-                  <div className="tool-call-result">
-                    <strong>Result:</strong>
-                    <pre>{toolCall.result}</pre>
                   </div>
                 )}
               </div>
@@ -130,7 +124,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
         if (customTags.includes(domNode.name)) {
           return (
             <CustomTag tag={domNode.name}>
-              {domToReact(domNode.children as any, options)}
+              {domToReact(domNode.children as DOMNode[], options)}
             </CustomTag>
           );
         }
