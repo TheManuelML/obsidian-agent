@@ -1,434 +1,504 @@
-/* Global */
-.button-icon {
-    background: transparent !important;
-    color: var(--text-muted) !important;
-    box-shadow: none !important;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    width: 28px;
-    height: 28px;
-}
+/* ==============================
+    CLASS NAMES CONVENTION
+    .obsidian-agent__file-name__main-component__optional-subcomponent
+============================== */
 
-.button-icon:hover {
-    background: var(--background-secondary-alt) !important;
-    color: var(--text-normal) !important;
-    transition: 0.2s ease;
-}
 
-.button-icon:disabled {
-    color: var(--text-faint) !important;
-    cursor: not-allowed;
-}
+/* ==============================
+    BASE
+============================== */
 
-.button-icon-primary {
-    background: transparent !important;
-    color: var(--interactive-accent) !important;
-    box-shadow: none !important;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    width: 28px;
-    height: 28px;
-}
 
-.button-icon-primary:hover {
-    background: var(--background-secondary-alt) !important;
-    color: var(--interactive-accent-hover) !important;
-    transition: 0.2s ease;
-}
-
-.button-icon-primary:disabled {
-    color: var(--text-faint) !important;
-    cursor: not-allowed;
-}
-
-.button-background {
-    background-color: var(--background-primary) !important;
-    border-radius: var(--radius-s);
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.button-background:hover {
-    background-color: var(--background-modifier-hover) !important;
-    transition: 0.2s ease;
-}
-
-.button-background-primary {
-    background-color: var(--interactive-accent) !important;
-    color: var(--text-muted);
-}
-
-.button-background-primary:hover {
-    background-color: var(--interactive-accent-hover) !important;
-    color: var(--text-normal);
-    transition: 0.2s ease;
-}
-
+/* ==============================
+    LAYOUT
+============================== */
 /* Chat.tsx */
-.chat-main-container {
+.obsidian-agent__chat-main__container {
     display: flex;
     flex-direction: column;
+    position: relative;
     height: 100%;
     padding: 1rem;
-    position: relative;
 }
 
-.chat-main-input-container {
-    margin-bottom: 1rem;
+.obsidian-agent__chat-main__input {
     position: relative;
+    margin-bottom: 1rem;
 }
 
 /* ChatForm.tsx */
-.chat-form {
+.obsidian-agent__chat-form {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
     justify-content: space-between;
     align-items: center;
-}
-
-.chat-file-title {
-    background: var(--background-primary) !important;
-    box-shadow: none !important;
-    border: 1px solid var(--background-secondary-alt);
-    border-radius: var(--radius-s);
-    font-size: var(--font-ui-medium);
-    color: var(--text-muted);
-    padding: 0.5rem;
-    cursor: pointer;
-}
-
-.chat-form-actions {
-    display: flex;
     gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.obsidian-agent__chat-form__actions {
+    display: flex;
     align-items: center;
+    gap: 0.5rem;
 }
 
 /* ChatMessages.tsx */
-.chat-messages {
+.obsidian-agent__chat-messages {
     flex: 1;
     overflow-y: auto;
+    
+    background-color: var(--background-secondary);
     border: none;
     border-radius: var(--radius-s);
+    
     padding: 0;
-    background-color: var(--background-secondary);
     margin-bottom: 1rem;
     padding-right: 1rem;
 }
 
 /* ChatSingleMessage.tsx */
-.bot-message {
+.obsidian-agent__chat-single-message__bot-message {
     margin: 0.5rem 0;
     padding: 0 0.5rem 0 1rem;
 }
 
-.bot-message-content {
-    white-space: normal;
-    word-break: break-word;
-    color: var(--text-normal);
-    overflow-x: auto;
-}
-
-.bot-message-actions {
+.obsidian-agent__chat-single-message__bot-message-actions {
     display: flex;
     justify-content: flex-end;
 }
 
 /* Styles to render tables */
-.bot-message-content table {
-    width: 100%;
+.obsidian-agent__chat-single-message__bot-message-content__table {
     border-collapse: collapse;
+    width: 100%;
     margin-top: 1em;
 }
-.bot-message-content th,
-.bot-message-content td {
+
+.obsidian-agent__chat-single-message__bot-message-content__table-th,
+.obsidian-agent__chat-single-message__bot-message-content__table-td {
+    text-align: center;
     border: 1px solid var(--background-modifier-border);
     padding: 0.5em;
-    text-align: center;
 }
-.bot-message-content th {
+
+.obsidian-agent__chat-single-message__bot-message-content__table-td {
     background-color: var(--background-secondary-alt);
 }
 
 /* Input.tsx */
-.input-container {
+.obsidian-agent__input__container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    
     background-color: var(--background-primary);
     border: 1px solid var(--background-secondary-alt);
     border-radius: var(--radius-s);
+    
     padding: 1rem;
     width: 100%;
 }
 
-.input-context-container {
+.obsidian-agent__input__context-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    
     gap: 0.5rem;
     margin-bottom: 0.5rem;
 }
 
-.context-row {
+.obsidian-agent__input__context-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    
     gap: 0.5rem;
 }
 
-.input-context-button {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none;
-    color: var(--text-muted) !important;
-    padding: 0.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.input-context-button:hover {
-    background: var(--background-secondary-alt) !important;
-    color: var(--text-normal) !important;
-    transition: 0.3s ease;
-}
-
-.input-context-button p {
-    font-size: var(--font-ui-small);
-}
-
-.attachment-tag {
+.obsidian-agent__input__attachment-tag {
     display: inline-flex;
     align-items: center;
+
+    font-size: var(--font-ui-small);
     background-color: var(--background-secondary-alt);
     border-radius: var(--radius-s);
-    padding: 0rem 0.5rem;
-    font-size: var(--font-ui-small);
+    
     max-width: 100%;
-    height: 28px; /* Same height as the 'button-icon' class */
+    height: 28px;
+    padding: 0rem 0.5rem;
 }
 
-.attachment-text {
-    margin-right: 6px;
+.obsidian-agent__input__attachment-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px; /* ajusta si es necesario */
+    margin-right: 6px;
+
+    max-width: 120px;
 }
 
-.attachment-image {
-    width: 1rem;
-    height: 1rem;
+.obsidian-agent__input__attachment-image {
     object-fit: cover;
     border-radius: var(--radius-s);
     margin-right: 0.25rem;
+    
+    width: 1rem;
+    height: 1rem;
 }
 
-.input-textarea-container {
-    width: 100%;
-    display: flex;
-}
-
-.input-textarea {
+.obsidian-agent__input__textarea {
     flex: 1;
+
     font-size: var(--font-ui-medium);
-    border: none;
-    background-color: transparent;
-    outline: none;
-    box-shadow: none;
+    font-family: inherit;
     color: var(--text-normal);
+    border: none;
+    outline: none;
+    background-color: transparent;
+    box-shadow: none;
     resize: none;
     overflow: auto;
+
     min-height: 4rem;
     height: auto;
     width: 100%;
     line-height: 1.4;
-    font-family: inherit;
 }
 
-.input-textarea:focus {
+.obsidian-agent__input__textarea-container {
+    display: flex;
+    width: 100%;
+}
+
+.obsidian-agent__input__textarea:focus {
     box-shadow: none !important;
 }
 
-.input-actions {
+.obsidian-agent__input__actions {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    
     margin-top: 1rem;
     width: 100%;
 }
 
-.input-model-button {
-    background-color: var(--background-secondary-alt) !important;
-    border-radius: var(--radius-s) !important;
-    border: none;
-    color: var(--text-muted) !important;
-    padding: 0.5rem;
-    cursor: pointer;
-}
-
-.input-right-actions {
+.obsidian-agent__input__right-actions {
     display: flex;
     flex-direction: row;
 }
 
 /* SettingsTab.tsx */
-.settings-rules-container {
+.obsidian-agent__settings-rules-container {
     flex-direction: column;
     align-items: stretch;
 }
 
-.settings-rules-control {
+.obsidian-agent__settings-rules-control {
     width: 100%;
 }
 
-.settings-rules-textarea {
+.obsidian-agent__settings-rules-textarea {
     width: 100%;
     min-height: 120px;
+    
     font-size: 1em;
+    
     resize: vertical;
     margin-top: 0.5em;
 }
 
-/* ChooseModelModal.tsx */
-.model-suggestion-wrapper {
+/* ==============================
+    COMPONENTS
+============================== */
+/* ChatForm.tsx */
+.obsidian-agent__chat-form__title {
+    padding: 0.5rem;
+
+    color: var(--text-muted);
+    font-size: var(--font-ui-medium);
+    background: var(--background-primary) !important;
+    box-shadow: none !important;
+    border: 1px solid var(--background-secondary-alt);
+    border-radius: var(--radius-s);
+    
+    cursor: pointer;
+}
+
+/* ChatSingleMessage.tsx */
+.obsidian-agent__chat-single-message__bot-message-content {
+    overflow-x: auto;
+    
+    white-space: normal;
+    word-break: break-word;
+    color: var(--text-normal);
+
+}
+
+/* Input.tsx */
+.obsidian-agent__input__context-button {
     display: flex;
     align-items: center;
+    
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+
+    gap: 0.25rem;
+    padding: 0.4rem;
+}
+
+.obsidian-agent__input__context-button:hover {
+    color: var(--text-normal) !important;
+    background: var(--background-secondary-alt) !important;
+    transition: 0.3s ease;
+}
+
+.obsidian-agent__input__context-button-p {
+    font-size: var(--font-ui-small);
+}
+
+.obsidian-agent__input__model-button {
+    color: var(--text-muted) !important;
+    background-color: var(--background-secondary-alt) !important;
+    border: none;
+    border-radius: var(--radius-s) !important;
+    
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+/* ChooseModelModal.tsx */
+.obsidian-agent__model-modal__suggestion-wrapper {
+    display: flex;
+    align-items: center;
+    
     gap: 10px;
     padding: 6px;
 }
 
-.model-color-circle {
+.obsidian-agent__model-modal__color-circle {
+    flex-shrink: 0;
+
+    border-radius: 50%;
+    
     width: 14px;
     height: 14px;
-    border-radius: 50%;
-    flex-shrink: 0;
 }
 
-.model-text-container {
+.obsidian-agent__model-modal__text-container {
     display: flex;
     flex-direction: column;
 }
 
-.model-name {
+.obsidian-agent__model-modal__name {
     font-weight: bold;
     margin-bottom: 2px;
 }
 
-.model-provider,
-.model-capabilities {
+.obsidian-agent__model-modal__provider,
+.obsidian-agent__model-modal__capabilities {
     font-size: 0.85em;
     color: var(--text-muted);
 }
 
-/* Animación para el icono de check al copiar */
-.copy-check-animate {
-  animation: pop-fade 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@keyframes pop-fade {
-  0% {
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Tool Calls Styling */
-.tool-calls-container {
+/* Tool Call Styling */
+.obsidian-agent__tool-call__container {
     padding-top: 1rem;
 }
   
-.tool-call {
+.obsidian-agent__tool-call {
+    font-family: var(--font-monospace);
+    font-size: 0.9em;
     background: var(--background-secondary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 8px;
+    
     margin-bottom: 0.75rem;
     padding: 0.75rem;
-    font-family: var(--font-monospace);
-    font-size: 0.9em;
 }
   
-.tool-call-header {
+.obsidian-agent__tool-call__header {
     display: flex;
     align-items: center;
+
+    font-weight: 600;
+
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    font-weight: 600;
 }
   
-.tool-call-name {
+.obsidian-agent__tool-call__name {
+    font-weight: 600;
     color: var(--text-normal);
-    font-weight: 600;
 }
   
-.tool-call-status {
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+.obsidian-agent__tool-call__status {
     font-size: 0.8em;
     font-weight: 500;
     text-transform: uppercase;
+
+    border-radius: 4px;
+
+    padding: 0.2rem 0.5rem;
 }
   
-.tool-call-args,
-.tool-call-result {
+.obsidian-agent__tool-call__args,
+.obsidian-agent__tool-call__result {
     margin-top: 0.5rem;
 }
   
-.tool-call-args strong,
-.tool-call-result strong {
-    color: var(--text-muted);
+.obsidian-agent__tool-call__args-strong,
+.obsidian-agent__tool-call__result-strong {
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+
+    color: var(--text-muted);
 }
   
-.tool-call-args pre,
-.tool-call-result pre {
+.obsidian-agent__tool-call__args-pre,
+.obsidian-agent__tool-call__result-pre {
+    font-size: 0.85em;
+    overflow-x: auto;
+    color: var(--text-normal);
     background: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 4px;
-    padding: 0.5rem;
+
     margin-top: 0.25rem;
-    overflow-x: auto;
-    font-size: 0.85em;
-    color: var(--text-normal);
+    padding: 0.5rem;    
 }
 
 /* Tool call dropdown styles */
-.tool-call-dropdown-header {
+.obsidian-agent__tool-call__dropdown-header {
     user-select: none;
     transition: background 0.2s;
 }
-.tool-call-dropdown-arrow {
-    font-size: 1.1em;
-    margin-left: 0.5rem;
+.obsidian-agent__tool-call__dropdown-arrow {
     display: inline-block;
+
+    font-size: 1.1em;
+    
+    margin-left: 0.5rem;
     transition: transform 0.2s;
 }
-.tool-call.open .tool-call-dropdown-arrow {
+.obsidian-agent__tool-call-open .obsidian-agent__tool-call__dropdown-arrow {
     transform: rotate(90deg);
 }
-.tool-call-dropdown-content {
-    margin-top: 0.5rem;
-    animation: dropdown-fade-in 0.2s;
+
+/* Buttons */
+.obsidian-agent__button-icon {
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+
+    width: 28px;
+    height: 28px;    
+    padding: 0;
 }
-@keyframes dropdown-fade-in {
+
+.obsidian-agent__button-icon:hover {
+    color: var(--text-normal) !important;
+    background: var(--background-secondary-alt) !important;
+    transition: 0.2s ease;
+}
+
+.obsidian-agent__button-icon:disabled {
+    color: var(--text-faint) !important;
+    cursor: not-allowed;
+}
+
+.obsidian-agent__button-icon-primary {
+    color: var(--interactive-accent) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+
+    width: 28px;
+    height: 28px;
+    padding: 0;
+}
+
+.obsidian-agent__button-icon-primary:hover {
+    color: var(--interactive-accent-hover) !important;
+    background: var(--background-secondary-alt) !important;
+    transition: 0.2s ease;
+}
+
+.obsidian-agent__button-icon-primary:disabled {
+    color: var(--text-faint) !important;
+    cursor: not-allowed;
+}
+
+.obsidian-agent__button-background {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--background-primary) !important;
+    border-radius: var(--radius-s);
+    
+    padding: 0.5rem;
+}
+
+.obsidian-agent__button-background:hover {
+    background-color: var(--background-modifier-hover) !important;
+    transition: 0.2s ease;
+}
+
+.obsidian-agent__button-background-primary {
+    color: var(--text-muted);
+    background-color: var(--interactive-accent) !important;
+}
+
+.obsidian-agent__button-background-primary:hover {
+    color: var(--text-normal);
+    background-color: var(--interactive-accent-hover) !important;
+    transition: 0.2s ease;
+}
+
+/* ==============================
+    UTILS
+============================== */
+
+
+/* ==============================
+    MEDIA QUERIES & KEYFRAMES
+============================== */
+/* Animación para el icono de check al copiar */
+.obsidian-agent__animate__copy-check-animate {
+    animation: obsidian-agent__animation__pop-fade 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes obsidian-agent__animation__pop-fade {
+0% {
+    opacity: 0;
+    transform: scale(0.7);
+}
+40% {
+    opacity: 1;
+    transform: scale(1.2);
+}
+70% {
+    opacity: 1;
+    transform: scale(1);
+}
+100% {
+    opacity: 1;
+    transform: scale(1);
+}
+}
+
+/* Dropdown animation for tool calls */
+.obsidian-agent__animate__tool-call-dropdown-content {
+    margin-top: 0.5rem;
+    animation: obsidian-agent__animation__dropdown-fade-in 0.2s;
+}
+@keyframes obsidian-agent__animation__dropdown-fade-in {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
 }
