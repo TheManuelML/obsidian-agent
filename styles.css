@@ -50,6 +50,17 @@
 }
 
 /* ChatSingleMessage.tsx */
+.obsidian-agent__chat-single-message__editing-container {
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.obsidian-agent__chat-single-message__user-message-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-normal);
+}
+
 .obsidian-agent__chat-single-message__bot-message {
     margin: 0.5rem 0;
     padding: 0 0.5rem 0 1rem;
@@ -303,6 +314,24 @@
     color: var(--text-muted);
 }
 
+/* DeleteChatModal.tsx */
+.obsidian-agent__delete-chat-modal__container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 300px;
+}
+
+.obsidian-agent__delete-chat-modal__header-wraper {
+    white-space: pre-wrap;
+}
+
+.obsidian-agent__delete-chat-modal__button-wraper {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
 /* Tool Call Styling */
 .obsidian-agent__tool-call__container {
     padding-top: 1rem;
@@ -382,6 +411,7 @@
     font-size: 1.1em;
     
     margin-left: 0.5rem;
+    transform: rotate(0deg);
     transition: transform 0.2s;
 }
 .obsidian-agent__tool-call-open .obsidian-agent__tool-call__dropdown-arrow {
@@ -462,10 +492,34 @@
     transition: 0.2s ease;
 }
 
+.obsidian-agent__button-exit-editing {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important; 
+    z-index: 2px !important;
+}
+
 /* ==============================
     UTILS
 ============================== */
-
+.obsidian-agent__display-none {
+    display: none !important;
+}
+.obsidian-agent__width-auto {
+    width: auto !important;
+}
+.obsidian-agent__position-relative {
+    position: relative !important;
+}
+.obsidian-agent__cursor-pointer {
+    cursor: pointer !important;
+}
+.obsidian-agent__margin-top-0 {
+    margin-top: 0 !important;
+}
+.obsidian-agent__margin-left-auto {
+    margin-left: auto !important;
+}
 
 /* ==============================
     MEDIA QUERIES & KEYFRAMES

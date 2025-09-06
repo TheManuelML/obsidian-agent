@@ -162,7 +162,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
           {selectedNotes.map((note) => (
             <div key={note.path} className="obsidian-agent__input__attachment-tag">
               <span className="obsidian-agent__input__attachment-text">{note.name.slice(0, -3)}</span>
-              <button onClick={() => removeNote(note)} className="obsidian-agent__button-icon" style={{width: 'auto'}}>
+              <button onClick={() => removeNote(note)} className="obsidian-agent__button-icon  obsidian-agent__width-auto">
                 <X size={12} />
               </button>
             </div>
@@ -173,7 +173,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
               <div key={index} className="obsidian-agent__input__attachment-tag">
                 <img src={previewUrl!} alt={img.name} className="obsidian-agent__input__attachment-image"/>
                 <span className="obsidian-agent__input__attachment-text">{img.name}</span>
-                <button onClick={() => removeImage(index)} className="obsidian-agent__button-icon" style={{width: 'auto'}}>
+                <button onClick={() => removeImage(index)} className="obsidian-agent__button-icon obsidian-agent__width-auto">
                   <X size={12} />
                 </button>
               </div>
@@ -211,7 +211,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
               <Image size={18} />
             </button>
             <input
-              style={{ display: "none" }}
+              className="obsidian-agent__display-none"
               type="file"
               ref={imageInputRef}
               onChange={handleFileSelect}

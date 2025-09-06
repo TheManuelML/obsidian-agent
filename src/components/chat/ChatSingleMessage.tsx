@@ -30,11 +30,11 @@ const ToolCallRenderer: React.FC<{ toolCalls: ToolCall[] }> = ({ toolCalls }) =>
       {toolCalls.map((toolCall, index) => {
         const isOpen = openIndexes.includes(index);
         return (
-          <div key={toolCall.id || index} className={`obsidian-agent__tool-call` + (isOpen ? 'obsidian-agent__tool-call-open' : '')}>
-            <div className="obsidian-agent__tool-call__header obsidian-agent__tool-call__dropdown-header" onClick={() => toggleIndex(index)} style={{cursor: 'pointer'}}>
+          <div key={toolCall.id || index} className={`obsidian-agent__tool-call` + (isOpen ? ' obsidian-agent__tool-call-open' : '')}>
+            <div className="obsidian-agent__tool-call__header obsidian-agent__tool-call__dropdown-header obsidian-agent__cursor-pointer" onClick={() => toggleIndex(index)}>
               <Wrench size={16} />
               <span className="obsidian-agent__tool-call__name">{toolCall.name}</span>
-              <span className="obsidian-agent__tool-call__dropdown-arrow" style={{marginLeft: 'auto', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'}}>
+              <span className={`obsidian-agent__tool-call__dropdown-arrow obsidian-agent__margin-left-auto` + (isOpen ? ' obsidian-agent__tool-call__dropdown-arrow-open' : '')}>
                 <ChevronRight size={14} />
               </span>
             </div>
@@ -173,32 +173,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
     };
   }, [message.content, message.sender, preprocess]);
 
-  // Inject inline styles for tables when mounted
-  useEffect(() => {
-    const styleId = "chat-table-style";
-    if (!document.getElementById(styleId)) {
-      const style = createEl("style");
-      style.id = styleId;
-      style.textContent = `
-        .bot-content table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 1em;
-        }
-        .bot-content th,
-        .bot-content td {
-          border: 1px solid var(--background-modifier-border);
-          padding: 0.5em;
-          text-align: center;
-        }
-        .bot-content th {
-          background-color: var(--background-secondary-alt);
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
-
+  
   // Editing user message
   const handleEditClick = () => {
     if (message.sender === MessageSender.USER && setEditingMessageIndex) {
@@ -211,10 +186,9 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
   if (message.sender === MessageSender.USER) {
     if (isEditing) {
       return (
-        <div style={{marginTop: '0.5rem', position: 'relative'}}>
+        <div className="obsidian-agent__chat-single-message__editing-container">
           <button
-            className="obsidian-agent__button-icon"
-            style={{position: 'absolute', top: 8, right: 8, zIndex: 2}}
+            className="obsidian-agent__button-icon obsidian-agent__button-exit-editing"
             onClick={() => setEditingMessageIndex?.(null)}
             title="Exit edit mode"
           >
@@ -246,7 +220,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
       );
     } else {
       return (
-        <div className="obsidian-agent__input__container" style={{cursor: 'pointer', marginTop: 0}} onClick={handleEditClick}>
+        <div className="obsidian-agent__input__container obsidian-agent__cursor- obsidian-agent__margin-top-0" onClick={handleEditClick}>
           {/* Preview of the attached notes */}
           { editAttachments.length > 0 && (
             <div className="obsidian-agent__input__context-container">
@@ -260,7 +234,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
             </div>
           )}
           {/* Message content */}
-          <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'var(--text-normal)'}}>
+          <div className="obsidian-agent__chat-single-message__user-message-content">
             {parse(message.content, options)}
           </div>
         </div>
@@ -277,7 +251,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
         <div ref={contentRef} className="obsidian-agent__chat-single-message__bot-message-content" />
         {/* Copy button and other actions */}
         <div className="obsidian-agent__chat-single-message__bot-message-actions">
-          <button onClick={handleCopy} className="obsidian-agent__button-icon" style={{position: 'relative'}}>
+          <button onClick={handleCopy} className="obsidian-agent__button-icon obsidian-agent__position-relative">
             {copied ? <Check size={16} className="obsidian-agent__animate__copy-check-animate" /> : <Copy size={16} />}
           </button>
         </div>
