@@ -20,8 +20,8 @@ function DeleteChatModalContent({
         Do you really want to delete chat <b>{chatName || ''}</b>?.
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button className="button-background" onClick={onCancel}>{cancelButtonText}</button>
-        <button className="button-background button-background-primary" onClick={onConfirm}>{confirmButtonText}</button>
+        <button className="obsidian-agent__button-background" onClick={onCancel}>{cancelButtonText}</button>
+        <button className="obsidian-agent__button-background obsidian-agent__button-background-primary" onClick={onConfirm}>{confirmButtonText}</button>
       </div>
     </div>
   );

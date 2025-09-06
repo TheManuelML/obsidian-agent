@@ -28,7 +28,7 @@ export const ChatMessages: React.FC<ChatMessagesProps & {
     };
 
     return (
-        <div className="chat-messages">
+        <div className="obsidian-agent__chat-messages">
             {conversation.map((msg, i) => (
                 <ChatSingleMessage 
                     key={i} 

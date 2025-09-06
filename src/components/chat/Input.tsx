@@ -149,20 +149,20 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
   }
 
   return (
-    <div className="input-container">
-      <div className="input-context-container">
-        <div className="context-row">
+    <div className="obsidian-agent__input__container">
+      <div className="obsidian-agent__input__context-container">
+        <div className="obsidian-agent__input__context-row">
           {/* Button to add context */}
-          <button onClick={openNotePicker} className={(selectedNotes.length === 0 && selectedFiles.length === 0) ? "input-context-button" : "button-icon"}>
+          <button onClick={openNotePicker} className={(selectedNotes.length === 0 && selectedFiles.length === 0) ? ".obsidian-agent__input__context-button" : "obsidian-agent__button-icon"}>
             <AtSign size={16} />
             {(selectedNotes.length === 0 && selectedFiles.length === 0) && <p>Add context</p>}
           </button>
 
           {/* Show selected notes and images */}
           {selectedNotes.map((note) => (
-            <div key={note.path} className="attachment-tag">
-              <span className="attachment-text">{note.name.slice(0, -3)}</span>
-              <button onClick={() => removeNote(note)} className="button-icon" style={{width: 'auto'}}>
+            <div key={note.path} className="obsidian-agent__input__attachment-tag">
+              <span className="obsidian-agent__input__attachment-text">{note.name.slice(0, -3)}</span>
+              <button onClick={() => removeNote(note)} className="obsidian-agent__button-icon" style={{width: 'auto'}}>
                 <X size={12} />
               </button>
             </div>
@@ -170,10 +170,10 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
           {selectedFiles.map((img, index) => {
             const previewUrl = URL.createObjectURL(img);
             return (
-              <div key={index} className="attachment-tag">
-                <img src={previewUrl!} alt={img.name} className="attachment-image"/>
-                <span className="attachment-text">{img.name}</span>
-                <button onClick={() => removeImage(index)} className="button-icon" style={{width: 'auto'}}>
+              <div key={index} className="obsidian-agent__input__attachment-tag">
+                <img src={previewUrl!} alt={img.name} className="obsidian-agent__input__attachment-image"/>
+                <span className="obsidian-agent__input__attachment-text">{img.name}</span>
+                <button onClick={() => removeImage(index)} className="obsidian-agent__button-icon" style={{width: 'auto'}}>
                   <X size={12} />
                 </button>
               </div>
@@ -181,7 +181,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
           })}
         </div>
       </div>
-      <div className="input-textarea-container">
+      <div className="obsidian-agent__input__textarea-container">
         <textarea
           ref={textAreaRef}
           placeholder="Send a message..."
@@ -193,18 +193,18 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
               handleSend();
             }
           }}
-          className="input-textarea"
+          className="obsidian-agent__input__textarea"
         />
       </div>
-      <div className="input-actions">
-        <button onClick={openModelPicker} className="input-model-button">
+      <div className="obsidian-agent__input__actions">
+        <button onClick={openModelPicker} className="obsidian-agent__input__model-button">
           {selectedModel}
         </button>
-        <div className="input-right-actions">
+        <div className="obsidian-agent__input__right-actions">
           <div>
             <button
               onClick={() => imageInputRef.current?.click()}
-              className="button-icon"
+              className="obsidian-agent__button-icon"
               title={canUploadImages ? "Images" : "Image upload not supported by current model"}
               disabled={!canUploadImages}
             >
@@ -220,7 +220,7 @@ export const ChatInputBase: React.FC<ChatInputBaseProps> = ({
             />
           </div>
           <button
-            className="button-icon-primary"
+            className="obsidian-agent__button-icon-primary"
             onClick={handleSend}
             title="Send message"
             disabled={!value.trim()}

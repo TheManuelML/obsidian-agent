@@ -72,8 +72,8 @@ export class AgentSettingsTab extends PluginSettingTab {
       .setName("Agent rules")
       .setDesc("Add rules to change the agent behaviour and responses. For example: 'Always answer in English'");
     
-    rulesSetting.settingEl.classList.add("settings-rules-container");
-    rulesSetting.controlEl.classList.add("settings-rules-control");
+    rulesSetting.settingEl.classList.add("obsidian-agent__settings-rules-container");
+    rulesSetting.controlEl.classList.add("obsidian-agent__settings-rules-control");
     
     rulesSetting.addTextArea((text) => {
       text
@@ -83,7 +83,7 @@ export class AgentSettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       text.inputEl.rows = 6;
-      text.inputEl.classList.add("settings-rules-textarea");
+      text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
     });
 
 

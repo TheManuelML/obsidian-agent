@@ -26,24 +26,24 @@ const ToolCallRenderer: React.FC<{ toolCalls: ToolCall[] }> = ({ toolCalls }) =>
   };
 
   return (
-    <div className="tool-calls-container">
+    <div className="obsidian-agent__tool-call__container">
       {toolCalls.map((toolCall, index) => {
         const isOpen = openIndexes.includes(index);
         return (
-          <div key={toolCall.id || index} className={`tool-call` + (isOpen ? ' open' : '')}>
-            <div className="tool-call-header tool-call-dropdown-header" onClick={() => toggleIndex(index)} style={{cursor: 'pointer'}}>
+          <div key={toolCall.id || index} className={`obsidian-agent__tool-call` + (isOpen ? 'obsidian-agent__tool-call-open' : '')}>
+            <div className="obsidian-agent__tool-call__header obsidian-agent__tool-call__dropdown-header" onClick={() => toggleIndex(index)} style={{cursor: 'pointer'}}>
               <Wrench size={16} />
-              <span className="tool-call-name">{toolCall.name}</span>
-              <span className="tool-call-dropdown-arrow" style={{marginLeft: 'auto', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'}}>
+              <span className="obsidian-agent__tool-call__name">{toolCall.name}</span>
+              <span className="obsidian-agent__tool-call__dropdown-arrow" style={{marginLeft: 'auto', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'}}>
                 <ChevronRight size={14} />
               </span>
             </div>
             {isOpen && (
-              <div className="tool-call-dropdown-content">
+              <div className="obsidian-agent__animate__tool-call-dropdown-content">
                 {toolCall.args && Object.keys(toolCall.args).length > 0 && (
-                  <div className="tool-call-args">
-                    <strong>Arguments:</strong>
-                    <pre>{JSON.stringify(toolCall.args, null, 2)}</pre>
+                  <div className="obsidian-agent__tool-call__args">
+                    <strong className="obsidian-agent__tool-call__args-strong">Arguments:</strong>
+                    <pre className="obsidian-agent__tool-call__args-pre">{JSON.stringify(toolCall.args, null, 2)}</pre>
                   </div>
                 )}
               </div>
@@ -213,7 +213,7 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
       return (
         <div style={{marginTop: '0.5rem', position: 'relative'}}>
           <button
-            className="button-icon"
+            className="obsidian-agent__button-icon"
             style={{position: 'absolute', top: 8, right: 8, zIndex: 2}}
             onClick={() => setEditingMessageIndex?.(null)}
             title="Exit edit mode"
@@ -246,14 +246,14 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
       );
     } else {
       return (
-        <div className="input-container" style={{cursor: 'pointer', marginTop: 0}} onClick={handleEditClick}>
+        <div className="obsidian-agent__input__container" style={{cursor: 'pointer', marginTop: 0}} onClick={handleEditClick}>
           {/* Preview of the attached notes */}
           { editAttachments.length > 0 && (
-            <div className="input-context-container">
-              <div className="context-row">
+            <div className="obsidian-agent__input__context-container">
+              <div className="obsidian-agent__input__context-row">
                 {editAttachments?.map((note) => (
-                  <div key={note.path} className="attachment-tag">
-                    <span className="attachment-text">{note.name.slice(0, -3)}</span>
+                  <div key={note.path} className="obsidian-agent__input__attachment-tag">
+                    <span className="obsidian-agent__input__attachment-text">{note.name.slice(0, -3)}</span>
                   </div>
                 ))}
               </div>
@@ -268,17 +268,17 @@ export const ChatSingleMessage: React.FC<ChatSingleMessageEditableProps> = ({
     }
   } else {
     return (
-      <div className="bot-message">
+      <div className="obsidian-agent__chat-single-message__bot-message">
         {/* Tool calls */}
         {message.toolCalls && message.toolCalls.length > 0 && (
           <ToolCallRenderer toolCalls={message.toolCalls} />
         )}
         {/* Message content */}
-        <div ref={contentRef} className="bot-message-content" />
+        <div ref={contentRef} className="obsidian-agent__chat-single-message__bot-message-content" />
         {/* Copy button and other actions */}
-        <div className="bot-message-actions">
-          <button onClick={handleCopy} className="button-icon" style={{position: 'relative'}}>
-            {copied ? <Check size={16} className="copy-check-animate" /> : <Copy size={16} />}
+        <div className="obsidian-agent__chat-single-message__bot-message-actions">
+          <button onClick={handleCopy} className="obsidian-agent__button-icon" style={{position: 'relative'}}>
+            {copied ? <Check size={16} className="obsidian-agent__animate__copy-check-animate" /> : <Copy size={16} />}
           </button>
         </div>
       </div>

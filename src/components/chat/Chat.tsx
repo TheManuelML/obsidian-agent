@@ -113,7 +113,7 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <div className="chat-main-container">
+    <div className="obsidian-agent__chat-main__container">
       <ChatForm
         chatFile={chatFile}
         chatFiles={chatFiles}
@@ -130,7 +130,7 @@ export const Chat: React.FC = () => {
         editingMessageIndex={editingMessageIndex}
         setEditingMessageIndex={setEditingMessageIndex}
       />
-      <div className="chat-main-input-container">
+      <div className="obsidian-agent__chat-main__input">
         <ChatInput onSend={handleSendMessage}/>
       </div>  
     </div>

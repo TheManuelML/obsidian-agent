@@ -69,20 +69,20 @@ export const ChatForm: React.FC<ChatFormProps> = ({
     }
 
     return (
-        <div className="chat-form">
+        <div className="obsidian-agent__chat-form">
             <div>
                 <button
                     onClick={openChatHistory}
-                    className="chat-file-title"
+                    className="obsidian-agent__chat-form__title"
                 >
                     {chatFile?.basename || "No chat selected"}
                 </button>
             </div>
-            <div className="chat-form-actions">
+            <div className="obsidian-agent__chat-form__actions">
                 <button 
                     onClick={handleCreateChat} 
                     title="Create new chat"
-                    className="button-icon-primary"
+                    className="obsidian-agent__button-icon-primary"
                 >
                     <Plus size={28} />
                 </button>
@@ -90,7 +90,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                 <button 
                     onClick={openChatHistory} 
                     title="Select chat"
-                    className="button-icon"
+                    className="obsidian-agent__button-icon"
                 >
                     <History size={20}/>
                 </button>
@@ -106,7 +106,7 @@ export const ChatForm: React.FC<ChatFormProps> = ({
                     }}
                     title="Delete chat"
                     disabled={chatFiles.length <= 1}
-                    className="button-icon"
+                    className="obsidian-agent__button-icon"
                 >
                     <Trash2 size={20} />
                 </button>

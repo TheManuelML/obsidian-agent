@@ -48,25 +48,25 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     };
     const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
   
-    const wrapper = el.createDiv({ cls: "model-suggestion-wrapper" });
+    const wrapper = el.createDiv({ cls: "obsidian-agent__model-modal__suggestion-wrapper" });
   
     // Color circle
-    const colorCircle = wrapper.createDiv({ cls: "model-color-circle", attr: { style: `background: ${color}` } });
+    const colorCircle = wrapper.createDiv({ cls: "obsidian-agent__model-modal__color-circle", attr: { style: `background: ${color}` } });
 
     // Text container
-    const textContainer = wrapper.createDiv({ cls: "model-text-container" });
+    const textContainer = wrapper.createDiv({ cls: "obsidian-agent__model-modal__text-container" });
   
-    const nameEl = textContainer.createDiv({ cls: "model-name" });
+    const nameEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__name" });
     nameEl.setText(model.name + (model.name === this.activeModel ? " (current)" : ""));
   
-    const providerEl = textContainer.createDiv({ cls: "model-provider" });
+    const providerEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__provider" });
     providerEl.setText(`Provider: ${model.provider}`);
 
     let capabilities = "text, " + model.capabilities.join(", ")
     if (!model.capabilities || model.capabilities.length < 1) {
       capabilities = "text-only"
     } 
-    const capsEl = textContainer.createDiv({ cls: "model-capabilities" });
+    const capsEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__capabilities" });
     capsEl.setText(`Capabilities: ${capabilities}`);
   }
 }

@@ -35,12 +35,6 @@
     margin-bottom: 1rem;
 }
 
-.obsidian-agent__chat-form__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 /* ChatMessages.tsx */
 .obsidian-agent__chat-messages {
     flex: 1;
@@ -223,6 +217,12 @@
     border-radius: var(--radius-s);
     
     cursor: pointer;
+}
+
+.obsidian-agent__chat-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* ChatSingleMessage.tsx */
