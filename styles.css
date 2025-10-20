@@ -89,7 +89,14 @@
     white-space: normal;
     word-break: break-word;
     color: var(--text-normal);
+}
 
+.obsidian-agent__chat-single-message__bot-message-thinking-content {
+    overflow-x: auto;
+    
+    white-space: normal;
+    word-break: break-word;
+    color: var(--text-muted) !important; 
 }
 
 /* Input.tsx */

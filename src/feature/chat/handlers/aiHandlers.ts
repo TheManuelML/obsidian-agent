@@ -38,7 +38,7 @@ export const handleCall = async (
   // Create the agent message
   const tempMessage: Message = {
     sender: "bot",
-    content: "",
+    content: "*Thinking ...*",
     attachments: [],
     toolCalls: [],
   };

@@ -43,6 +43,7 @@ export interface Message {
 export interface MessageProps {
   index: number;
   message: Message;
+  conversation: Message[];
   setConversation: (value: Message[] | ((prev: Message[]) => Message[])) => void;
   activeChat: TFile | null;
 }
