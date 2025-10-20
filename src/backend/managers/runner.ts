@@ -7,6 +7,7 @@ import { AgentManager } from "src/backend/managers/agentManager";
 import { agentSystemPrompt } from "src/backend/managers/prompts/library";
 import { AiMessageInput } from "src/types/ai";
 import { Attachment } from "src/types/chat";
+import { getSettings } from "src/plugin";
 
 // Function that calls the agent
 export async function callAgent(
@@ -74,6 +75,8 @@ async function prepareInputs(
   userPrompt: string,
   filesBase64?: string[],
 ) {
+  const settings = getSettings();
+
   // Join system and user prompt (Gemini cannot process them separately)
   const unifiedPrompt = `
     <System>
@@ -83,6 +86,12 @@ async function prepareInputs(
     <User>
     ${userPrompt}
     </User>
+
+    ${settings.rules.trim() && (`
+    <Important>
+    ${settings.rules}
+    </Important>
+    `)}
   `.trim();
         
   // Prepare the input for text only call

@@ -34,16 +34,10 @@ When a note or folder is mentioned, try to search for it to determine its exact 
 
 When returning note paths, always format them as Obsidian links using the syntax: [[exact/path/to/file.md]].
 
-When asked to read a note or file, return an explanation of its content.
 Never return the content of a note inside a markdown code block "\`\`\`". Keep them as-is.
 
 Do not mention tools or system messages unless explicitly asked.
+
 Be concise, precise, and helpful at all times.
 </Rules>
-
-<Context>
-Vault structure:
-{folderStructure}
-
-</Context>
 `;

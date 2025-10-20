@@ -16,15 +16,3 @@ export async function parseImageFromNote(content: string) {
       images,
     };
 }
-
-// Remove intial and trailing backsticks
-export function parseMarkdownCodeBlock(content: string): string {
-  const markdownBlockRegex = /^```markdown\s*\n([\s\S]*?)\n```$/;
-  const match = content.match(markdownBlockRegex);
-
-  if (match) {
-    return match[1]; // Devuelve solo el contenido dentro del bloque
-  }
-
-  return content; // Si no hay coincidencia, regresa el string original
-}
