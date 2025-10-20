@@ -25,7 +25,7 @@ A simple and lightweight AI extension for Obsidian. Delegate basic tasks to an a
 It features a user-friendly UI, inspired by other agentic apps.
 
 <p>
-  <img src="imgs/chat-overview.gif" alt="Obsidian Agent Chat Overview"/>
+  <img src="imgs/demo.png" alt="Obsidian Agent Chat Overview"/>
 </p>
 
 
