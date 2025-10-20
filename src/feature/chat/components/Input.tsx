@@ -8,7 +8,7 @@ import { ChooseModelModal } from "src/feature/modals/ChooseModelModal";
 import { allAvailableModels } from "src/settings/models";
 import { Attachment, InputProps } from "src/types/chat";
 import { Model } from "src/types/ai";
-import { DEFAULT_SETTINGS } from "src/settings/defaults";
+import { AgentSettings } from "src/settings/SettingsTab";
 
 export default function Input({
   initialValue,
@@ -24,11 +24,29 @@ export default function Input({
 
   const [message, setMessage] = useState<string>(initialValue);
 
-  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_SETTINGS.model);
+  const [selectedModel, setSelectedModel] = useState<string>(getSettings().model);
   const [selectedNotes, setSelectedNotes] = useState<Attachment[]>(attachments);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [canUpload, setCanUpload] = useState<boolean>(false);
 
+  useEffect(() => {
+    const plugin = getPlugin();
+  
+    const handleSettingsUpdate = (newSettings: AgentSettings) => {
+      setSelectedModel(newSettings.model);
+      setCanUpload(
+        allAvailableModels.find(m => m.name === newSettings.model)?.capabilities.includes("vision") ?? false
+      );
+    };
+  
+    plugin.settingsEmitter.on("settings-updated", handleSettingsUpdate);
+  
+    // Cleanup
+    return () => {
+      plugin.settingsEmitter.off("settings-updated", handleSettingsUpdate);
+    };
+  }, []);
+  
   useEffect(() => {
     // Find the model in the list of available models and check if can upload images or not
     const model: Model = allAvailableModels.find(model => model.name === selectedModel)!;
@@ -129,7 +147,11 @@ export default function Input({
 
       <div className="obsidian-agent__input__context-container">
         {/* Button to add context */}
-        <button onClick={openNotePicker} className="obsidian-agent__button-icon">
+        <button 
+          title="Add context"
+          onClick={openNotePicker} 
+          className="obsidian-agent__button-icon"
+        >
           <AtSign size={16} />
         </button>
         

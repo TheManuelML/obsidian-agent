@@ -1,4 +1,5 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
+import EventEmitter from 'events';
 import { ChatView, VIEW_TYPE_AGENT } from "src/feature/chat/View";
 import { ChooseModelModal } from 'src/feature/modals/ChooseModelModal';
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
@@ -10,6 +11,7 @@ let pluginInstance: ObsidianAgentPlugin;
 // Main plugin class
 export class ObsidianAgentPlugin extends Plugin {
   settings!: AgentSettings;
+  settingsEmitter = new EventEmitter();
 
   // Method that loads the plugin
   async onload() {
@@ -56,6 +58,7 @@ export class ObsidianAgentPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+    this.settingsEmitter.emit("settings-updated", this.settings);
   }
 
   // Method that ensures that the tab for the agent chat view exists

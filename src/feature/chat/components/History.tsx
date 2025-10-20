@@ -13,6 +13,7 @@ export default function History({
     <div className="obsidian-agent__chat-messages">
       {conversation.map((message, index) => (
         <ChatMessage
+          key={index}
           index={index}
           message={message}
           conversation={conversation}
