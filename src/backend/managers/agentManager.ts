@@ -10,61 +10,61 @@ import { ModelManager } from "src/backend/managers/modelManager";
 
 // Manage the creation and update of the agent
 export class AgentManager {
-    private static instance: AgentManager;
-    private agent?: Runnable;
-    private model?: LanguageModelLike;
-    private memorySaver?: MemorySaver;
-    
-    private constructor() {
-        // Set required values
-        this.setModel()
-        this.setMemory()
-        // Creates the chain
-        this.agent = this.createAgent();
+  private static instance: AgentManager;
+  private agent?: Runnable;
+  private model?: LanguageModelLike;
+  private memorySaver?: MemorySaver;
+
+  private constructor() {
+    // Set required values
+    this.setModel()
+    this.setMemory()
+    // Creates the chain
+    this.agent = this.createAgent();
+  }
+
+  static getInstance(): AgentManager {
+    if (!AgentManager.instance) {
+      AgentManager.instance = new AgentManager;
+    }
+    return AgentManager.instance;
+  }
+
+  // Set the model of the actual settings
+  private setModel() {
+    this.model = ModelManager.getInstance().getModel();
+  }
+
+  // Set the memory saver
+  private setMemory() {
+    this.memorySaver = MemoryManager.getInstance().getMemorySaver();
+  }
+
+  // Create the agent
+  private createAgent(): Runnable {
+    if (!this.model || !this.memorySaver) {
+      throw new Error("Model or memory not set");
     }
 
-    static getInstance(): AgentManager {
-        if (!AgentManager.instance) {
-            AgentManager.instance = new AgentManager;
-        }
-        return AgentManager.instance;
-    }
+    return createReactAgent({
+      llm: this.model,
+      checkpointSaver: this.memorySaver,
+      tools: [
+        createNote,
+        readNote,
+        editNote,
+        createDir,
+        listFiles,
+        search,
+      ]
+    });
+  }
 
-    // Set the model of the actual settings
-    private setModel() {
-        this.model = ModelManager.getInstance().getModel();
-    }
-
-    // Set the memory saver
-    private setMemory() {
-        this.memorySaver = MemoryManager.getInstance().getMemorySaver();
-    }
-
-    // Create the agent
-    private createAgent(): Runnable {
-        if (!this.model || !this.memorySaver) {
-            throw new Error("Model or memory not set");
-        }
-
-        return createReactAgent({
-            llm: this.model,
-            checkpointSaver: this.memorySaver,
-            tools: [
-                createNote,
-                readNote,
-                editNote,
-                createDir,
-                listFiles,
-                search,
-            ]
-        });
-    }
-
-    public getAgent(): Runnable {
-        // Update the model (it might have chaged)
-        this.setModel()
-        // Create the agent, a new one per call
-        this.agent = this.createAgent()
-        return this.agent;
-    }
+  public getAgent(): Runnable {
+    // Update the model (it might have chaged)
+    this.setModel()
+    // Create the agent, a new one per call
+    this.agent = this.createAgent()
+    return this.agent;
+  }
 }

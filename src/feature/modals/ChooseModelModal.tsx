@@ -1,6 +1,7 @@
 import { FuzzySuggestModal, App, FuzzyMatch } from 'obsidian';
 import { getSettings } from 'src/plugin';
-import { Model, allAvailableModels } from 'src/settings/models';
+import { allAvailableModels } from 'src/settings/models';
+import { Model } from 'src/types/ai';
 
 export class ChooseModelModal extends FuzzySuggestModal<Model> {
   private onChoose: (model: Model) => void;
@@ -41,10 +42,6 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     // Color per provider
     const providerColorMap: Record<string, string> = {
       google: "#7895F9",
-      openai: "#10A37F",
-      anthropic: "#E87C5C",
-      mistral: "#EA1C0C",
-      deepseek: "#476CF9",
     };
     const color = providerColorMap[model.provider.toLowerCase()] || "#CCCCCC";
   

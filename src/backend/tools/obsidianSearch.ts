@@ -46,7 +46,7 @@ export const search = tool(async (input) => {
     }
 }, {
     // Tool schema and metadata
-    name: 'search',
+    name: 'vault_search',
     description: 'Searches for notes and folders in Obsidian.',
     schema: z.object({
         name: z.string().describe('The name or part of the name to search for.'),

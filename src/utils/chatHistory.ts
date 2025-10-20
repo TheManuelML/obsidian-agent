@@ -1,163 +1,61 @@
 import { TFile } from "obsidian";
-import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { getApp } from "src/plugin";
-import { Message, MessageSender } from "src/types";
-
-// Helper function to serialize attachments
-const serializeAttachments = (attachments?: TFile[]) => {
-  if (!attachments || attachments.length === 0) return '';
-  
-  return `\n**Attached notes:**\n${attachments.map(note => `- [[${note.path}]]`).join('\n')}`;
-};
+import { Message } from "src/types/chat";
 
 // Export a message to a chat file
-export const exportMessage = async (message: Message, chatFile: TFile) => {
-  const app = getApp(); 
+export function exportMessage(message: Message, chat: TFile) {
+  const app = getApp();
 
-  // Add the new message with attachments
-  const attachmentsStr = serializeAttachments(message.attachments);
-  
-  // Serialize tool calls if present
-  let toolCallsStr = "";
-  if (message.toolCalls && message.toolCalls.length > 0) {
-    toolCallsStr = `\n\r**Tool calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
-  }
+  const payload: string = JSON.stringify(message);
+  app.vault.process(chat, (data) => {
+    const clean = data.trim(); 
+    return clean.length > 0 ? clean + "\n" + payload : payload;
+  });
 
-  // Rewrite the chat file with the new message
-  app.vault.process(chatFile, (data) => {
-    return data += `\n\r**${message.sender.toUpperCase()}**:\n${toolCallsStr}${toolCallsStr ? '\n\r' : ''}${message.content}${attachmentsStr}`;
+  return;
+}
+
+// Read the content of a chat file and return the messages
+export async function importConversation(chat: TFile): Promise<Message[]> {
+  const app = getApp();
+
+  const content = await app.vault.read(chat);
+  if (!content) return [];
+
+  // Divide lines and parse messages
+  const messages = content
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.length > 0 && line.startsWith("{"))
+  .map(line => { 
+    return JSON.parse(line) 
   })
-};
-
-// Import a conversation in an array of Message objects
-export const importConversation = async (chatFile: TFile): Promise<Message[]> => {
-  const app = getApp(); 
-  const chat = await app.vault.read(chatFile);
-  if (!chat) return [];
-
-  const messages: Message[] = [];
-
-  const messageBlocks = [
-    ...chat.matchAll(
-      /\n\r\*\*(user|bot)\*\*:\s*\n([\s\S]*?)(?=\n\r\*\*(?:user|bot)\*\*:|\n*$)/gi
-    )
-  ];
-
-  for (const match of messageBlocks) {
-    const sender = match[1].toLowerCase() === 'user' ? MessageSender.USER : MessageSender.BOT;
-    let fullContent = match[2].trim();
-    
-    // Extract tool calls if present
-    let toolCalls: ToolCall[] = [];
-    const toolCallsBlockMatch = fullContent.match(/\*\*Tool calls:\*\*[\r\n]+((?:- .*\n?)*)/);
-    if (toolCallsBlockMatch) {
-      const toolCallsBlock = toolCallsBlockMatch[1];
-      toolCalls = toolCallsBlock
-        .split('\n')
-        .map(line => line.replace(/^- /, '').trim())
-        .filter(Boolean)
-        .map(str => {
-          try { return JSON.parse(str); } catch { return undefined; }
-        })
-        .filter(Boolean);
-      fullContent = fullContent.replace(toolCallsBlockMatch[0], '').replace(/^\n+/, '').trim();
-    }
-
-    // Split content and attachments
-    const attachmentsMatch = fullContent.match(/\*\*Attached notes:\*\*\n([\s\S]*?)(?=\*\*Attached files:\*\*|\n*$)/);
-    
-    let content = fullContent;
-    let attachments: TFile[] = [];
-    
-    // Extract notes
-    if (attachmentsMatch) {
-      const notesContent = attachmentsMatch[1].trim();
-      const notePaths = notesContent.split('\n').map(line => line.replace('- [[', '').replace(']]', ''));
-      attachments = notePaths
-        .map(path => app.vault.getAbstractFileByPath(path))
-        .filter((file): file is TFile => file instanceof TFile);
-      content = content.replace(attachmentsMatch[0], '').trim();
-    }
-    
-    // Remove files section from content if present (we don't support files in Message type yet)
-    const filesMatch = fullContent.match(/\*\*Attached files:\*\*\n([\s\S]*?)(?=\n*$)/);
-    if (filesMatch) {
-      content = content.replace(filesMatch[0], '').trim();
-    }
-    
-    messages.push({ 
-      sender, 
-      content,
-      attachments,
-      toolCalls
-    });
-  }  
+  .filter((msg): msg is Message => msg !== null);
 
   return messages;
-};
+}
 
 // Function to get the thread_id of the chat
-export const getThreadId = async (chatFile: TFile): Promise<string> => {
+export async function getThreadId(chat: TFile) {
   const app = getApp();
-  const content = await app.vault.read(chatFile);
+  const content = await app.vault.read(chat);
+
   const match = content.match(/thread_id:\s*(chat-[\w:-]+)/);
   return match ? match[1] : '';
-};
+}
 
 // Remove the last message from a chat file
-export const removeLastMessage = async (chatFile: TFile) => {
-  const app = getApp();
-
-  // Rewrite the chat file without the last message
-  app.vault.process(chatFile, (data) => {
-    if (!data) return "";
-
-    // Extract the message blocks with regex
-    const messageBlocks = [
-      ...data.matchAll(
-        /\n\r\*\*(user|bot)\*\*:\s*\n([\s\S]*?)(?=\n\r\*\*(?:user|bot)\*\*:|\n*$)/gi
-      )
-    ];
-
-    if (messageBlocks.length > 0) {
-      // Get the last message block
-      const lastBlock = messageBlocks[messageBlocks.length - 1];
-      const lastBlockIndex = data.lastIndexOf(lastBlock[0]);
-      
-      // Remove the last message block
-      return data.substring(0, lastBlockIndex).trim();
-    } 
-
-    return "";
-  });
-};
-
-// Rewrite the chat history with a new conversation
-export const rewriteChatHistory = async (chatFile: TFile, messages: Message[]) => {
+export async function removeLastMessages(chat: TFile, n: number) {
   const app = getApp();
   
-  // Rewrite the chat file
-  await app.vault.process(chatFile, (data) => {
-    // Extract thread_id from the original chat
-    const threadIdMatch = data.match(/thread_id:\s*(chat-[\w:-]+)/);
-    const threadId = threadIdMatch ? threadIdMatch[1] : '';
-    
-    // Start with thread_id
-    let newChat = threadId ? `thread_id: ${threadId}` : '';
-    
-    // Add all messages
-    for (const message of messages) {
-      const attachmentsStr = serializeAttachments(message.attachments);
-      
-      // Serialize tool calls if present
-      let toolCallsStr = "";
-      if (message.toolCalls && message.toolCalls.length > 0) {
-        toolCallsStr = `\n\r**Tool calls:**\n${message.toolCalls.map(tc => `- ${JSON.stringify(tc)}`).join('\n')}`;
-      }
-      
-      newChat += `\n\r**${message.sender.toUpperCase()}**:\n${toolCallsStr}${toolCallsStr ? '\n\r' : ''}${message.content}${attachmentsStr}`;
-    }
+  const content = await app.vault.read(chat);
 
-    return newChat;
-  });
-};
+  const lines = content.split("\n");
+  if (lines.length === 0 || n <= 0) return;
+
+  // Remove last n lines
+  const newLines = lines.slice(0, Math.max(0, lines.length - n));
+
+  // Rewrite the content
+  await app.vault.modify(chat, newLines.join("\n"));
+}

@@ -3,95 +3,99 @@
     .obsidian-agent__file-name__main-component__optional-subcomponent
 ============================== */
 
-
-/* ==============================
-    BASE
-============================== */
-
-
 /* ==============================
     LAYOUT
 ============================== */
+/* hr */
+.obsidian-agent__hr {
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
 /* Chat.tsx */
 .obsidian-agent__chat-main__container {
     display: flex;
     flex-direction: column;
     position: relative;
     height: 100%;
+    overflow: hidden;
     padding: 1rem;
-}
-
-.obsidian-agent__chat-main__input {
-    position: relative;
     margin-bottom: 1rem;
+    gap: 0;
 }
 
-/* ChatForm.tsx */
+/* Form.tsx */
 .obsidian-agent__chat-form {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
 }
 
-/* ChatMessages.tsx */
-.obsidian-agent__chat-messages {
-    flex: 1;
-    overflow-y: auto;
+.obsidian-agent__chat-form__title {
+    padding: 0.5rem;
+
+    color: var(--text-normal) !important;
+    font-size: var(--font-ui-medium);
+    background: var(--background-primary) !important;
+    box-shadow: none !important;
+    border-radius: var(--radius-s);
     
+    cursor: pointer;
+}
+
+.obsidian-agent__chat-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* History.tsx */
+.obsidian-agent__chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
     background-color: var(--background-secondary);
     border: none;
     border-radius: var(--radius-s);
-    
     padding: 0;
-    margin-bottom: 1rem;
-    padding-right: 1rem;
+    min-height: 0;
 }
 
-/* ChatSingleMessage.tsx */
-.obsidian-agent__chat-single-message__editing-container {
-    margin-top: 0.5rem;
-    position: relative;
+/* Message.tsx */
+.obsidian-agent__chat-single-message__user-message {
+    background-color: var(--background-primary);
+    
+    border-radius: var(--radius-s);
+    border-bottom-right-radius: 0%;
+
+    padding: 0.8rem;
+    margin: 0 0.2rem 0 0;
+    cursor: pointer;
 }
 
 .obsidian-agent__chat-single-message__user-message-content {
+    color: var(--text-muted);
     white-space: pre-wrap;
     word-break: break-word;
-    color: var(--text-normal);
 }
 
 .obsidian-agent__chat-single-message__bot-message {
-    margin: 0.5rem 0;
-    padding: 0 0.5rem 0 1rem;
+    margin: 0;
+    margin-bottom: 1rem;
 }
 
-.obsidian-agent__chat-single-message__bot-message-actions {
-    display: flex;
-    justify-content: flex-end;
-}
+.obsidian-agent__chat-single-message__bot-message-content {
+    overflow-x: auto;
+    
+    white-space: normal;
+    word-break: break-word;
+    color: var(--text-normal);
 
-/* Styles to render tables */
-.obsidian-agent__chat-single-message__bot-message-content__table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 1em;
-}
-
-.obsidian-agent__chat-single-message__bot-message-content__table-th,
-.obsidian-agent__chat-single-message__bot-message-content__table-td {
-    text-align: center;
-    border: 1px solid var(--background-modifier-border);
-    padding: 0.5em;
-}
-
-.obsidian-agent__chat-single-message__bot-message-content__table-td {
-    background-color: var(--background-secondary-alt);
 }
 
 /* Input.tsx */
 .obsidian-agent__input__container {
     display: flex;
+    flex-shrink: 0;
     flex-direction: column;
     align-items: flex-start;
     
@@ -101,12 +105,14 @@
     
     padding: 1rem;
     width: 100%;
+    position: relative;
 }
 
 .obsidian-agent__input__context-container {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: start;
     
     gap: 0.5rem;
     margin-bottom: 0.5rem;
@@ -216,36 +222,6 @@
 /* ==============================
     COMPONENTS
 ============================== */
-/* ChatForm.tsx */
-.obsidian-agent__chat-form__title {
-    padding: 0.5rem;
-
-    color: var(--text-muted);
-    font-size: var(--font-ui-medium);
-    background: var(--background-primary) !important;
-    box-shadow: none !important;
-    border: 1px solid var(--background-secondary-alt);
-    border-radius: var(--radius-s);
-    
-    cursor: pointer;
-}
-
-.obsidian-agent__chat-form__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* ChatSingleMessage.tsx */
-.obsidian-agent__chat-single-message__bot-message-content {
-    overflow-x: auto;
-    
-    white-space: normal;
-    word-break: break-word;
-    color: var(--text-normal);
-
-}
-
 /* Input.tsx */
 .obsidian-agent__input__context-button {
     display: flex;
@@ -264,10 +240,6 @@
     color: var(--text-normal) !important;
     background: var(--background-secondary-alt) !important;
     transition: 0.3s ease;
-}
-
-.obsidian-agent__input__context-button-p {
-    font-size: var(--font-ui-small);
 }
 
 .obsidian-agent__input__model-button {
@@ -343,8 +315,6 @@
     background: var(--background-secondary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 8px;
-    
-    margin-bottom: 0.75rem;
     padding: 0.75rem;
 }
   
@@ -495,9 +465,11 @@
 .obsidian-agent__button-exit-editing {
     position: absolute !important;
     top: 8px !important;
-    right: 8px !important; 
-    z-index: 2px !important;
+    right: 12px !important;
+    transform: none !important;
+    z-index: 10 !important;
 }
+  
 
 /* ==============================
     UTILS
@@ -508,14 +480,8 @@
 .obsidian-agent__width-auto {
     width: auto !important;
 }
-.obsidian-agent__position-relative {
-    position: relative !important;
-}
 .obsidian-agent__cursor-pointer {
     cursor: pointer !important;
-}
-.obsidian-agent__margin-top-0 {
-    margin-top: 0 !important;
 }
 .obsidian-agent__margin-left-auto {
     margin-left: auto !important;

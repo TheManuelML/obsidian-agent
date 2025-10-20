@@ -7,7 +7,7 @@ import { getNextAvailableFileName } from "src/utils/renaming";
 import { formatTags } from 'src/utils/formating';
 import { parseImageFromNote } from "src/utils/parsing";
 import { ModelManager } from 'src/backend/managers/modelManager';
-import { PromptTemplateManager } from 'src/backend/managers/prompts/promptManager';
+import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
 
 // Obsidian tool to write notes
 export const createNote = tool(async (input) => {
@@ -40,11 +40,8 @@ export const createNote = tool(async (input) => {
         if (topic && useLLM) {
             try {
                 // Get prompt template
-                const promptManager = new PromptTemplateManager();
-                const promptValue = await promptManager.getSimplePromptTemplate('write', topic);
-                
-                let sysPrompt = promptValue.messages[0].content; // Extract the string from SystemMessage type
-                if (context) sysPrompt = `${sysPrompt}\nUse the following context to write the note: ${context}.`;
+                let sysPrompt = writingSystemPrompt; // Extract the string from SystemMessage type
+                if (context) sysPrompt += `\nUse the following context to write the note: ${context}.`;
                 
                 const humanPrompt = `Please write a markdown note about ${topic}.` + (tags.length > 0 ? ` Add the following tags: ${tags.join(', ')}.` : '');
                 
@@ -191,11 +188,8 @@ export const editNote = tool(async (input) => {
                 if (settings.debug) console.error(errorMsg);
                 throw new Error(errorMsg);
             }
-
-            const promptManager = new PromptTemplateManager();
-            const promptValue = await promptManager.getSimplePromptTemplate('write', newContent || '');
-            
-            let sysPrompt = promptValue.messages[0].content; // Extract the string from SystemMessage type
+    
+            let sysPrompt = writingSystemPrompt;
             if (context) sysPrompt += `\nYou can use the following context while editing: ${context}`;
 
             const humanPrompt = `Update the following markdown note:\n###\n${oldContent}\n###` +

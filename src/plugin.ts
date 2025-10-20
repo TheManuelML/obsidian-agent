@@ -1,8 +1,8 @@
 import { Plugin, App, WorkspaceLeaf } from 'obsidian';
-import { ChatView, VIEW_TYPE_AGENT } from "src/components/chat/View";
-import { ChooseModelModal } from 'src/components/modal/ChooseModelModal';
+import { ChatView, VIEW_TYPE_AGENT } from "src/feature/chat/View";
+import { ChooseModelModal } from 'src/feature/modals/ChooseModelModal';
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
-import { Model } from 'src/settings/models';
+import { Model } from 'src/types/ai';
 import { DEFAULT_SETTINGS } from "src/settings/defaults";
 
 let pluginInstance: ObsidianAgentPlugin;
@@ -101,7 +101,8 @@ export class ObsidianAgentPlugin extends Plugin {
 
 // Function that returns the app property of the Plugin class
 export function getApp(): App {
-  return pluginInstance.app
+  if(!pluginInstance) throw new Error("Plugin instance not set yet");
+  return pluginInstance.app;
 }
 
 // Function that returns the settings of the plugin
@@ -110,17 +111,12 @@ export function setPlugin(p: ObsidianAgentPlugin) {
 }
 // Function that returns the plugin instance
 export function getPlugin(): ObsidianAgentPlugin {
-  if (!pluginInstance) {
-    throw new Error("Plugin instance not set yet");
-  }
+  if (!pluginInstance) throw new Error("Plugin instance not set yet");
   return pluginInstance;
 }
 
 // Function that return the settings
 export function getSettings(): AgentSettings {
-  if (!pluginInstance) {
-    throw new Error("Plugin instance not set yet");
-  }
-  const plugin = getPlugin();
-  return plugin.settings
+  if (!pluginInstance) throw new Error("Plugin instance not set yet");
+  return pluginInstance.settings
 }

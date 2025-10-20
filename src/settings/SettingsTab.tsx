@@ -1,16 +1,12 @@
 import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin, getApp, getPlugin } from "src/plugin";
-import { ChooseModelModal } from "src/components/modal/ChooseModelModal";
+import { ChooseModelModal } from "src/feature/modals/ChooseModelModal";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
   provider: string;
   model: string;
   googleApiKey: string;
-  openaiApiKey: string;
-  anthropicApiKey: string;
-  mistralApiKey: string;
-  deepseekApiKey: string;
   rules: string;
   chatsFolder: string;
   debug: boolean;
@@ -88,11 +84,9 @@ export class AgentSettingsTab extends PluginSettingTab {
 
 
     // API keys settings
-    new Setting(containerEl).setName('Api keys').setHeading();
-
     // GOOGLE
     const googleSetting = new Setting(containerEl)
-      .setName("Google key")
+      .setName("Google api key")
       .setDesc("Enter your Google API key. Not required if you are not using Google models.");
     let googleRevealed = false;
     googleSetting.addText((text) => {
@@ -113,110 +107,6 @@ export class AgentSettingsTab extends PluginSettingTab {
           const input = googleSetting.controlEl.querySelector("input");
           if (input) input.type = googleRevealed ? "text" : "password";
           btn.setIcon(googleRevealed ? "eye-off" : "eye");
-        });
-    });
-
-    // OPENAI
-    const openaiSetting = new Setting(containerEl)
-      .setName("OpenAI key")
-      .setDesc("Enter your OpenAI API key. Not required if you are not using OpenAI models.");
-    let openaiRevealed = false;
-    openaiSetting.addText((text) => {
-      text
-        .setPlaceholder("Enter your API key")
-        .setValue(this.plugin.settings.openaiApiKey)
-        .onChange(async (value) => {
-          this.plugin.settings.openaiApiKey = value;
-          await this.plugin.saveSettings();
-        });
-      text.inputEl.type = "password";
-    });
-    openaiSetting.addExtraButton((btn) => {
-      btn.setIcon("eye")
-        .setTooltip("Show/hide api key")
-        .onClick(() => {
-          openaiRevealed = !openaiRevealed;
-          const input = openaiSetting.controlEl.querySelector("input");
-          if (input) input.type = openaiRevealed ? "text" : "password";
-          btn.setIcon(openaiRevealed ? "eye-off" : "eye");
-        });
-    });
-
-    // ANTHROPIC
-    const anthropicSetting = new Setting(containerEl)
-      .setName("Anthropic key")
-      .setDesc("Enter your Anthropic API key. Not required if you are not using Anthropic models.");
-    let anthropicRevealed = false;
-    anthropicSetting.addText((text) => {
-      text
-        .setPlaceholder("Enter your API key")
-        .setValue(this.plugin.settings.anthropicApiKey)
-        .onChange(async (value) => {
-          this.plugin.settings.anthropicApiKey = value;
-          await this.plugin.saveSettings();
-        });
-      text.inputEl.type = "password";
-    });
-    anthropicSetting.addExtraButton((btn) => {
-      btn.setIcon("eye")
-        .setTooltip("Show/hide api key")
-        .onClick(() => {
-          anthropicRevealed = !anthropicRevealed;
-          const input = anthropicSetting.controlEl.querySelector("input");
-          if (input) input.type = anthropicRevealed ? "text" : "password";
-          btn.setIcon(anthropicRevealed ? "eye-off" : "eye");
-        });
-    });
-
-    // MISTRAL
-    const mistralSetting = new Setting(containerEl)
-      .setName("Mistral key")
-      .setDesc("Enter your Mistral API key. Not required if you are not using Mistral models.");
-    let mistralRevealed = false;
-    mistralSetting.addText((text) => {
-      text
-        .setPlaceholder("Enter your API key")
-        .setValue(this.plugin.settings.mistralApiKey)
-        .onChange(async (value) => {
-          this.plugin.settings.mistralApiKey = value;
-          await this.plugin.saveSettings();
-        });
-      text.inputEl.type = "password";
-    });
-    mistralSetting.addExtraButton((btn) => {
-      btn.setIcon("eye")
-        .setTooltip("Show/hide api key")
-        .onClick(() => {
-          mistralRevealed = !mistralRevealed;
-          const input = mistralSetting.controlEl.querySelector("input");
-          if (input) input.type = mistralRevealed ? "text" : "password";
-          btn.setIcon(mistralRevealed ? "eye-off" : "eye");
-        });
-    });
-
-    // DEEPSEEK
-    const deepseekSetting = new Setting(containerEl)
-      .setName("Deepseek key")
-      .setDesc("Enter your Deepseek API key. Not required if you are not using Deepseek models.");
-    let deepseekRevealed = false;
-    deepseekSetting.addText((text) => {
-      text
-        .setPlaceholder("Enter your API key")
-        .setValue(this.plugin.settings.deepseekApiKey)
-        .onChange(async (value) => {
-          this.plugin.settings.deepseekApiKey = value;
-          await this.plugin.saveSettings();
-        });
-      text.inputEl.type = "password";
-    });
-    deepseekSetting.addExtraButton((btn) => {
-      btn.setIcon("eye")
-        .setTooltip("Show/hide api key")
-        .onClick(() => {
-          deepseekRevealed = !deepseekRevealed;
-          const input = deepseekSetting.controlEl.querySelector("input");
-          if (input) input.type = deepseekRevealed ? "text" : "password";
-          btn.setIcon(deepseekRevealed ? "eye-off" : "eye");
         });
     });
 

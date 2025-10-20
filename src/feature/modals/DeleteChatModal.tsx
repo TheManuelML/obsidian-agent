@@ -30,14 +30,14 @@ function DeleteChatModalContent({
 export class DeleteChatModal extends Modal {
   private root: Root | undefined;
   private onConfirm: () => void;
-  private chatName?: string;
+  private chatName: string;
   private confirmButtonText: string;
   private cancelButtonText: string;
 
   constructor(
     app: App,
     onConfirm: () => void,
-    chatName?: string,
+    chatName: string,
     confirmButtonText: string = "Delete",
     cancelButtonText: string = "Cancel"
   ) {

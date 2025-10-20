@@ -1,4 +1,4 @@
-const writingSystemPrompt = `
+export const writingSystemPrompt = `
 You are a helpful assistant that writes notes in Obsidian. Follow the following rules that Obsidian has:
     - The note must be written in markdown format.
     - Link other files using [[FILE_PATH]]
@@ -13,7 +13,7 @@ You are a helpful assistant that writes notes in Obsidian. Follow the following 
 Just respond with the content of the note. NEVER return the content of the note inside a markdow "code block \`\`\`".
 `;
 
-const agentSystemPrompt = `
+export const agentSystemPrompt = `
 <Task>
 You are a helpful assistant with access to the user's Obsidian vault.
 </Task>
@@ -46,8 +46,3 @@ Vault structure:
 
 </Context>
 `;
-
-export const promptLibrary: {'write': string, 'agent': string} = {
-    'write': writingSystemPrompt,
-    'agent': agentSystemPrompt,
-}

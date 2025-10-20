@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Message } from "src/types/index";
+import { Message } from "src/types/chat";
 
 // Scroll to the bottom of the conversation
 export const useAutoScroll = (conversation: Message[]) => {

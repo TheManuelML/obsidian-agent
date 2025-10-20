@@ -1,6 +1,19 @@
 import { TFile, TFolder } from "obsidian";
-import { FolderNode } from "src/types";
 import { getApp } from "src/plugin";
+
+// Type used in the folder structure functions
+export type FolderNode =
+  | {
+      type: "folder";
+      name: string;
+      path: string;
+      children: FolderNode[];
+    }
+  | {
+      type: "file";
+      name: string;
+      path: string;
+    };
 
 // Helper function to build the tree in a JSON format
 export function getFolderStructure(folder: TFolder): FolderNode[] {

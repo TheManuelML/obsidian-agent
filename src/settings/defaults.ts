@@ -1,16 +1,11 @@
-import { ModelName, ModelProvider } from "src/settings/models";
 import { AgentSettings } from "src/settings/SettingsTab";
 
 // Default settings for the plugin
-export const DEFAULT_SETTINGS: Partial<AgentSettings> = {
-    provider: ModelProvider.DEFAULT,
-    model: ModelName.DEFAULT,
-    googleApiKey: '',
-    openaiApiKey: '',
-    anthropicApiKey: '',
-    mistralApiKey: '',
-    deepseekApiKey: '',
-    rules: '',
-    chatsFolder: 'Chats',
-    debug: false
-  };
+export const DEFAULT_SETTINGS: AgentSettings = {
+  provider: "google",
+  model: "gemini-2.0-flash",
+  googleApiKey: '',
+  rules: '',
+  chatsFolder: 'Chats',
+  debug: false
+};
