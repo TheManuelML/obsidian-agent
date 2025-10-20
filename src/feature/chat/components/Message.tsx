@@ -10,7 +10,6 @@ import { MessageProps } from "src/types/chat";
 export default function Message({
   index,
   message,
-  conversation,
   setConversation,
   activeChat,
 }: MessageProps) {
@@ -76,7 +75,6 @@ export default function Message({
           editingMessageIndex={index}
           isRegeneration={true}
           setIsEditing={setIsEditing}
-          conversation={conversation}
           setConversation={setConversation}
           attachments={message.attachments}
         />

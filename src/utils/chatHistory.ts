@@ -45,16 +45,19 @@ export async function getThreadId(chat: TFile) {
 }
 
 // Remove the last message from a chat file
-export async function removeLastMessages(chat: TFile, n: number) {
+export async function removeMessagesAfterIndexN(chat: TFile, n: number) {
   const app = getApp();
   
   const content = await app.vault.read(chat);
 
   const lines = content.split("\n");
-  if (lines.length === 0 || n <= 0) return;
+  if (lines.length === 0 || n <= 0) {
+    // Clean all the messages if n is 0 or less
+    await app.vault.modify(chat, "");
+  }
 
-  // Remove last n lines
-  const newLines = lines.slice(0, Math.max(0, lines.length - n));
+  // Return the lines between 0 and n
+  const newLines = lines.slice(0, n);
 
   // Rewrite the content
   await app.vault.modify(chat, newLines.join("\n"));

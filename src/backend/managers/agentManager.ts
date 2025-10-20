@@ -5,6 +5,7 @@ import { Runnable } from "@langchain/core/runnables";
 import { createNote, editNote, readNote } from "src/backend/tools/obsidianFiles";
 import { createDir, listFiles } from "src/backend/tools/obsidianDirs";
 import { search } from "src/backend/tools/obsidianSearch";
+import { webSearch } from "src/backend/tools/webSearch";
 import { MemoryManager } from "src/backend/managers/memoryManager";
 import { ModelManager } from "src/backend/managers/modelManager";
 
@@ -56,6 +57,7 @@ export class AgentManager {
         createDir,
         listFiles,
         search,
+        webSearch,
       ]
     });
   }

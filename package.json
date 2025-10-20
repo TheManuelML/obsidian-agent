@@ -26,14 +26,11 @@
 		"typescript": "^4.7.4"
 	},
 	"dependencies": {
-		"@langchain/anthropic": "^0.3.21",
+		"@google/genai": "^1.25.0",
 		"@langchain/community": "^0.3.41",
 		"@langchain/core": "^0.3.59",
-		"@langchain/deepseek": "^0.0.2",
 		"@langchain/google-genai": "^0.2.5",
 		"@langchain/langgraph": "^0.2.67",
-		"@langchain/mistralai": "^0.2.1",
-		"@langchain/openai": "^0.5.7",
 		"html-react-parser": "^5.2.5",
 		"lucide-react": "^0.503.0",
 		"react": "^19.1.0",

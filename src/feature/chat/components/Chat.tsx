@@ -60,7 +60,6 @@ export default function Chat() {
         activeChat={activeChat}
         editingMessageIndex={null}
         isRegeneration={false}
-        conversation={conversation}
         setIsEditing={null}
         setConversation={setConversation}
         attachments={[]}

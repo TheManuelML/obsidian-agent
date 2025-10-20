@@ -1,6 +1,6 @@
 import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { TFile, Notice } from "obsidian";
-import { exportMessage, removeLastMessages } from "src/utils/chatHistory";
+import { exportMessage, removeMessagesAfterIndexN } from "src/utils/chatHistory";
 import { callAgent } from "src/backend/managers/runner";
 import { Attachment, Message } from "src/types/chat";
 
@@ -12,21 +12,15 @@ export const handleCall = async (
   message: string,
   attachments: Attachment[],
   files: File[],
-  conversation: Message[],
   updateConversation: (value: Message[] | ((prev: Message[]) => Message[])) => void,
   isRegeneration: boolean,
 ) => {
   // If regenerating, remove the messages after the regenerated message
   if (isRegeneration && messageIndex !== null) {
-    const length = conversation.length;
-    const n = length - 1 - messageIndex;
-
-    if (n > 0) {
-      // Remove the last n lines from the chat file
-      await removeLastMessages(chat, n);
-      // Update the conversation
-      updateConversation((prev) => prev.slice(0, prev.length - n));
-    }
+    // Rewrites the chat file from messages from 0 to n. If n is 0 empties the chat file
+    await removeMessagesAfterIndexN(chat, messageIndex);
+    // Update the conversation
+    updateConversation((prev) => prev.slice(0, messageIndex));
   }
 
   // Create the user message

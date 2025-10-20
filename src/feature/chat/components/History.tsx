@@ -16,7 +16,6 @@ export default function History({
           key={index}
           index={index}
           message={message}
-          conversation={conversation}
           setConversation={setConversation}
           activeChat={activeChat}
         />

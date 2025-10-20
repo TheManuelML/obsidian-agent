@@ -16,7 +16,6 @@ export default function Input({
   editingMessageIndex,
   isRegeneration,
   setIsEditing,
-  conversation,
   setConversation,
   attachments,
 }: InputProps) {
@@ -56,6 +55,10 @@ export default function Input({
   // Hanlder to send message
   const handleSendWithState = async () => {
     setMessage("");
+    
+    if (isRegeneration && setIsEditing) {
+      setIsEditing(false);
+    }
 
     await handleCall(
       activeChat!,
@@ -63,7 +66,6 @@ export default function Input({
       message,
       selectedNotes,
       selectedFiles,
-      conversation,
       setConversation,
       isRegeneration,
     )
