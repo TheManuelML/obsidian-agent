@@ -41,6 +41,7 @@ It features a user-friendly UI, inspired by other agentic apps.
 ## ✨ Core Features
 <ul>
   <li><b>Note Reading:</b> Understands and edit your notes.</li>
+  <li><b>Web search:</b> Search information across the web.</li>
   <li><b>Customizable:</b> Tweak settings and agent rules to fit your workflow.</li>
   <li><b>Different providers:</b> Work with your favorite LLM providers.</li>
 </ul>
@@ -56,7 +57,7 @@ The agent can use the following tools to interact with your vault:
 - **Create folder**: Create a new directory/folder, e.g: *Create a folder called '2024 Plans'*
 - **List files**: List files in a directory, e.g: *List all files in the folder 'Research'*
 - **Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
-
+- **Web search**: Search for content on the web. *Search on the web for todays temperature in Austin, Texas*
 
 ## 🟡 Disclosures
 This plugin connects to remote AI services to process your requests.
