@@ -29,12 +29,14 @@ export const webSearch = tool(async (input) => {
   } catch (error) {
     return {
       success: false,
+      query,
       response: String(error),
     }
   }
 
   return {
     success: true,
+    query,
     response: response.text
   };
 }, {
