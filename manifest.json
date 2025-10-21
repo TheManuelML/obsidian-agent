@@ -3,7 +3,7 @@
 	"name": "AI Agent",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Lend your vault to an AI agent. It can read, write, and search your notes.",
+	"description": "Empower your Obsidian vault with Google Gemini. This intelligent AI agent integrates Google's artificial intelligence language models to help you perform tasks and conduct web searches directly from Obsidian.",
 	"author": "Manuel Magaña López",
 	"authorUrl": "https://github.com/TheManuelML",
 	"fundingUrl": "https://coff.ee/themanuelml",

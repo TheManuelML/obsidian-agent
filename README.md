@@ -31,19 +31,18 @@ It features a user-friendly UI, inspired by other agentic apps.
 
 ## 🧠 Getting Started
 
-1. Download the plugin cloning the repository inside your `~/vault/.obsidian/plugins/` or downloading the plugin from **Community Plugins** in Obsidian (soon).
+1. Download from **Community Plugins** in Obsidian or clone the repository inside your `~/vault/.obsidian/plugins/` folder.
 2. Enable the plugin from Obsidian's settings panel.
-3. Add the corresponding API key in the plugin's settings panel.
+3. Add the corresponding Google API key in the plugin's settings panel.
 
-> Make sure you have an API key from one of the supported providers: [supported providers](./docs/providers.md).
+> Make sure you have an API key from Google with the Gemini service enable.
 
 
 ## ✨ Core Features
 <ul>
   <li><b>Note Reading:</b> Understands and edit your notes.</li>
   <li><b>Web search:</b> Search information across the web.</li>
-  <li><b>Customizable:</b> Tweak settings and agent rules to fit your workflow.</li>
-  <li><b>Different providers:</b> Work with your favorite LLM providers.</li>
+  <li><b>Customizable:</b> Tweak agent rules to fit your workflow.</li>
 </ul>
 
 
@@ -54,20 +53,18 @@ The agent can use the following tools to interact with your vault:
 - **Create note**: Create a new note in your vault, e.g: *Create a note titled 'Project Ideas'*
 - **Read note**: Read the content of a note, e.g: *Read the active note*
 - **Edit note**: Edit an existing note, e.g: *Add a summary of this text: [...] to the note 'Book Review'*
-- **Create folder**: Create a new directory/folder, e.g: *Create a folder called '2024 Plans'*
-- **List files**: List files in a directory, e.g: *List all files in the folder 'Research'*
+- **Create folder**: Create a new folder, e.g: *Create a folder called '2024 Plans'*
+- **List files**: List files in a folder, e.g: *List all files in the folder 'Research'*
 - **Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
 - **Web search**: Search for content on the web. e.g: *Search on the web for todays temperature in Austin, Texas*
 
 ## 🟡 Disclosures
-This plugin connects to remote AI services to process your requests.
+This plugin connects to remote Google AI services to process your requests.
 
 > **Why is this needed?**  
 > The AI models that power these features run on external servers and require an internet connection. Your notes or queries are sent securely to the selected provider for processing, and the results are only returned to your vault.
 
-To use these AI services, you must set an API key for your chosen provider: [supported providers](./docs/providers.md). You are responsible for obtaining and managing your API keys.
-
-The plugin hasn't been accepted yet. To used it, download it by cloning the repo inside `/YourVault/.obsidian/plugins/` directory. 
+To use these AI service, you must set a Google API key. You are responsible for obtaining and managing your API keys.
 
 ## 🫱🏼‍🫲🏼 Contributing & Support
 
