@@ -31,13 +31,15 @@ export const webSearch = tool(async (input) => {
       success: false,
       query,
       response: String(error),
+      sources: [],
     }
   }
 
   return {
     success: true,
     query,
-    response: response.text
+    response: response.text,
+    sources: getSourceList(response),
   };
 }, {
   // Tool schema and metadata
@@ -47,3 +49,22 @@ export const webSearch = tool(async (input) => {
       query: z.string().describe('Query for the web search')
   })
 });
+
+
+function getSourceList(response: any) {
+  const chunks: Array<{
+    web: {
+      uri: string,
+      title: string,
+    }
+  }> = response.candidates[0]?.groundingMetadata?.groundingChunks;
+
+  const sources: string[] = [];
+
+  for (const url of chunks) {
+    const source = url.web.uri;
+    sources.push(source)
+  }
+
+  return sources;
+}
