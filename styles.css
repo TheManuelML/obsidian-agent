@@ -313,6 +313,9 @@
 
 /* Tool Call Styling */
 .obsidian-agent__tool-call__container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding-top: 1rem;
 }
   

@@ -19,9 +19,13 @@ export default function Input({
   setConversation,
   attachments,
 }: InputProps) {
+  const settings = getSettings();
+  const apiKey = settings.googleApiKey?.trim();
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [message, setMessage] = useState<string>(initialValue);
+  const canSend = message.trim() && activeChat && apiKey;
 
   const [selectedModel, setSelectedModel] = useState<string>(getSettings().model);
   const [selectedNotes, setSelectedNotes] = useState<Attachment[]>(attachments);
@@ -51,6 +55,13 @@ export default function Input({
     const model: Model = allAvailableModels.find(model => model.name === selectedModel)!;
     setCanUpload(model.capabilities.includes("vision"));
   }, [selectedModel])
+
+  // Disable or not the button
+  const getButtonTitle = () => {
+    if (!apiKey) return "Set an API key";
+    if (!message.trim()) return "Write something";
+    return "Send message";
+  };
 
   // Hanlder to send message
   const handleSendWithState = async () => {
@@ -228,8 +239,8 @@ export default function Input({
           <button
             className="obsidian-agent__button-icon-primary"
             onClick={handleSendWithState}
-            title="Send message"
-            disabled={!message.trim() || !activeChat}
+            title={getButtonTitle()}
+            disabled={!canSend}
           >
             <CircleArrowRight size={24} />
           </button>

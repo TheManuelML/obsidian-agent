@@ -55,56 +55,70 @@ export const handleCall = async (
     if (chunk) accumulatedContent += chunk;
     
     // Add upcoming toolcalls
-    if (toolCalls) accumulatedToolCalls = [...accumulatedToolCalls, ...toolCalls];
+    if (toolCalls && toolCalls.length) accumulatedToolCalls = [...accumulatedToolCalls, ...toolCalls];
 
     // Update the conversation with the upcoming chunks
     updateConversation((prev: Message[]) => {
       const update = [...prev];
+      const lastIndex = update.length - 1;
 
-      update[update.length - 1] = {
-        ...update[update.length - 1],
+      update[lastIndex] = {
+        ...update[lastIndex],
         content: accumulatedContent,
         toolCalls: accumulatedToolCalls
-      }
+      };
       return update;
     });
   };
 
   // Call
-  await callAgent(
-    chat,
-    message,
-    attachments,
-    files,
-    updateMessage 
-  )
+  let callError: string = "";
+  try {
+    await callAgent(chat, message, attachments, files, updateMessage);
+  } catch (error) {
+    callError = String(error);
+  };
 
   // Check if the agent return something
-  if (accumulatedContent.trim()) {
+  const trimmed = accumulatedContent.trim();
+  const hasMeaningfulContent = !callError && trimmed && trimmed !== "*Thinking ...*";
+  
+  if (hasMeaningfulContent) {
     const botMessage: Message = {
       sender: "bot",
       content: accumulatedContent,
-      attachments,
+      attachments: [],
       toolCalls: accumulatedToolCalls,
     };
-    // Just export the message, the tmp message is already in the conversation
+
+    // Replace the temporary message in the conversation state with the final bot message
+    updateConversation((prev: Message[]) => {
+      const update = [...prev];
+      const lastIndex = update.length - 1;
+      update[lastIndex] = botMessage;
+      return update;
+    });
+
+    // Export the final bot message to the chat file
     exportMessage(botMessage, chat);
   
   } else {
-    const errorMsg = "No response recieved from the AI";
-    new Notice(errorMsg, 5000);
+    new Notice(callError, 5000);
 
     // Create an error message to show on the chat, replacing the empty tmp message
     updateConversation((prev: Message[]) => {
       const update = [...prev];
+      const lastIndex = update.length - 1;
 
-      update[update.length - 1] = {
-        ...update[update.length - 1],
+      update[lastIndex] = {
+        ...update[lastIndex],
         sender: "error",
         content: "*Unable to generate message. Try again later.*",
-      }
+        attachments: [],
+        toolCalls: [],
+      };
       return update;
-    })
+    });
 
     const errorMessage: Message = {
       sender: "error",

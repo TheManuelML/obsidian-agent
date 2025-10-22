@@ -13,13 +13,13 @@ export const allAvailableModels: Model[] = [
     capabilities: ["vision", "websearch"],
   },
   {
+    provider: "google",
+    name: "gemini-2.5-flash-lite",
+    capabilities: ["vision", "websearch"]
+  },
+  {
     provider: "google", 
     name: "gemini-2.5-pro",
     capabilities: ["vision", "websearch"],
   },
-  {
-    provider: "google",
-    name: "gemini-2.5-flash-lite",
-    capabilities: ["vision", "websearch"]
-  }
 ];
