@@ -80,10 +80,43 @@ export const handleCall = async (
   };
 
   // Check if the agent return something
-  const trimmed = accumulatedContent.trim();
-  const hasMeaningfulContent = !callError && trimmed && trimmed !== "*Thinking ...*";
-  
-  if (hasMeaningfulContent) {
+  const hasTools = accumulatedToolCalls && accumulatedToolCalls.length > 0;
+  const hasMeaningfulContent = accumulatedContent.trim() && accumulatedContent.trim() !== "*Thinking ...*";
+
+  const somethingWentWrong = callError || (!hasMeaningfulContent && !hasTools);
+
+  if (somethingWentWrong) {
+    // Clean up the accumulated content and tool calls
+    if (callError) {
+      accumulatedContent = "";
+      accumulatedToolCalls = [];
+    }
+    
+    // Create an error message to show on the chat, replacing the empty tmp message
+    const errorMessage: Message = {
+      sender: "error",
+      content: callError
+        ? "*Something went wrong while processing the request.*"
+        : "*No answer was generated for the request.*",
+      attachments: [],
+      toolCalls: [],
+    };
+
+    updateConversation((prev: Message[]) => {
+      const update = [...prev];
+      const lastIndex = update.length - 1;
+
+      update[lastIndex] = errorMessage;
+      return update;
+    });
+
+    // Export the final bot message to the chat file
+    exportMessage(errorMessage, chat);
+
+  } else {
+    // Generate message in case the agent only executed tools
+    if (!hasMeaningfulContent && hasTools) accumulatedContent = `*Tools executed successfully.*`;
+
     const botMessage: Message = {
       sender: "bot",
       content: accumulatedContent,
@@ -102,30 +135,5 @@ export const handleCall = async (
     // Export the final bot message to the chat file
     exportMessage(botMessage, chat);
   
-  } else {
-    new Notice(callError, 5000);
-
-    // Create an error message to show on the chat, replacing the empty tmp message
-    updateConversation((prev: Message[]) => {
-      const update = [...prev];
-      const lastIndex = update.length - 1;
-
-      update[lastIndex] = {
-        ...update[lastIndex],
-        sender: "error",
-        content: "*Unable to generate message. Try again later.*",
-        attachments: [],
-        toolCalls: [],
-      };
-      return update;
-    });
-
-    const errorMessage: Message = {
-      sender: "error",
-      content: "*Unable to generate message. Try again later.*",
-      attachments: [],
-      toolCalls: [],
-    };
-    exportMessage(errorMessage, chat);
   };
 }

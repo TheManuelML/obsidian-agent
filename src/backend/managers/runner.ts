@@ -1,7 +1,7 @@
 import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { AIMessageChunk, ToolMessage } from "@langchain/core/messages";
 import { TFile } from "obsidian";
-import { imageToBase64 } from "./prompts/images";
+import { imageToBase64 } from "./prompts/imagePrompt";
 import { getThreadId } from "src/utils/chatHistory";
 import { AgentManager } from "src/backend/managers/agentManager";
 import { agentSystemPrompt } from "src/backend/managers/prompts/library";

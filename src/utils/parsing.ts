@@ -1,4 +1,4 @@
-export async function parseImageFromNote(content: string) {
+export async function removeImagesFromNote(content: string) {
     // Detect images ![NAME](data:image/png;base64,...)
     const imageRegex = /!\[[^\]]*]\((data:image\/[a-zA-Z]+;base64,[^)]+)\)/g;
   
