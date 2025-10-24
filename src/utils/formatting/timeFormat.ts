@@ -12,7 +12,7 @@ export function getTime(): string {
     return date 
 }
 
-// Returns the current date in a string in the format of an ID for the chat name and thread ID
+// Returns the current date in an ID format for the chat metadata
 export function getTimeId(): string {
     return new Date().toISOString().replace(/[:.]/g, '-')
 }

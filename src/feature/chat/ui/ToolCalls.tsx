@@ -38,7 +38,7 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
             >
               <Wrench size={16} />
               <span className="obsidian-agent__tool-call__name">
-                {toolCall.name}
+                {toolCall.name.replace('_', ' ')}
               </span>
               <span
                 className={`obsidian-agent__tool-call__dropdown-arrow obsidian-agent__margin-left-auto${

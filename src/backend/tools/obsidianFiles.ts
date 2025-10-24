@@ -2,10 +2,10 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { Notice, TFile } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
-import { findClosestFile, findMatchingFolder } from 'src/utils/searching';
-import { getNextAvailableFileName } from "src/utils/renaming";
-import { formatTags } from 'src/utils/formating';
-import { removeImagesFromNote } from "src/utils/parsing";
+import { findClosestFile, findMatchingFolder } from 'src/utils/notes/searching';
+import { getNextAvailableFileName } from "src/utils/notes/renaming";
+import { formatTags } from 'src/utils/notes/tags';
+import { removeImagesFromNote } from "src/utils/parsing/imageParse";
 import { ModelManager } from 'src/backend/managers/modelManager';
 import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
 

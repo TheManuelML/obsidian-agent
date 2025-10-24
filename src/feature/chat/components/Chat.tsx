@@ -4,7 +4,7 @@ import Form from "src/feature/chat/components/Form";
 import History from "src/feature/chat/components/History";
 import Input from "src/feature/chat/components/Input";
 import { ensureActiveChat } from "src/feature/chat/handlers/chatHandlers";
-import { importConversation } from "src/utils/chatHistory";
+import { importConversation } from "src/utils/chat/chatHistory";
 import { Message } from "src/types/chat";
 
 export default function Chat() {

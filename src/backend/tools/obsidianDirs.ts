@@ -2,9 +2,9 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { Notice } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
-import { getNextAvailableFolderName } from 'src/utils/renaming';
-import { findMatchingFolder } from 'src/utils/searching'
-import { getFolderStructure } from 'src/utils/vaultStructure';
+import { getNextAvailableFolderName } from 'src/utils/notes/renaming';
+import { findMatchingFolder } from 'src/utils/notes/searching'
+import { getFolderStructure } from 'src/utils/vault/vaultStructure';
 
 // Obsidian tool to create directories
 export const createDir = tool(async (input) => {

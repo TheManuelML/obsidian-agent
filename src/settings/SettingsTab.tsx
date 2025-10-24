@@ -29,7 +29,7 @@ export class AgentSettingsTab extends PluginSettingTab {
     // Language model settings
     new Setting(containerEl)
       .setName("Model")
-      .setDesc("Select the language model to use.")
+      .setDesc("Select the Google language model to use.")
       .addButton((button) => {
         button.setButtonText(this.plugin.settings.model || "Choose model");
         button.onClick(() => {
@@ -48,9 +48,9 @@ export class AgentSettingsTab extends PluginSettingTab {
     // Chat history folder
     new Setting(containerEl)
       .setName("Chat history folder")
-      .setDesc("Select the folder where the chat history will be saved.")
+      .setDesc("Select the folder where your chat histories will be saved.")
       .addDropdown((dropdown: DropdownComponent) => {
-        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
+        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder && !file.isRoot());
         folders.forEach(folder => {
           dropdown.addOption(folder.path, folder.name);
         });
@@ -62,32 +62,12 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
-    
-    // Agent rules
-    const rulesSetting = new Setting(containerEl)
-      .setName("Agent rules")
-      .setDesc("Add rules to change the agent behaviour and responses. For example: 'Always answer in English'");
-    
-    rulesSetting.settingEl.classList.add("obsidian-agent__settings-rules-container");
-    rulesSetting.controlEl.classList.add("obsidian-agent__settings-rules-control");
-    
-    rulesSetting.addTextArea((text) => {
-      text
-        .setValue(this.plugin.settings.rules)
-        .onChange(async (value) => {
-          this.plugin.settings.rules = value;
-          await this.plugin.saveSettings();
-        });
-      text.inputEl.rows = 6;
-      text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
-    });
-
 
     // API keys settings
     // GOOGLE
     const googleSetting = new Setting(containerEl)
       .setName("Google api key")
-      .setDesc("Enter your Google API key. Not required if you are not using Google models.");
+      .setDesc("Enter your Google API key.");
     let googleRevealed = false;
     googleSetting.addText((text) => {
       text
@@ -108,6 +88,26 @@ export class AgentSettingsTab extends PluginSettingTab {
           if (input) input.type = googleRevealed ? "text" : "password";
           btn.setIcon(googleRevealed ? "eye-off" : "eye");
         });
+    });
+    
+    // Agent rules
+    const rulesSetting = new Setting(containerEl)
+      .setName("Agent rules")
+      .setDesc("Add an aditional set of rules to change the agent behaviour.");
+    
+    rulesSetting.settingEl.classList.add("obsidian-agent__settings-rules-container");
+    rulesSetting.controlEl.classList.add("obsidian-agent__settings-rules-control");
+    
+    rulesSetting.addTextArea((text) => {
+      text
+        .setValue(this.plugin.settings.rules)
+        .onChange(async (value) => {
+          this.plugin.settings.rules = value;
+          await this.plugin.saveSettings();
+        });
+      text.inputEl.placeholder = "E.g. Always answer in Spanish.";
+      text.inputEl.rows = 4;
+      text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
     });
 
     

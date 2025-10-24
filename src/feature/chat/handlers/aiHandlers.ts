@@ -1,6 +1,6 @@
 import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { TFile, Notice } from "obsidian";
-import { exportMessage, removeMessagesAfterIndexN } from "src/utils/chatHistory";
+import { exportMessage, removeMessagesAfterIndexN } from "src/utils/chat/chatHistory";
 import { callAgent } from "src/backend/managers/runner";
 import { Attachment, Message } from "src/types/chat";
 import { getSettings } from "src/plugin";

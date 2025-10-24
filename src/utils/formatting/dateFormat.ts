@@ -1,3 +1,4 @@
+// ms constants 
 const MS = { 
   "s": 1_000, 
   "m": 60_000,
@@ -6,6 +7,7 @@ const MS = {
   "w": 7 * 86_400_000 
 };
 
+// Main function to parse date ranges
 export function parseDateRange(
   dateRange: string | { start: string | number, end: string | number },
   now = new Date(),
@@ -55,7 +57,7 @@ export function parseDateRange(
   return undefined; // invalid date
 }
 
-
+// Helper function to parse a date input
 function parseDate(date: any) {
   if (date === null || date === undefined) return undefined;
   

@@ -1,9 +1,9 @@
 {
 	"id": "ai-agent",
 	"name": "AI Agent",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
-	"description": "Empower your Obsidian vault with Google Gemini. This intelligent AI agent integrates Google's artificial intelligence language models to help you perform tasks and conduct web searches directly from Obsidian.",
+	"description": "Empower your vault with Google Gemini. This AI agent integrates Google's artificial intelligence language models to help you perform tasks and conduct web searches.",
 	"author": "Manuel Magaña López",
 	"authorUrl": "https://github.com/TheManuelML",
 	"fundingUrl": "https://coff.ee/themanuelml",

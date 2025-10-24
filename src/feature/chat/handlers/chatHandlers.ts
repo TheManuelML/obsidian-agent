@@ -1,7 +1,7 @@
 import { TFile, TFolder, Notice } from "obsidian";
 import { getApp, getSettings } from "src/plugin";
-import { formatTagsForChat } from "src/utils/formating";
-import { getTime, getTimeId } from "src/utils/time";
+import { formatTagsForChat } from "src/utils/notes/tags";
+import { getTime, getTimeId } from "src/utils/formatting/timeFormat";
 
 // Create the chat folder
 async function createChatFolder(): Promise<TFolder | null> {

@@ -4,7 +4,8 @@ import { LanguageModelLike } from "@langchain/core/language_models/base";
 import { Runnable } from "@langchain/core/runnables";
 import { createNote, editNote, readNote } from "src/backend/tools/obsidianFiles";
 import { createDir, listFiles } from "src/backend/tools/obsidianDirs";
-import { search, noteFiltering } from "src/backend/tools/obsidianSearch";
+import { vaultSearch } from "src/backend/tools/obsidianSearch";
+import { noteFiltering } from "../tools/obsidianFilter";
 import { webSearch } from "src/backend/tools/webSearch";
 import { MemoryManager } from "src/backend/managers/memoryManager";
 import { ModelManager } from "src/backend/managers/modelManager";
@@ -56,7 +57,7 @@ export class AgentManager {
         editNote,
         createDir,
         listFiles,
-        search,
+        vaultSearch,
         noteFiltering,
         webSearch,
       ]

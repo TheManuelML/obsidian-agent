@@ -8,7 +8,7 @@ export async function removeImagesFromNote(content: string) {
   
     while ((match = imageRegex.exec(content)) !== null) {
       images.push(match[1]);
-      cleanedContent = cleanedContent.replace(match[0], ""); // Elimina la imagen del contenido
+      cleanedContent = cleanedContent.replace(match[0], ""); // Remove the image from the content
     }
   
     return {
