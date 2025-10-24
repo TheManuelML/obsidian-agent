@@ -3,6 +3,7 @@ import { TFile, Notice } from "obsidian";
 import { exportMessage, removeMessagesAfterIndexN } from "src/utils/chatHistory";
 import { callAgent } from "src/backend/managers/runner";
 import { Attachment, Message } from "src/types/chat";
+import { getSettings } from "src/plugin";
 
 // This function should call callAgent() and add the new user and bot messages to the History
 // And remove all messages that were after the edited user message
@@ -88,6 +89,10 @@ export const handleCall = async (
   if (somethingWentWrong) {
     // Clean up the accumulated content and tool calls
     if (callError) {
+      const errorMsg = `Error while processing the request: ${callError}`;
+      if (getSettings().debug) console.error(errorMsg);
+      new Notice (errorMsg, 5000);
+      
       accumulatedContent = "";
       accumulatedToolCalls = [];
     }

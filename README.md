@@ -55,7 +55,8 @@ The agent can use the following tools to interact with your vault:
 - **Edit note**: Edit an existing note, e.g: *Add a summary of this text: [...] to the note 'Book Review'*
 - **Create folder**: Create a new folder, e.g: *Create a folder called '2024 Plans'*
 - **List files**: List files in a folder, e.g: *List all files in the folder 'Research'*
-- **Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
+- **Vault Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
+- **Note filtering**: Return note paths that fall inside a date range, e.g: *Give me yesterday's notes*
 - **Web search**: Search for content on the web. e.g: *Search on the web for todays temperature in Austin, Texas*
 
 ## 🟡 Disclosures

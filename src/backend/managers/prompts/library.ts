@@ -21,6 +21,7 @@ You have the following tools at your disposal:
     - create folder: Create a new folder
     - list files: List the files in a folder
     - search: Search for a file or folder
+    - note filtering: Filter notes based on a date range
     - web search: Search for information on the web
 </Tools>
 
