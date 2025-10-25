@@ -119,7 +119,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Read images")
-      .setDesc("Enable the agent to automatically read notes inside notes when executing the read note tool.")
+      .setDesc("Automatically extract images from notes when running the 'read note' tool.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.readImages)
