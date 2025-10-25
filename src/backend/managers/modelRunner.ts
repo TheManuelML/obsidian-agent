@@ -1,4 +1,4 @@
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { HumanMessage, SystemMessage } from "langchain";
 import { ModelManager } from "src/backend/managers/modelManager";
 import { imageToBase64 } from "src/utils/parsing/imageBase64";
 
@@ -27,12 +27,14 @@ export async function callModel(
       .bindTools([searchTool])
       .invoke(input);
 
-    type GroundingChunk = {
-      web: {
-        uri: string,
-        title: string,
-      }
-    };
+    //! Sources cannot be extracted yet
+    //! https://github.com/langchain-ai/langchainjs/issues/9264
+    // type GroundingChunk = {
+    //   web: {
+    //     uri: string,
+    //     title: string,
+    //   }
+    // };
     // const urls: string[] = response.response_metadata.groundingMetadata.groundingChunks.map(((chunk: GroundingChunk) => {
     //   return chunk.web.uri;
     // }));
@@ -44,7 +46,7 @@ export async function callModel(
   }
 
   // Call the model
-  const response = await llm.invoke(input);
+  const response = await llm.bindTools([]).invoke(input);
   return response.content.toString();
 }
 

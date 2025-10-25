@@ -1,4 +1,4 @@
-import { tool } from '@langchain/core/tools';
+import { tool } from 'langchain';
 import { z } from 'zod';
 import { Notice, TFile } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
@@ -11,10 +11,18 @@ import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
 import { callModel } from 'src/backend/managers/modelRunner';
 
 // Obsidian tool to write notes
-export const createNote = tool(async (input) => {
+export const createNote = tool(async (input: {
+  topic: string,
+  name: string,
+  tags: string[],
+  context: string,
+  dirPath: string,
+  content: string,
+  useLlm: boolean
+}) => {
   const app = getApp();
   const settings = getSettings();
-  let { topic, name, tags, context, dirPath, content, useLLM } = input; 
+  let { topic, name, tags, context, dirPath, content, useLlm } = input; 
 
   // Find the closest folder
   const matchedFolder = findMatchingFolder(dirPath);
@@ -32,7 +40,7 @@ export const createNote = tool(async (input) => {
   
   // Content generation
   if (!content) {
-    if (topic && useLLM) {
+    if (topic && useLlm) {
       let sysPrompt = writingSystemPrompt;
       if (context) sysPrompt += `\nUse the following context to write the note: ${context}.`;
 
@@ -71,7 +79,7 @@ export const createNote = tool(async (input) => {
 
   // Create the note
   await app.vault.create(fullPath, content);
-  return { success: true, usedLLM: !!topic && useLLM, name, tags, content, fullPath, parentDir: dirPath };
+  return { success: true, usedLlm: !!topic && useLlm, name, tags, content, fullPath, parentDir: dirPath };
 }, {
   // Tool schema and metadata
   name: 'create_note',
@@ -83,16 +91,23 @@ export const createNote = tool(async (input) => {
     context: z.string().optional().default('').describe('Context the user provided to write the note'),
     dirPath: z.string().optional().default('').describe('The path of the directory where the note is going to be stored'),
     content: z.string().optional().default('').describe('Custom markdown content to use instead of generating'),
-    useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the content.')
+    useLlm: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the content.')
   })
 })
 
 
 // Obsidian tool to update or write on existing notes
-export const editNote = tool(async (input) => {
+export const editNote = tool(async (input: {
+  fileName: string,
+  activeNote: boolean,
+  newContent: string,
+  useLlm: boolean,
+  tags: string[],
+  context: string,
+}) => {
   const app = getApp();
   const settings = getSettings();
-  const { fileName, activeNote, newContent, useLLM, tags, context } = input;
+  const { fileName, activeNote, newContent, useLlm, tags, context } = input;
     
   let matchedFile: TFile | null;
 
@@ -126,11 +141,11 @@ export const editNote = tool(async (input) => {
   let updatedContent = '';
 
   // If the user do not want to generate content replace directly
-  if (!useLLM && (newContent || tags.length > 0)) {
+  if (!useLlm && (newContent || tags.length > 0)) {
     updatedContent = newContent || oldContent;
     if (tags.length > 0) updatedContent = formatTags(tags) + '\n' + updatedContent;
 
-  } else if (useLLM) {
+  } else if (useLlm) {
     const llm = ModelManager.getInstance().getModel();
 
     let sysPrompt = writingSystemPrompt;
@@ -163,7 +178,7 @@ export const editNote = tool(async (input) => {
     // Save the updated content
   await app.vault.modify(matchedFile, updatedContent);
   
-  return { success: true, useLLM, path: matchedFile.path, oldContent, newContent: updatedContent, tags };
+  return { success: true, useLlm, path: matchedFile.path, oldContent, newContent: updatedContent, tags };
 }, {
   name: 'update_note',
   description: 'Write, replace and edit content of a note. Can use LLM or not, supports tags and context. Specify the note name or detect the active note if no name provided.',
@@ -171,7 +186,7 @@ export const editNote = tool(async (input) => {
     fileName: z.string().optional().describe('The name or path of the note to edit. Without the markdown extension .md'),
     activeNote: z.boolean().default(false).optional().describe('If no filename provided set to true to read the active note'),
     newContent: z.string().optional().describe('New content or instructions to apply to the note'),
-    useLLM: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the updated note'),
+    useLlm: z.boolean().optional().default(true).describe('Whether to use the LLM to generate the updated note'),
     tags: z.array(z.string()).optional().default([]).describe('Tags to add or update in the note, do not make them up'),
     context: z.string().optional().default('').describe('Additional context for the LLM to use when editing'),
   })
@@ -179,7 +194,10 @@ export const editNote = tool(async (input) => {
 
 
 // Obsidian tool to read notes
-export const readNote = tool(async (input) => {
+export const readNote = tool(async (input: {
+  fileName: string,
+  activeNote: boolean,
+}) => {
   const app = getApp();
   const settings = getSettings();
   const { fileName, activeNote } = input;

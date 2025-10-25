@@ -1,10 +1,15 @@
-import { tool } from '@langchain/core/tools';
+import { tool } from 'langchain';
 import { z } from 'zod';
 import { getApp } from 'src/plugin';
 import { parseDateRange } from 'src/utils/formatting/dateFormat';
 
 // Tool to search notes based on their date or tags
-export const noteFiltering = tool(async (input) => {
+export const noteFiltering = tool(async (input: {
+  field: 'creation' | 'modification';
+  dateRange: string | { start: number; end: number };
+  limit: number;
+  sortOrder: 'asc' | 'desc';
+}) => {
   const app = getApp();
   const { field, dateRange, limit, sortOrder } = input;
 

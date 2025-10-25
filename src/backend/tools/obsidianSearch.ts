@@ -1,9 +1,12 @@
-import { tool } from '@langchain/core/tools';
+import { tool } from 'langchain';
 import { z } from 'zod';
 import { findClosestFile, findMatchingFolder } from "src/utils/notes/searching";
 
 // Tool to search notes and folders
-export const vaultSearch = tool(async (input) => {
+export const vaultSearch = tool(async (input: {
+  name: string,
+  isNote: boolean
+}) => {
   // Declare input
   let { name, isNote } = input;
 

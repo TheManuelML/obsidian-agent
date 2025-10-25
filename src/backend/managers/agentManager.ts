@@ -1,7 +1,6 @@
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent, ReactAgent } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
-import { LanguageModelLike } from "@langchain/core/language_models/base";
-import { Runnable } from "@langchain/core/runnables";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { createNote, editNote, readNote } from "src/backend/tools/obsidianFiles";
 import { createDir, listFiles } from "src/backend/tools/obsidianDirs";
 import { vaultSearch } from "src/backend/tools/obsidianSearch";
@@ -13,8 +12,8 @@ import { ModelManager } from "src/backend/managers/modelManager";
 // Manage the creation and update of the agent
 export class AgentManager {
   private static instance: AgentManager;
-  private agent?: Runnable;
-  private model?: LanguageModelLike;
+  private agent?: ReactAgent;
+  private model?: ChatGoogleGenerativeAI;
   private memorySaver?: MemorySaver;
 
   private constructor() {
@@ -43,14 +42,14 @@ export class AgentManager {
   }
 
   // Create the agent
-  private createAgent(): Runnable {
+  private createAgent(): ReactAgent {
     if (!this.model || !this.memorySaver) {
       throw new Error("Model or memory not set");
     }
 
-    return createReactAgent({
-      llm: this.model,
-      checkpointSaver: this.memorySaver,
+    return createAgent({
+      model: this.model,
+      checkpointer: this.memorySaver,
       tools: [
         createNote,
         readNote,
@@ -64,7 +63,7 @@ export class AgentManager {
     });
   }
 
-  public getAgent(): Runnable {
+  public getAgent(): ReactAgent {
     // Update the model (it might have chaged)
     this.setModel()
     // Create the agent, a new one per call

@@ -1,5 +1,4 @@
-import { ToolCall } from "@langchain/core/dist/messages/tool";
-import { AIMessageChunk, ToolMessage } from "@langchain/core/messages";
+import { ToolMessage, AIMessageChunk, ToolCall } from "langchain";
 import { TFile } from "obsidian";
 import { imageToBase64 } from "src/utils/parsing/imageBase64";
 import { getThreadId } from "src/utils/chat/chatHistory";
@@ -60,7 +59,6 @@ export async function callAgent(
           id: item.id,
           name: item.name!.toString(),
           args: JSON.parse(item.content.toString()),
-          type: "tool_call",
         }]
 
         updateAiMessage("", toolCall);
