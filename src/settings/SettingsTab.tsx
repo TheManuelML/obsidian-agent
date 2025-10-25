@@ -8,8 +8,13 @@ export interface AgentSettings {
   model: string;
   googleApiKey: string;
   rules: string;
+
+  readImages: boolean;
+
   chatsFolder: string;
+  
   debug: boolean;
+
 }
 
 // Settings tab class
@@ -109,6 +114,21 @@ export class AgentSettingsTab extends PluginSettingTab {
       text.inputEl.rows = 4;
       text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
     });
+
+    // Agent skills
+    new Setting(containerEl).setName('Agent skills').setHeading();
+
+    new Setting(containerEl)
+      .setName("Read images")
+      .setDesc("Enable the agent to automatically read notes inside notes when executing the read note tool.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.readImages)
+          .onChange(async (value) => {
+            this.plugin.settings.readImages = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     
     // Developer settings

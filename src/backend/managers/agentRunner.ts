@@ -38,7 +38,7 @@ export async function callAgent(
   if (files) {
     for (const img of files) base64Images.push(await imageToBase64(img))
   }
-  input = await prepareInputs(agentSystemPrompt, fullUserMessage, base64Images);
+  input = await prepareAgentInputs(agentSystemPrompt, fullUserMessage, base64Images);
 
   // Call
   const stream = await agent.stream(input, config);
@@ -70,7 +70,7 @@ export async function callAgent(
 }
 
 // Function that prepare the prompts into inputs for the agent
-async function prepareInputs(
+async function prepareAgentInputs(
   systemPrompt: string,
   userPrompt: string,
   filesBase64?: string[],

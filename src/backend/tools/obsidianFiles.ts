@@ -5,9 +5,10 @@ import { getApp, getSettings } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/notes/searching';
 import { getNextAvailableFileName } from "src/utils/notes/renaming";
 import { formatTags } from 'src/utils/notes/tags';
-import { removeImagesFromNote } from "src/utils/parsing/imageParse";
+import { removeImagesFromNote, extractImagesFromNote } from "src/utils/parsing/imageParse";
 import { ModelManager } from 'src/backend/managers/modelManager';
 import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
+import { callModel } from 'src/backend/managers/modelRunner';
 
 // Obsidian tool to write notes
 export const createNote = tool(async (input) => {
@@ -38,13 +39,9 @@ export const createNote = tool(async (input) => {
       const humanPrompt = `Write a note about: ${topic}.`;
       
       try {
-        const llm = ModelManager.getInstance().getModel();
-
-        const response = await llm.invoke([
-          { role: 'system', content: sysPrompt },
-          { role: 'user', content: humanPrompt },
-        ]);
-        content = response.content.toString();
+        const response = await callModel(sysPrompt, humanPrompt, [], []);
+        if (typeof response !== "string") throw new Error("Invalid response from LLM");
+        content = response;
 
         if (tags.length > 0) content = formatTags(tags) + "\n" + content
 
@@ -105,7 +102,6 @@ export const editNote = tool(async (input) => {
     if (!matchedFile) {
       const errorMsg = "It seems like there is not an active note, and you haven't opened any recently."
       if (settings.debug) console.error(errorMsg);
-      new Notice(errorMsg, 5000);
       
       return { success: false, error: errorMsg}
     }
@@ -115,15 +111,13 @@ export const editNote = tool(async (input) => {
     if (!matchedFile) {
       const errorMsg = `Could not find any note with the exact name or similar to "${fileName}".`
       if (settings.debug) console.error(errorMsg);
-      new Notice(errorMsg, 5000);
-
+      
       return { success: false, error: errorMsg };
     }
   } else {
     const errorMsg = "No file name provided and 'active note' is not set as true.";
     if (settings.debug) console.error(errorMsg);
-    new Notice(errorMsg, 5000);
-  
+    
     return { success: false, error: errorMsg };
   }
 
@@ -147,26 +141,21 @@ export const editNote = tool(async (input) => {
       `Return the full updated markdown note.`;
 
     try {
-      const response = await llm.invoke([
-        { role: 'system', content: sysPrompt },
-        { role: 'user', content: humanPrompt },
-      ]);
-
-      updatedContent = response.content.toString();
+      const response = await callModel(sysPrompt, humanPrompt, [], []);
+      if (typeof response !== "string") throw new Error("Invalid response from LLM");
+      updatedContent = response;
 
       if (tags.length > 0) updatedContent = formatTags(tags) + '\n' + updatedContent;
 
     } catch (error) {
       const errorMsg = 'Error invoking LLM: ' + error;  
       if (settings.debug) console.error(errorMsg);
-      new Notice(errorMsg, 5000);
       
       return { success: false, error: errorMsg };
     }
   } else {
     const errorMsg = 'No new content, tags, or topic provided to update the note.';  
     if (settings.debug) console.error(errorMsg);
-    new Notice(errorMsg, 5000);
     
     return { success: false, error: errorMsg };
   }
@@ -202,7 +191,6 @@ export const readNote = tool(async (input) => {
     if (!matchedFile) {
       const errorMsg = "It seems like there is not an active note, and you haven't opened any recently."
       if (settings.debug) console.error(errorMsg);
-      new Notice(errorMsg, 5000);
       
       return { success: false, error: errorMsg }
     }
@@ -213,7 +201,6 @@ export const readNote = tool(async (input) => {
     if (!matchedFile) {
       const errorMsg = `Could not find any note with the name or similar to "${fileName}".`;
       if (settings.debug) console.error(errorMsg);
-      new Notice(errorMsg, 5000);
 
       return { success: false, error: `Could not find any note similar to "${fileName}".`};
     }
@@ -221,16 +208,27 @@ export const readNote = tool(async (input) => {
   } else {
     const errorMsg = "No file name provided and 'active note' is not set as true.";
     if (settings.debug) console.error(errorMsg);
-    new Notice(errorMsg, 5000);
     
     return { success: false, error: errorMsg };
   }
 
   // Read the file
-  const content = await app.vault.read(matchedFile);
-  const cleanedContent = await removeImagesFromNote(content);
+  let content = await app.vault.read(matchedFile);
+  if (settings.readImages) {
+    const images = await extractImagesFromNote(content);
+
+    const sysPrompt = "Return a summary/description of the following images";
+    const humanPrompt = "Here are the images.";
+    const imageSummary = await callModel(sysPrompt, humanPrompt, [], images);
+    if (typeof imageSummary !== "string") throw new Error("Invalid response from LLM");
+    
+    content = await removeImagesFromNote(content);
+    content += `\n\n## Image Summary\n${imageSummary}\n`;
+  } else {
+    content = await removeImagesFromNote(content);
+  }
         
-  return { success: true, content: cleanedContent.content, path: matchedFile.path };
+  return { success: true, content: content, path: matchedFile.path };
 }, {
   // Tool schema and metadata
   name: 'read_note',

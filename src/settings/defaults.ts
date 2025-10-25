@@ -7,5 +7,6 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   googleApiKey: '',
   rules: '',
   chatsFolder: 'Chats',
-  debug: false
+  debug: false,
+  readImages: true,
 };
