@@ -5,6 +5,7 @@ import { getApp, getSettings } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/notes/searching';
 import { getNextAvailableFileName } from "src/utils/notes/renaming";
 import { formatTags } from 'src/utils/notes/tags';
+import { getEmbeds } from 'src/utils/parsing/getEmbeds';
 import { removeImagesFromNote, extractImagesFromNote } from "src/utils/parsing/imageParse";
 import { ModelManager } from 'src/backend/managers/modelManager';
 import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
@@ -47,7 +48,7 @@ export const createNote = tool(async (input: {
       const humanPrompt = `Write a note about: ${topic}.`;
       
       try {
-        const response = await callModel(sysPrompt, humanPrompt, [], []);
+        const response = await callModel(sysPrompt, humanPrompt, []);
         if (typeof response !== "string") throw new Error("Invalid response from LLM");
         content = response;
 
@@ -74,8 +75,6 @@ export const createNote = tool(async (input: {
     fullPath = dirPath + '/' + name;
     if (!dirPath || dirPath === '/') fullPath = name; // -> Name.md
   }
-
-  console.log('Creating note at path:', fullPath);
 
   // Create the note
   await app.vault.create(fullPath, content);
@@ -156,7 +155,7 @@ export const editNote = tool(async (input: {
       `Return the full updated markdown note.`;
 
     try {
-      const response = await callModel(sysPrompt, humanPrompt, [], []);
+      const response = await callModel(sysPrompt, humanPrompt, []);
       if (typeof response !== "string") throw new Error("Invalid response from LLM");
       updatedContent = response;
 
@@ -232,21 +231,51 @@ export const readNote = tool(async (input: {
 
   // Read the file
   let content = await app.vault.read(matchedFile);
-  if (settings.readImages) {
-    const images = await extractImagesFromNote(content);
+  
+  try {
+    // Extract base64 images, from embeds and from content
+    let base64Images: Array<{base64: string, mimeType: "image/png" | "image/jpeg"}> = []
+    if (settings.readImages) {
+      // Extract base64 images from embeds
+      const embedsToBase64 = getEmbeds(matchedFile);
+      if (embedsToBase64.length > 0) {
+        base64Images = embedsToBase64;
+      }
 
-    const sysPrompt = "Return a summary/description of the following images";
-    const humanPrompt = "Here are the images.";
-    const imageSummary = await callModel(sysPrompt, humanPrompt, [], images);
-    if (typeof imageSummary !== "string") throw new Error("Invalid response from LLM");
-    
-    content = await removeImagesFromNote(content);
-    content += `\n\n## Image Summary\n${imageSummary}\n`;
-  } else {
-    content = await removeImagesFromNote(content);
-  }
+      // Extract base64 images from the note content
+      const images = await extractImagesFromNote(content);
+      if (images && images.length > 0) {
+        base64Images.push(...images);
+      }
+      
+      if (base64Images && base64Images.length > 0) {
+        const imageDescriptions = await callModel(
+          "Return a summary/description of the following image(s)", 
+          "Image(s):",
+          base64Images
+        );
+        if (typeof imageDescriptions !== "string") throw new Error("Invalid response from LLM");  
         
-  return { success: true, content: content, path: matchedFile.path };
+        // Remove images from the content
+        content = await removeImagesFromNote(content);
+        
+        return { success: true, content: content, path: matchedFile.path, imageDescriptions};
+
+      } else {
+        content = await removeImagesFromNote(content);
+      }
+    
+    } else {
+      content = await removeImagesFromNote(content);
+    }
+  } catch (error) {
+    const errorMsg = 'Error processing images in the note: ' + error;
+    if (settings.debug) console.error(errorMsg);
+    
+    return { success: false, error: errorMsg };
+  }    
+
+  return { success: true, content: "\n" + content, path: matchedFile.path };
 }, {
   // Tool schema and metadata
   name: 'read_note',

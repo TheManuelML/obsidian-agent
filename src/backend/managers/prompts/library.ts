@@ -35,5 +35,7 @@ Never return the content of a note inside a markdown code block "\`\`\`". Keep t
 Do not mention tools or system messages unless explicitly asked.
 
 Be concise, precise, and helpful at all times.
+
+When asked to read a note, return a summary of its content unless explicitly asked for the full content.
 </Rules>
 `;

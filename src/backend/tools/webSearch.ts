@@ -10,7 +10,7 @@ export const webSearch = tool(async (input: {
   const { query } = input;  
   
   try {
-    const groundingSearch = await callModel("You are a helpful assistant", query, [], [], true);
+    const groundingSearch = await callModel("You are a helpful assistant", query, [], true);
   
     if (typeof groundingSearch === "string") {
       return { success: false, error: 'Web search failed: ' + groundingSearch};
