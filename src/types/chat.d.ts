@@ -1,5 +1,5 @@
 import { TFile } from "obsidian";
-import { ToolCall } from "@langchain/core/dist/messages/tool";
+import { ToolCall } from "langchain";
 
 // Input
 export interface InputProps {

@@ -4,6 +4,8 @@ import { ChooseModelModal } from "src/feature/modals/ChooseModelModal";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
+  chatsFolder: string;
+
   provider: string;
   model: string;
   googleApiKey: string;
@@ -11,10 +13,7 @@ export interface AgentSettings {
 
   readImages: boolean;
 
-  chatsFolder: string;
-  
   debug: boolean;
-
 }
 
 // Settings tab class
@@ -30,6 +29,24 @@ export class AgentSettingsTab extends PluginSettingTab {
   display(): void {
     let { containerEl } = this;
     containerEl.empty();
+
+    // Chat history folder
+    new Setting(containerEl)
+      .setName("Chat history folder")
+      .setDesc("Select the folder where your chat histories will be saved.")
+      .addDropdown((dropdown: DropdownComponent) => {
+        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder && !file.isRoot());
+        folders.forEach(folder => {
+          dropdown.addOption(folder.path, folder.name);
+        });
+        
+        dropdown
+          .setValue(this.plugin.settings.chatsFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.chatsFolder = value;
+            await this.plugin.saveSettings();
+          });
+      });
 
     // Language model settings
     new Setting(containerEl)
@@ -48,24 +65,6 @@ export class AgentSettingsTab extends PluginSettingTab {
           }).open();
         });
         return button;
-      });
-
-    // Chat history folder
-    new Setting(containerEl)
-      .setName("Chat history folder")
-      .setDesc("Select the folder where your chat histories will be saved.")
-      .addDropdown((dropdown: DropdownComponent) => {
-        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder && !file.isRoot());
-        folders.forEach(folder => {
-          dropdown.addOption(folder.path, folder.name);
-        });
-        
-        dropdown
-          .setValue(this.plugin.settings.chatsFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.chatsFolder = value;
-            await this.plugin.saveSettings();
-          });
       });
 
     // API keys settings

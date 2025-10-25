@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { ToolCall } from "langchain";
 import { Wrench, ChevronRight, Check, Copy } from "lucide-react";
 import type { ToolCallsProps } from "src/types/chat";
-import { ToolCall } from "@langchain/core/dist/messages/tool";
 
 export default function ToolCalls({ toolCalls }: ToolCallsProps) {
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);

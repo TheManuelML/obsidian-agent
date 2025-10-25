@@ -1,4 +1,4 @@
-import { tool } from '@langchain/core/tools';
+import { tool } from 'langchain';
 import { z } from 'zod';
 import { Notice } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
@@ -7,11 +7,14 @@ import { findMatchingFolder } from 'src/utils/notes/searching'
 import { getFolderStructure } from 'src/utils/vault/vaultStructure';
 
 // Obsidian tool to create directories
-export const createDir = tool(async (input) => {
+export const createDir = tool(async (input: {
+  name: string,
+  dirPath: string
+}) => {
     // Declaring the app and inputs
     const app = getApp();
     const settings = getSettings();
-    let { name = 'New directory', dirPath = '' } = input;
+    let { name, dirPath } = input;
 
     // Sanitize the path
     dirPath = dirPath.replace(/(\.\.\/|\/{2,})/g, '/').replace(/^\/+|\/+$/g, ''); // remove '..', double slashes, and leading and trailing slashes
@@ -49,17 +52,19 @@ export const createDir = tool(async (input) => {
     name: 'create_directory',
     description: 'Create a directory in Obsidian. No parameters are needed.',
     schema: z.object({
-        name: z.string().optional().describe('The name of the directory'),
-        dirPath: z.string().optional().describe('The path of the directory where is going to be placed'),
+        name: z.string().optional().default("New directory").describe('The name of the directory'),
+        dirPath: z.string().optional().default("").describe('The path of the directory where is going to be placed'),
     })
 })
 
 
 // List a tree of files and directories in a directory
-export const listFiles = tool(async (input) => {
+export const listFiles = tool(async (input: {
+  dirPath: string
+}) => {
     // Declaring the app and inputs
     const settings = getSettings();
-    let { dirPath = '/' } = input;
+    let { dirPath } = input;
 
     // Find the matching folder if the path is not absolute    
     const matchingFolder = findMatchingFolder(dirPath);
@@ -100,6 +105,6 @@ export const listFiles = tool(async (input) => {
     name: 'list_files',
     description: 'List files and directories of a directory.',
     schema: z.object({
-        dirPath: z.string().optional().describe('The path of the directory to list files from'),
+        dirPath: z.string().optional().default("/").describe('The path of the directory to list files from'),
     })
 })
