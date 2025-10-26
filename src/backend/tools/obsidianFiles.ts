@@ -82,7 +82,7 @@ export const createNote = tool(async (input: {
 }, {
   // Tool schema and metadata
   name: 'create_note',
-  description: 'Create a note. Content can be generated with a topic or provided manually.',
+  description: 'Create a note. Content can be generated with a topic or provided manually. If no name provided a default one will be used.',
   schema: z.object({
     topic: z.string().optional().default('').describe('The topic of the note, what is going to be written about'),
     name: z.string().optional().default('Generated note.md').describe('The note name the user provided with markdown file extension .md'),

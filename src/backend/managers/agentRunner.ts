@@ -49,6 +49,7 @@ export async function callAgent(
     
     for (const item of items) {
       if (item instanceof AIMessageChunk) {
+        if (item.content.toString().trim() === "") continue;
         const newMessageContent = item.content.toString();
         
         updateAiMessage(newMessageContent, []);
