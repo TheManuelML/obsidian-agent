@@ -40,7 +40,7 @@ export const handleCall = async (
   // Create the agent message
   const tempMessage: Message = {
     sender: "bot",
-    content: "*Thinking ...*",
+    content: "",
     attachments: [],
     toolCalls: [],
     processed: false,
@@ -84,9 +84,8 @@ export const handleCall = async (
 
   // Check if the agent return something
   const hasTools = accumulatedToolCalls && accumulatedToolCalls.length > 0;
-  const hasMeaningfulContent = accumulatedContent.trim() && accumulatedContent.trim() !== "*Thinking ...*";
-
-  const somethingWentWrong = callError || (!hasMeaningfulContent && !hasTools);
+  
+  const somethingWentWrong = callError || (!accumulatedContent.trim() && !hasTools);
 
   let botMessage: Message | null = null;
   let errorMessage: Message | null = null;
@@ -125,7 +124,7 @@ export const handleCall = async (
 
   } else {
     // Generate message in case the agent only executed tools
-    if (!hasMeaningfulContent && hasTools) accumulatedContent = `*Tools executed successfully.*`;
+    if (!accumulatedContent.trim() && hasTools) accumulatedContent = `*Tools executed successfully.*`;
 
     botMessage = {
       sender: "bot",
