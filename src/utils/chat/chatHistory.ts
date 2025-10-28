@@ -51,14 +51,38 @@ export async function removeMessagesAfterIndexN(chat: TFile, n: number) {
   const content = await app.vault.read(chat);
 
   const lines = content.split("\n");
-  if (lines.length === 0 || n <= 0) {
-    // Clean all the messages if n is 0 or less
-    await app.vault.modify(chat, "");
+  // Identify header (non-JSON) lines at the top and JSON message lines after
+  const firstMsgIdx = lines.findIndex((l) => l.trim().startsWith("{"));
+  const headerLines = firstMsgIdx === -1 ? lines : lines.slice(0, firstMsgIdx);
+  const messageLines = firstMsgIdx === -1 ? [] : lines.slice(firstMsgIdx).filter((l) => l.trim().startsWith("{"));
+
+  // If n <= 0, keep only headers (remove all messages)
+  const safeN = Math.max(0, n);
+  const keptMessages = messageLines.slice(0, safeN);
+
+  const newContent = [...headerLines, ...keptMessages].join("\n");
+  await app.vault.modify(chat, newContent);
+}
+
+export async function removeLastNMessages(chat: TFile, n: number) {
+  const app = getApp();
+  
+  const content = await app.vault.read(chat);
+
+  const lines = content.split("\n");
+  // No-op if n <= 0
+  if (n <= 0) {
+    return;
   }
 
-  // Return the lines between 0 and n
-  const newLines = lines.slice(0, n);
+  // Identify header (non-JSON) lines at the top and JSON message lines after
+  const firstMsgIdx = lines.findIndex((l) => l.trim().startsWith("{"));
+  const headerLines = firstMsgIdx === -1 ? lines : lines.slice(0, firstMsgIdx);
+  const messageLines = firstMsgIdx === -1 ? [] : lines.slice(firstMsgIdx).filter((l) => l.trim().startsWith("{"));
 
-  // Rewrite the content
-  await app.vault.modify(chat, newLines.join("\n"));
+  const keptCount = Math.max(0, messageLines.length - n);
+  const keptMessages = messageLines.slice(0, keptCount);
+
+  const newContent = [...headerLines, ...keptMessages].join("\n");
+  await app.vault.modify(chat, newContent);
 }

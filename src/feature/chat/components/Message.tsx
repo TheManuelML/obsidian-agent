@@ -96,22 +96,25 @@ export default function Message({
     }
 
     return (
-      <div 
-        className="obsidian-agent__chat-single-message__user-message" 
-        onClick={() => setIsEditing(prev => !prev)}
+      <div
+        className={`obsidian-agent__chat-single-message__user-message-border
+          ${message.processed === false ? "loading-border" : ""}
+        `}
       >
-        {/* Map the attached notes */}
-        {message.attachments.length > 0 && (
-          <Attachments attachments={message.attachments}/>
-        )}
-      
-        {/* Message content */}
-        <div className="obsidian-agent__chat-single-message__user-message-content">
-          {message.content}
+        <div
+          className="obsidian-agent__chat-single-message__user-message"
+          onClick={() => setIsEditing(prev => !prev)}
+        >
+          {message.attachments.length > 0 && (
+            <Attachments attachments={message.attachments}/>
+          )}
+          <div className="obsidian-agent__chat-single-message__user-message-content">
+            {message.content}
+          </div>
         </div>
       </div>
     );
-  } 
+  }
   
   return (
     <div className="obsidian-agent__chat-single-message__bot-message">

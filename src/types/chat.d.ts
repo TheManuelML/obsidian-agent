@@ -38,6 +38,7 @@ export interface Message {
   content: string;
   attachments: Attachment[];
   toolCalls: ToolCall[];
+  processed?: boolean;
 }
 
 export interface MessageProps {

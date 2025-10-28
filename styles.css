@@ -62,6 +62,7 @@
 
 /* Message.tsx */
 .obsidian-agent__chat-single-message__user-message {
+    position: relative;
     background-color: var(--background-primary);
     
     border-radius: var(--radius-s);
@@ -70,9 +71,48 @@
     padding: 0.8rem;
     margin: 0 0.2rem 0 0;
     cursor: pointer;
+
+    z-index: 3;
+}
+
+.obsidian-agent__chat-single-message__user-message-border {
+    position: relative;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.obsidian-agent__chat-single-message__user-message-border.loading-border::before {
+    position: absolute;
+    content: "";
+    width: 150%;
+    height: 150%;
+    background-image: conic-gradient(from 270deg, transparent 90%, var(--text-faint) 100%);
+    left: -25%;
+    top: -25%;
+    z-index: 1;
+    animation: rotate 2s linear infinite;
+}
+
+.obsidian-agent__chat-single-message__user-message-border.loading-border::after {
+    position: absolute;
+    content: "";
+    width: 150%;
+    height: 150%;
+    background-image: conic-gradient(from 90deg, transparent 90%, var(--text-faint) 100%);
+    left: -25%;
+    top: -25%;
+    z-index: 2;
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .obsidian-agent__chat-single-message__user-message-content {
+    margin-top: 4px;
     color: var(--text-muted);
     white-space: pre-wrap;
     word-break: break-word;
@@ -110,7 +150,7 @@
     border: 1px solid var(--background-secondary-alt);
     border-radius: var(--radius-s);
     
-    padding: 1rem;
+    padding: 10px;
     width: 100%;
     position: relative;
 }
@@ -120,9 +160,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: start;
-    
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
 }
 
 .obsidian-agent__input__context-row {
@@ -138,12 +176,26 @@
     align-items: center;
 
     font-size: var(--font-ui-small);
-    background-color: var(--background-secondary-alt);
+    background: none;
+    border: 1px solid var(--background-secondary-alt);
     border-radius: var(--radius-s);
     
     max-width: 100%;
     height: 28px;
     padding: 0rem 0.5rem;
+}
+
+.obsidian-agent__input__remove-attachment-button {
+    width: auto;
+    color: var(--text-muted) !important;
+    background: none !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+.obsidian-agent__input__remove-attachment-button:hover {
+    color: var(--text-normal) !important;
 }
 
 .obsidian-agent__input__attachment-text {
@@ -178,6 +230,7 @@
     overflow: auto;
 
     min-height: 4rem;
+    padding: 0 2px;
     height: auto;
     width: 100%;
     line-height: 1.4;
@@ -186,10 +239,17 @@
 .obsidian-agent__input__textarea-container {
     display: flex;
     width: 100%;
+    margin-top: 4px;
 }
 
 .obsidian-agent__input__textarea:focus {
     box-shadow: none !important;
+    background: none;
+}
+
+.obsidian-agent__input__textarea:hover {
+    box-shadow: none !important;
+    background: none;
 }
 
 .obsidian-agent__input__actions {
@@ -204,6 +264,68 @@
 .obsidian-agent__input__right-actions {
     display: flex;
     flex-direction: row;
+    gap: 4px;
+}
+
+.obsidian-agent__input__select-model-button {
+  background: none !important; 
+  display: flex;
+  gap: 2px;
+  align-items:center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer; 
+  padding: 0;
+  height: auto;
+  color: var(--text-faint) !important;
+}
+.obsidian-agent__input__select-model-button:hover {
+    color: var(--text-muted) !important;
+}
+
+.obsidian-agent__input__attach-image-button {
+    color: var(--text-faint) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;    
+    padding: 0;  
+}
+.obsidian-agent__input__attach-image-button:hover {
+    color: var(--text-muted) !important;  
+}
+
+.obsidian-agent__input__add-context-button {
+    border: 1px solid var(--background-secondary-alt) !important;
+    background: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    padding: 0 8px;
+    color: var(--text-faint) !important;
+        
+}
+.obsidian-agent__input__add-context-button:hover {
+  background-color: var(--background-secondary) !important;
+  color: var(--text-muted) !important;
+}
+
+.obsidian-agent__input__submit_button {
+    width: auto;
+    display: flex;
+    padding: 0 8px;
+    align-items: center;
+    gap: 4px;
+    border-radius: var(--radius-s);
+    border: none;
+    cursor: pointer;
+}
+
+.obsidian-agent__input__submit_button:disabled {
+    cursor: not-allowed;
+    color: var(--text-muted) !important;
 }
 
 /* SettingsTab.tsx */

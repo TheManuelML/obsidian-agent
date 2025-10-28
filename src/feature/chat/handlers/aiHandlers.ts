@@ -1,6 +1,6 @@
 import { ToolCall } from "langchain";
 import { TFile, Notice } from "obsidian";
-import { exportMessage, removeMessagesAfterIndexN } from "src/utils/chat/chatHistory";
+import { exportMessage, removeMessagesAfterIndexN, removeLastNMessages } from "src/utils/chat/chatHistory";
 import { callAgent } from "src/backend/managers/agentRunner";
 import { Attachment, Message } from "src/types/chat";
 import { getSettings } from "src/plugin";
@@ -29,7 +29,8 @@ export const handleCall = async (
     sender: "user",
     content: message,
     attachments,
-    toolCalls: []
+    toolCalls: [],
+    processed: false,
   };
   // Update the conversation with this new message
   updateConversation((prev: Message[]) => [...prev, userMessage]);
@@ -42,6 +43,7 @@ export const handleCall = async (
     content: "*Thinking ...*",
     attachments: [],
     toolCalls: [],
+    processed: false,
   };
   // Update the conversation with this temp message
   updateConversation((prev: Message[]) => [...prev, tempMessage]);
@@ -86,6 +88,8 @@ export const handleCall = async (
 
   const somethingWentWrong = callError || (!hasMeaningfulContent && !hasTools);
 
+  let botMessage: Message | null = null;
+  let errorMessage: Message | null = null;
   if (somethingWentWrong) {
     // Clean up the accumulated content and tool calls
     if (callError) {
@@ -98,20 +102,21 @@ export const handleCall = async (
     }
     
     // Create an error message to show on the chat, replacing the empty tmp message
-    const errorMessage: Message = {
+    errorMessage = {
       sender: "error",
       content: callError
         ? "*Something went wrong while processing the request.*"
         : "*No answer was generated for the request.*",
       attachments: [],
       toolCalls: [],
+      processed: true,
     };
 
     updateConversation((prev: Message[]) => {
       const update = [...prev];
       const lastIndex = update.length - 1;
 
-      update[lastIndex] = errorMessage;
+      update[lastIndex] = errorMessage!;
       return update;
     });
 
@@ -122,23 +127,50 @@ export const handleCall = async (
     // Generate message in case the agent only executed tools
     if (!hasMeaningfulContent && hasTools) accumulatedContent = `*Tools executed successfully.*`;
 
-    const botMessage: Message = {
+    botMessage = {
       sender: "bot",
       content: accumulatedContent,
       attachments: [],
       toolCalls: accumulatedToolCalls,
+      processed: true,
     };
 
     // Replace the temporary message in the conversation state with the final bot message
     updateConversation((prev: Message[]) => {
       const update = [...prev];
       const lastIndex = update.length - 1;
-      update[lastIndex] = botMessage;
+      update[lastIndex] = botMessage!;
       return update;
     });
 
     // Export the final bot message to the chat file
     exportMessage(botMessage, chat);
-  
   };
+
+  // Access the user message and change the processed flag to true
+  updateConversation((prev: Message[]) => {
+    const update = [...prev];
+    
+    const userMessageIndex = isRegeneration && messageIndex !== null
+      ? messageIndex
+      : update.findLastIndex((m) => m.sender === "user");
+
+    update[userMessageIndex] = {
+      ...update[userMessageIndex],
+      processed: true,
+    };
+    return update;
+  });
+
+  // Remove the user and bot/error messages and rewrite the user message with the porcessed flag set to true
+  await removeLastNMessages(chat, 2);
+
+  userMessage.processed = true;
+  exportMessage(userMessage, chat);
+  
+  if (errorMessage !== null) {
+    exportMessage(errorMessage, chat);
+  } else if (botMessage !== null ){
+    exportMessage(botMessage, chat);
+  }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { AtSign, X, CircleArrowRight, Image } from "lucide-react";
+import { AtSign, X, CornerDownLeft, ChevronDown, Image } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp, getPlugin, getSettings } from "src/plugin";
 import { handleCall } from "src/feature/chat/handlers/aiHandlers";
@@ -163,9 +163,9 @@ export default function Input({
         <button 
           title="Add context"
           onClick={openNotePicker} 
-          className="obsidian-agent__button-icon"
+          className="obsidian-agent__input__add-context-button"
         >
-          <AtSign size={16} />
+          <AtSign size={14} />
         </button>
         
         {/* Show selected notes and images */}
@@ -174,7 +174,7 @@ export default function Input({
             <span className="obsidian-agent__input__attachment-text">{note.basename}</span>
             <button 
               onClick={() => removeNote(note)} 
-              className="obsidian-agent__button-icon  obsidian-agent__width-auto"
+              className="obsidian-agent__input__remove-attachment-button"
             >
               <X size={12} />
             </button>
@@ -213,14 +213,19 @@ export default function Input({
       </div>
 
       <div className="obsidian-agent__input__actions">
-        <button onClick={openModelPicker} className="obsidian-agent__input__model-button">
+        <button 
+          onClick={openModelPicker} 
+          className="obsidian-agent__input__select-model-button"
+        >
+          <ChevronDown size={14}/>
           {selectedModel}
         </button>
+        
         <div className="obsidian-agent__input__right-actions">
           <div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="obsidian-agent__button-icon"
+              className="obsidian-agent__input__attach-image-button"
               title={canUpload ? "Images" : "Image upload not supported by current model"}
               disabled={!canUpload}
             >
@@ -237,12 +242,13 @@ export default function Input({
             </input>
           </div>
           <button
-            className="obsidian-agent__button-icon-primary"
+            className="obsidian-agent__input__submit_button"
             onClick={handleSendWithState}
             title={getButtonTitle()}
             disabled={!canSend}
           >
-            <CircleArrowRight size={24} />
+            submit
+            <CornerDownLeft size={14} />
           </button>
         </div>
       </div>

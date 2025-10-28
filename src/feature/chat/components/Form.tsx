@@ -1,4 +1,4 @@
-import { Trash2, CirclePlus, History } from "lucide-react";
+import { Trash2, Plus, History } from "lucide-react";
 import { TFile } from "obsidian";
 import { getApp } from "src/plugin";
 import { handleCreateChat, handleDeleteChat } from "src/feature/chat/handlers/chatHandlers";
@@ -52,9 +52,9 @@ export default function Form({
         <button 
           onClick={handleCreateWithStates}
           title="Create new chat"
-          className="obsidian-agent__button-icon-primary"
+          className="obsidian-agent__button-icon"
         >
-          <CirclePlus size={20} />
+          <Plus size={20} />
         </button>
 
         <button
