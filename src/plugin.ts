@@ -4,6 +4,7 @@ import { ChatView, VIEW_TYPE_AGENT } from "src/feature/chat/View";
 import { ChooseModelModal } from 'src/feature/modals/ChooseModelModal';
 import { AgentSettings, AgentSettingsTab } from "src/settings/SettingsTab";
 import { Model } from 'src/types/ai';
+import { registerEditorMenuItems } from 'src/feature/menu/editorMenu';
 import { DEFAULT_SETTINGS } from "src/settings/defaults";
 
 let pluginInstance: ObsidianAgentPlugin;
@@ -50,6 +51,9 @@ export class ObsidianAgentPlugin extends Plugin {
         }).open();
       },
     });
+
+    // Menu Items (Actions when right click on a markdown view)
+    registerEditorMenuItems(this);
   }
 
   async loadSettings() {

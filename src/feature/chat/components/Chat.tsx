@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { TFile } from "obsidian";
 import Form from "src/feature/chat/components/Form";
 import History from "src/feature/chat/components/History";
@@ -7,10 +7,22 @@ import { ensureActiveChat } from "src/feature/chat/handlers/chatHandlers";
 import { importConversation } from "src/utils/chat/chatHistory";
 import { Message } from "src/types/chat";
 
-export default function Chat() {
+export interface ChatRef {
+  getActiveChat: () => TFile | null;
+  getUpdateConversation: () => (value: Message[] | ((prev: Message[]) => Message[])) => void;
+  setActiveChat: (chat: TFile | null) => void;
+}
+
+const Chat = forwardRef<ChatRef>((props, ref) => {
   const [conversation, setConversation] = useState<Message[]>([]);
   const [activeChat, setActiveChat] = useState<TFile | null>(null);
   const [availableChats, setAvailableChats] = useState<TFile[]>([]);
+
+  useImperativeHandle(ref, () => ({
+    getActiveChat: () => activeChat,
+    getUpdateConversation: () => setConversation,
+    setActiveChat: (chat: TFile | null) => setActiveChat(chat),
+  }));
 
   // Executed when loading the component
   useEffect(() => {
@@ -66,4 +78,8 @@ export default function Chat() {
       />
     </div>
   );
-};
+});
+
+Chat.displayName = 'Chat';
+
+export default Chat;
