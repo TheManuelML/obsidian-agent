@@ -43,6 +43,7 @@ It features a user-friendly UI, inspired by other agentic apps.
   <li><b>Note Reading:</b> Understands and edit your notes.</li>
   <li><b>Web search:</b> Search information across the web.</li>
   <li><b>Customizable:</b> Tweak agent rules to fit your workflow.</li>
+  <li><b>Built-in actions:</b> Right click on selected text to open the menu items.</li>
 </ul>
 
 
@@ -58,6 +59,8 @@ The agent can use the following tools to interact with your vault:
 - **Vault Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
 - **Note filtering**: Return note paths that fall inside a date range, e.g: *Give me yesterday's notes*
 - **Web search**: Search for content on the web. e.g: *Search on the web for todays temperature in Austin, Texas*
+
+Also you can right click over select text, in your markdown notes, to summarize or ask the agent about the selection.
 
 ## 🟡 Disclosures
 This plugin connects to remote Google AI services to process your requests.
