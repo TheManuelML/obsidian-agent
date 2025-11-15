@@ -4,6 +4,7 @@ export interface Model {
   provider: "google",
   name: string,
   capabilities: Array<"vision" | "reasoning" | "websearch">,
+  description: string,
 }
 
 export interface ModelConfig {

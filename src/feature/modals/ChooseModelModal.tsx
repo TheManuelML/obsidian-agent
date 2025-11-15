@@ -56,14 +56,17 @@ export class ChooseModelModal extends FuzzySuggestModal<Model> {
     const nameEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__name" });
     nameEl.setText(model.name + (model.name === this.activeModel ? " (current)" : ""));
   
-    const providerEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__provider" });
+    const providerEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info-bold" });
     providerEl.setText(`Provider: ${model.provider}`);
 
     let capabilities = "text, " + model.capabilities.join(", ")
     if (!model.capabilities || model.capabilities.length < 1) {
       capabilities = "text-only"
     } 
-    const capsEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__capabilities" });
+    const capsEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info-bold" });
     capsEl.setText(`Capabilities: ${capabilities}`);
+  
+    const descEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info" });
+    descEl.setText(`${model.description}`);
   }
 }

@@ -126,10 +126,7 @@ export default function Message({
       {/* Message content */}
       <div 
         ref={contentRef}
-        className={`${message.content === "*Thinking ...*" ? 
-          "obsidian-agent__chat-single-message__bot-message-thinking-content" :
-          "obsidian-agent__chat-single-message__bot-message-content"
-        }`}
+        className="obsidian-agent__chat-single-message__bot-message-content"
       >
         {message.content}
       </div>

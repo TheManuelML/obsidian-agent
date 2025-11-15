@@ -1,5 +1,7 @@
-import { FuzzySuggestModal, TFile, App } from 'obsidian';
+import { FuzzySuggestModal, TFile, App, FuzzyMatch } from 'obsidian';
 import { getSettings } from 'src/plugin';
+import { Message } from 'src/types/chat';
+import { importConversation } from 'src/utils/chat/chatHistory';
 
 export class ChatHistoryModal extends FuzzySuggestModal<TFile> {
   private onChoose: (file: TFile) => void;
@@ -48,5 +50,27 @@ export class ChatHistoryModal extends FuzzySuggestModal<TFile> {
   onChooseItem(item: TFile): void {
     this.onChoose(item);
     this.close();
+  }
+
+  async renderSuggestion(chatMatch: FuzzyMatch<TFile>, el: HTMLElement): Promise<void> {
+    const { item: chat } = chatMatch;
+    el.empty();
+
+    const wrapper = el.createDiv({ cls: "obsidian-agent__model-modal__suggestion-wrapper" });
+
+    // Text container
+    const textContainer = wrapper.createDiv({ cls: "obsidian-agent__model-modal__text-container" });
+
+    const nameEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__name" });
+    nameEl.setText(chat.basename + (chat === this.activeChat ? " (current)" : ""));
+
+    const firstMessagePreview = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info" });
+    const conversation: Message[] = await importConversation(chat);
+    const lenght = conversation.length;
+    firstMessagePreview.setText(
+      conversation.length > 0 ?
+        `${conversation[lenght - 1].content.slice(0, 100)}...` :
+        `empty chat`
+    );
   }
 }

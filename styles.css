@@ -60,6 +60,19 @@
     min-height: 0;
 }
 
+.obsidian-agent__empty-chat {
+    flex-grow: 1;
+    display: flex;
+    padding: 0 1rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: medium;
+    font-weight: 500;    
+    color: var(--text-faint);
+}
+
 /* Message.tsx */
 .obsidian-agent__chat-single-message__user-message {
     position: relative;
@@ -129,14 +142,6 @@
     white-space: normal;
     word-break: break-word;
     color: var(--text-normal);
-}
-
-.obsidian-agent__chat-single-message__bot-message-thinking-content {
-    overflow-x: auto;
-    
-    white-space: normal;
-    word-break: break-word;
-    color: var(--text-muted) !important; 
 }
 
 /* Input.tsx */
@@ -409,9 +414,13 @@
     margin-bottom: 2px;
 }
 
-.obsidian-agent__model-modal__provider,
-.obsidian-agent__model-modal__capabilities {
+.obsidian-agent__model-modal__info {
     font-size: 0.85em;
+    color: var(--text-muted);
+}
+.obsidian-agent__model-modal__info-bold {
+    font-size: 0.85em;
+    font-weight: bold;
     color: var(--text-muted);
 }
 
