@@ -13,7 +13,6 @@
     </a>
   </div>
   <div>
-    <img src="https://img.shields.io/badge/Release-1.0.0-blueviolet" alt="Release">
     <img src="https://img.shields.io/badge/Licence-MIT-D93192" alt="Release">
     <img src="https://img.shields.io/github/stars/TheManuelML/obsidian-agent?style=social" alt="GitHub stars">
   </div>
