@@ -66,10 +66,12 @@ export class ChatHistoryModal extends FuzzySuggestModal<TFile> {
 
     const firstMessagePreview = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info" });
     const conversation: Message[] = await importConversation(chat);
-    const lenght = conversation.length;
+    const len = conversation.length;
     firstMessagePreview.setText(
       conversation.length > 0 ?
-        `${conversation[lenght - 1].content.slice(0, 100)}...` :
+        conversation[len - 1].content.length > 100 ?
+          `${conversation[len - 1].content.slice(0, 100).replace("\n", " ")}...` :
+          `${conversation[len - 1].content}` :
         `empty chat`
     );
   }
