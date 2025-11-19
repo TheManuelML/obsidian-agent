@@ -416,7 +416,7 @@
 
 .obsidian-agent__model-modal__info {
     font-size: 0.85em;
-    color: var(--text-muted);
+    color: var(--text-faint);
 }
 .obsidian-agent__model-modal__info-bold {
     font-size: 0.85em;

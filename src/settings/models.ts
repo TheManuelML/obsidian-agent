@@ -26,4 +26,10 @@ export const allAvailableModels: Model[] = [
     capabilities: ["vision", "websearch"],
     description: "State-of-the-art thinking model, capable of reasoning over complex problems in code, math, and STEM, as well as analyzing large datasets, codebases, and documents using long context.",
   },
+  {
+    provider: "google",
+    name: "gemini-3-pro-preview",
+    capabilities: ["vision", "websearch"],
+    description: "The best model in the world for multimodal understanding, and our most powerful agentic and vibe-coding model yet, delivering richer visuals and deeper interactivity, all built on a foundation of state-of-the-art reasoning.",
+  },
 ];
