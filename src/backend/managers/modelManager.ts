@@ -26,11 +26,11 @@ export class ModelManager {
       streaming: true, // DEFAULT
       apiKey: providerApiKey,
       safetySettings: [
-        {category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE},
-        {category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE},
-        {category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE},
-        {category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE},
-        {category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE},
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
       ]
     }
     return config
@@ -42,7 +42,7 @@ export class ModelManager {
 
     // Search the selected model on the model list 
     const model = allAvailableModels.find(m => m.name === settings.model)!;
-    
+
     // Configure the model depending on the provider
     const config: ModelConfig = this.getModelConfig(model);
 
@@ -52,6 +52,7 @@ export class ModelManager {
       apiKey: config.apiKey,
       streaming: config.streaming,
       safetySettings: config.safetySettings,
+      apiVersion: "v1beta",
     });
   }
 }
