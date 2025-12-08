@@ -1,4 +1,4 @@
-import { FuzzySuggestModal, TFile, App } from 'obsidian';
+import { FuzzySuggestModal, TFile, App, FuzzyMatch } from 'obsidian';
 
 export class AddContextModal extends FuzzySuggestModal<TFile> {
   private onChoose: (file: TFile) => void;
@@ -59,5 +59,21 @@ export class AddContextModal extends FuzzySuggestModal<TFile> {
   onChooseItem(item: TFile): void {
     this.onChoose(item);
     this.close();
+  }
+
+  renderSuggestion(item: FuzzyMatch<TFile>, el: HTMLElement): void {
+    const { item: file } = item;
+    el.empty();
+
+    const wrapper = el.createDiv({ cls: "obsidian-agent__model-modal__suggestion-wrapper" });
+
+    // Text container
+    const textContainer = wrapper.createDiv({ cls: "obsidian-agent__model-modal__text-container" });
+
+    const nameEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__name" });
+    nameEl.setText(file.basename);
+
+    const pathEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info" });
+    pathEl.setText(file.path);
   }
 }
