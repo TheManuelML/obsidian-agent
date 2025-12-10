@@ -110,7 +110,12 @@ export const handleCall = async (
   if (somethingWentWrong) {
     // Clean up the accumulated content and tool calls
     if (callError) {
-      const errorMsg = `Error while processing the request: ${callError}`;
+      let errorMsg = `Error while processing the request: ${callError}`;        
+      
+      if (callError.includes("[429 ] You exceeded your current quota")) {
+        errorMsg = "You have exceeded your current quota. Please check your plan and usage or consult with your API key provider.";
+      }
+      
       if (getSettings().debug) console.error(errorMsg);
       new Notice (errorMsg, 5000);
       

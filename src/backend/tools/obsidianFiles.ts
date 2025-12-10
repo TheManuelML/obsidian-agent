@@ -1,5 +1,6 @@
 import { tool } from 'langchain';
 import { z } from 'zod';
+import { diffLines } from "diff";
 import { Notice, TFile } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
 import { findClosestFile, findMatchingFolder } from 'src/utils/notes/searching';
@@ -7,7 +8,6 @@ import { getNextAvailableFileName } from "src/utils/notes/renaming";
 import { formatTags } from 'src/utils/notes/tags';
 import { getEmbeds } from 'src/utils/parsing/getEmbeds';
 import { removeImagesFromNote, extractImagesFromNote } from "src/utils/parsing/imageParse";
-import { ModelManager } from 'src/backend/managers/modelManager';
 import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
 import { callModel } from 'src/backend/managers/modelRunner';
 
@@ -78,7 +78,14 @@ export const createNote = tool(async (input: {
 
   // Create the note
   await app.vault.create(fullPath, content);
-  return { success: true, usedLlm: !!topic && useLlm, name, tags, content, fullPath, parentDir: dirPath };
+  return { 
+    success: true, 
+    usedLlm: !!topic && useLlm, 
+    name, 
+    tags, 
+    fullPath, 
+    parentDir: dirPath 
+  };
 }, {
   // Tool schema and metadata
   name: 'create_note',
@@ -145,14 +152,12 @@ export const editNote = tool(async (input: {
     if (tags.length > 0) updatedContent = formatTags(tags) + '\n' + updatedContent;
 
   } else if (useLlm) {
-    const llm = ModelManager.getInstance().getModel();
-
     let sysPrompt = writingSystemPrompt;
     if (context) sysPrompt += `\nYou can use the following context to edit the note: ${context}`;
 
     const humanPrompt = `Update the following markdown note:\n###\n${oldContent}\n###` +
       (newContent ? `Apply the following update or topic: "${newContent}".\n`: '') +
-      `Return the full updated markdown note.`;
+      `Return the full updated markdown note. Do not remove any existing content unless specified (including links and paths).`;
 
     try {
       const response = await callModel(sysPrompt, humanPrompt, []);
@@ -174,10 +179,33 @@ export const editNote = tool(async (input: {
     return { success: false, error: errorMsg };
   }
 
-    // Save the updated content
+  // Clean updated content
+  updatedContent = updatedContent.trim();
+  if (updatedContent.startsWith("\n")) {
+    // Remove the leading new line
+    updatedContent = updatedContent.slice(1);
+  }
+
+  // Save the updated content
   await app.vault.modify(matchedFile, updatedContent);
   
-  return { success: true, useLlm, path: matchedFile.path, oldContent, newContent: updatedContent, tags };
+  // Send the diff instead both old and new texts. This is to save tokens
+  let changes = diffLines(oldContent, updatedContent);
+  let diffText = "";
+  changes.forEach(part => {
+    const prefix = part.added ? "+" : part.removed ? "-" : " ";
+    diffText += prefix + part.value;
+  });
+
+  console.log("Diff:", diffText);
+
+  return { 
+    success: true, 
+    useLlm, 
+    path: matchedFile.path, 
+    diff: diffText, 
+    tags,
+  };
 }, {
   name: 'update_note',
   description: 'Write, replace and edit content of a note. Can use LLM or not, supports tags and context. Specify the note name or detect the active note if no name provided.',
@@ -259,7 +287,7 @@ export const readNote = tool(async (input: {
         // Remove images from the content
         content = await removeImagesFromNote(content);
         
-        return { success: true, content: content, path: matchedFile.path, imageDescriptions};
+        return { success: true, content: "\n" + content, path: matchedFile.path, imageDescriptions};
 
       } else {
         content = await removeImagesFromNote(content);
