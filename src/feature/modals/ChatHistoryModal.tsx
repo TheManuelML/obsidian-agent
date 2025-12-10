@@ -69,9 +69,9 @@ export class ChatHistoryModal extends FuzzySuggestModal<TFile> {
     const len = conversation.length;
     firstMessagePreview.setText(
       conversation.length > 0 ?
-        conversation[len - 1].content.length > 100 ?
-          `${conversation[len - 1].content.slice(0, 100).replace("\n", " ")}...` :
-          `${conversation[len - 1].content}` :
+        conversation[len - 1].content.length > 50 ?
+          `${conversation[len - 1].content.slice(0, 50).replace("\n", " ")}...` :
+          `${conversation[len - 1].content.replace("\n", " ")}` :
         `empty chat`
     );
   }

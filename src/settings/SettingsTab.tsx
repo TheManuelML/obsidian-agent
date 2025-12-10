@@ -4,16 +4,14 @@ import { ChooseModelModal } from "src/feature/modals/ChooseModelModal";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
-  chatsFolder: string;
-
   provider: string;
   model: string;
   googleApiKey: string;
   rules: string;
-
-  readImages: boolean;
-
+  chatsFolder: string;
   debug: boolean;
+  readImages: boolean;
+  generateChatName: boolean;
 }
 
 // Settings tab class
@@ -118,8 +116,20 @@ export class AgentSettingsTab extends PluginSettingTab {
     new Setting(containerEl).setName('Agent skills').setHeading();
 
     new Setting(containerEl)
+      .setName("Auto-generate chat name")
+      .setDesc("Ask the model to automatically generate a name for the chat based on your first message.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.generateChatName)
+          .onChange(async (value) => {
+            this.plugin.settings.generateChatName = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Read images")
-      .setDesc("Automatically extract images from notes when running the 'read note' tool.")
+      .setDesc("Pass images from notes as inputs to the model when running the 'read note' tool. Otherwise, images will be removed and only text content will be readed.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.readImages)
@@ -128,7 +138,6 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
-
     
     // Developer settings
     new Setting(containerEl).setName('Developer settings').setHeading();

@@ -1,9 +1,12 @@
 import { ToolCall } from "langchain";
 import { TFile, Notice } from "obsidian";
-import { exportMessage, removeMessagesAfterIndexN, removeLastNMessages } from "src/utils/chat/chatHistory";
+import { exportMessage, removeMessagesAfterIndexN, removeLastNMessages, importConversation } from "src/utils/chat/chatHistory";
 import { callAgent } from "src/backend/managers/agentRunner";
+import { callModel } from "src/backend/managers/modelRunner";
 import { Attachment, Message } from "src/types/chat";
-import { getSettings } from "src/plugin";
+import { getApp, getSettings } from "src/plugin";
+import { imageToBase64 } from "src/utils/parsing/imageBase64";
+
 
 // This function should call callAgent() and add the new user and bot messages to the History
 // And remove all messages that were after the edited user message
@@ -22,6 +25,21 @@ export const handleCall = async (
     await removeMessagesAfterIndexN(chat, messageIndex);
     // Update the conversation
     updateConversation((prev) => prev.slice(0, messageIndex));
+  }
+
+  // If is the first message, generate a name for the chat file
+  const settings = getSettings();
+  if (settings.generateChatName) {
+    const conversation = await importConversation(chat);
+    if (conversation.length === 0) {
+      const app = getApp();
+  
+      const newName = await generateChatFileName(message, files);
+      const newPath = chat.parent?.path + "/" + newName + ".md";
+  
+      await app.vault.rename(chat, newPath);
+      chat = app.vault.getFileByPath(newPath)!;
+    }
   }
 
   // Create the user message
@@ -172,4 +190,28 @@ export const handleCall = async (
   } else if (botMessage !== null ){
     exportMessage(botMessage, chat);
   }
+}
+
+// Function that generates a name for a chat file
+async function generateChatFileName(userMessage: string, images: File[]) {
+  const base64Images: {
+    base64: string, 
+    mimeType: "image/png" | "image/jpeg"
+  }[] = [];
+  
+  for (const image of images) {
+    const base64 = await imageToBase64(image);
+    base64Images.push({
+      base64: base64,
+      mimeType: image.type === "image/png" ? "image/png" : "image/jpeg",
+    });
+  }
+
+  const newName = await callModel(
+    "You have the task of generating a title for a user-bot chat based on the user message provided to you. The title should be short and descriptive, no more than four words.",
+    userMessage,
+    base64Images,
+  )
+
+  return newName;
 }

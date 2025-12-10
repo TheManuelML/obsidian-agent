@@ -9,4 +9,5 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   chatsFolder: 'Chats',
   debug: false,
   readImages: true,
+  generateChatName: false,
 };

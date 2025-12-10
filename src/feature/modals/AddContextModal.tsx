@@ -71,7 +71,8 @@ export class AddContextModal extends FuzzySuggestModal<TFile> {
     const textContainer = wrapper.createDiv({ cls: "obsidian-agent__model-modal__text-container" });
 
     const nameEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__name" });
-    nameEl.setText(file.basename);
+    const isActive = file.path === this.activeNote?.path;
+    nameEl.setText(this.formatNoteTitle(file.basename, isActive));
 
     const pathEl = textContainer.createDiv({ cls: "obsidian-agent__model-modal__info" });
     pathEl.setText(file.path);
