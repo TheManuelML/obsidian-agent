@@ -9,7 +9,7 @@ import { callModel } from 'src/backend/managers/modelRunner';
 
 
 export const editNoteFunctionDeclaration = {
-  name: "update_note",
+  name: "edit_note",
   description: "Write, replace and edit content of a note. Can use LLM or not, supports tags and context. Specify the note name or detect the active note if no name provided.",
   parameters: {
     type: Type.OBJECT,
@@ -29,13 +29,13 @@ export const editNoteFunctionDeclaration = {
       },
       useLlm: {
         type: Type.BOOLEAN,
-        description: "Whether to use the LLM to generate the updated note",
+        description: "Whether to use the LLM to generate content for the note",
         default: true,
       },
       tags: {
         type: Type.ARRAY,
         items: { type: Type.STRING },
-        description: "Tags to add or update in the note, do not make them up",
+        description: "Tags to add in the note, do not make them up",
         default: [],
       },
       context: {

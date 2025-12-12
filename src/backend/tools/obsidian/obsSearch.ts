@@ -18,7 +18,7 @@ export const vaultSearchFunctionDeclaration = {
         default: true,
       },
     },
-    required: [name],
+    required: ["name"],
   },
 };
 
