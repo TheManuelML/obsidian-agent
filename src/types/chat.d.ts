@@ -33,7 +33,7 @@ export interface Message {
   reasoning: string;
   attachments: Attachment[];
   toolCalls: ToolCall[];
-  processed?: boolean;
+  processed: boolean;
 }
 
 export interface MessageProps {
@@ -56,7 +56,12 @@ export interface ToolCallsProps {
 }
 
 // Reasoning Block
-export interface ReasoningBlockProps {
+export interface ReasoningBlock {
+  title: string;
+  content: string;
+}
+
+export interface ReasoningProps {
   reasoning: string;
   isProcessed: boolean;
 }

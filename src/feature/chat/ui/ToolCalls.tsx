@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { FunctionCall } from "@google/genai";
-import { Wrench, ChevronRight, Check, Copy } from "lucide-react";
+import { Code, ChevronRight } from "lucide-react";
 import type { ToolCallsProps } from "src/types/chat";
 
 export default function ToolCalls({ toolCalls }: ToolCallsProps) {
@@ -30,7 +29,7 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
               className="obsidian-agent__tool-call__header obsidian-agent__tool-call__dropdown-header obsidian-agent__cursor-pointer"
               onClick={() => toggleIndex(index)}
             >
-              <Wrench size={16} />
+              <Code size={14} />
               <span className="obsidian-agent__tool-call__name">
                 {toolCall.name.replace('_', ' ')}
               </span>
@@ -48,12 +47,21 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
                 {toolCall.args && Object.keys(toolCall.args).length > 0 && (
                   <div className="obsidian-agent__tool-call__args">
                     <div className="obsidian-agent__tool-call__args-header">
-                      <strong className="obsidian-agent__tool-call__args-strong">
-                        Args:
-                      </strong>
+                      Arguments:
                     </div>
                     <pre className="obsidian-agent__tool-call__args-pre">
                       {JSON.stringify(toolCall.args, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {toolCall.response && (Object.keys(toolCall.response).length > 0 || toolCall.response.length > 0) && (
+                  <div className="obsidian-agent__tool-call__args">
+                    <div className="obsidian-agent__tool-call__args-header">
+                      Response:
+                    </div>
+                    <pre className="obsidian-agent__tool-call__args-pre">
+                      {JSON.stringify(toolCall.response, null, 2)}
                     </pre>
                   </div>
                 )}

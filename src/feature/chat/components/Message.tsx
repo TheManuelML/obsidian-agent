@@ -121,8 +121,8 @@ export default function Message({
     <div className="obsidian-agent__chat-single-message__bot-message">
       {/* Reasoning block */}
       <ReasoningBlock 
-        reasoning={message.reasoning || ""} 
-        isProcessed={message.processed !== false}
+        reasoning={message.reasoning} 
+        isProcessed={message.processed}
       />
     
       {/* Tool calls */}

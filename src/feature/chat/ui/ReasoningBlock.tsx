@@ -1,118 +1,156 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Brain, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronRight } from "lucide-react";
 import { MarkdownRenderer, Component } from "obsidian";
 import { getApp } from "src/plugin";
-import { ReasoningBlockProps } from "src/types/chat";
+import { ReasoningBlock, ReasoningProps } from "src/types/chat";
 
-export default function ReasoningBlock({ reasoning, isProcessed }: ReasoningBlockProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const componentRef = useRef<Component | null>(null);
-
-  const cleanGoogleReasoning = useCallback((content: string): string => {
-    let t = content;
-    // "*"
-    t = t.replace(/^\s*\*\s*$/gm, "");
-    // "***Title**" → "**Title**"
-    t = t.replace(/\*{3}([^*]+)\*{2}/g, "**$1**"); 
-    t = t.replace(/\*{3}([^*]+)\*{3}/g, "**$1**");
-    t = t.replace(/\*([^*]+)\*\*/g, "**$1**");
-
-    // "***" or "*"
-    t = t.replace(/^\*\s*(?!\s)/gm, ""); 
+export default function Reasoning({ 
+  reasoning, 
+  isProcessed 
+}: ReasoningProps) {
+  const [reasoningBlocks, setReasoningBlocks] = useState<ReasoningBlock[]>([]);
+  const [openBlocks, setOpenBlocks] = useState<Set<number>>(new Set());
   
-    t = t.replace(/\n{3,}/g, "\n");
-    t = t.replace(/\n{2,}/g, "\n");
+  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const componentRefs = useRef<(Component | null)[]>([]);
+
+  const cleanGoogleReasoning = (content: string): string => {
+    let t = content;
+
+    t = t.replace(/^\s*\*\s*$/gm, "");
+  
+    t = t.replace(/^\*+(?=\w)/gm, "**");
+    t = t.replace(/(?<=\w)\*+$/gm, "**");
+  
+    t = t.replace(/\n{3,}/g, "\n\n");
+  
     return t.trim();
-  }, []);
+  };
 
   // Handle Obsidian links
-  const preprocess = useCallback((content: string): string => {
+  const preprocess = (content: string): string => {
     if (!content) return "";
     // Convert [[link]] to obsidian://open?file=link
     return content.replace(".md]]", "]]").replace(/\[\[([^\]]+)\]\]/g, (_, p1) => {
       const encoded = encodeURIComponent(p1.trim());
       return `[${p1.trim()}](obsidian://open?file=${encoded})`;
     });
-  }, []);
+  };
+
+  // Return reasoning blocks
+  const getReasoningBlocks = (content: string): ReasoningBlock[] => {
+    const regex = /\*\*([^*]+)\*\*/g;
+    const blocks: ReasoningBlock[] = [];
+    const headers: { title: string; start: number; end: number }[] = [];
+  
+    let match: RegExpExecArray | null;
+  
+    while ((match = regex.exec(content)) !== null) {
+      headers.push({
+        title: match[1].trim(),
+        start: match.index,
+        end: regex.lastIndex
+      });
+    }
+  
+    if (headers.length === 0) return [];
+  
+    for (let i = 0; i < headers.length; i++) {
+      const { title, end } = headers[i];
+      const nextStart = headers[i + 1]?.start ?? content.length;
+  
+      const blockContent = content.slice(end, nextStart).trim();
+  
+      blocks.push({ title, content: blockContent });
+    }
+  
+    return blocks;
+  };
+
+  const toggleBlock = (index: number) => {
+    setOpenBlocks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) newSet.delete(index);
+      else newSet.add(index);
+      return newSet;
+    });
+  };  
+
+  useEffect(() => {
+    if (!isProcessed) return;
+    if (!reasoning) return;
+  
+    const cleaned = cleanGoogleReasoning(reasoning);
+    const pre = preprocess(cleaned);
+    const blocks = getReasoningBlocks(pre);
+  
+    setReasoningBlocks(blocks);
+  }, [reasoning, isProcessed]);
 
   useEffect(() => {
     const app = getApp();
-    if (!contentRef.current || !isOpen || !reasoning) return;
-
-    // Render markdown via Obsidian after preprocessing
-    if (componentRef.current) {
-      componentRef.current.unload();
-      componentRef.current = null;
-    }
-
-    while (contentRef.current.firstChild) {
-      contentRef.current.removeChild(contentRef.current.firstChild);
-    }
-
-    const container = document.createElement("div");
-    contentRef.current.appendChild(container);
-    
-    const newComponent = new Component();
-    componentRef.current = newComponent;
-    
-    const processed = preprocess(reasoning);
-    const clean = cleanGoogleReasoning(processed);
-    MarkdownRenderer.render(app, clean, container, '', newComponent);
-
-    // Cleanup
-    return () => {
-      if (componentRef.current === newComponent) {
-        newComponent.unload();
-        componentRef.current = null;
+  
+    reasoningBlocks.forEach((block, index) => {
+      if (!openBlocks.has(index)) return;
+  
+      const container = contentRefs.current[index];
+      if (!container) return;
+  
+      container.innerHTML = "";
+  
+      if (componentRefs.current[index]) {
+        componentRefs.current[index]?.unload();
       }
+  
+      const component = new Component();
+      componentRefs.current[index] = component;
+  
+      MarkdownRenderer.render(app, block.content, container, "", component);
+    });
+  
+    return () => {
+      componentRefs.current.forEach((c) => c?.unload());
     };
-  }, [reasoning, isOpen, preprocess]);
+  }, [openBlocks, reasoningBlocks]);
 
-  // Check if reasoning exists and has content
-  if (!reasoning || !reasoning.trim()) {
-    return null;
-  }
-
-  // Only show the dropdown button when message generation is complete
-  if (!isProcessed) {
-    return null;
-  }
-
+  if (!reasoning || !reasoning.trim()) return null;
+  if (!isProcessed) return null;
+  
   return (
     <div className="obsidian-agent__reasoning-block__container">
-      <div
-        className={`obsidian-agent__reasoning-block${
-          isOpen ? " obsidian-agent__reasoning-block-open" : ""
-        }`}
-      >
+      {reasoningBlocks.map((block, index) => (
         <div
-          className="obsidian-agent__reasoning-block__header obsidian-agent__reasoning-block__dropdown-header obsidian-agent__cursor-pointer"
-          onClick={() => setIsOpen(prev => !prev)}
+          key={index}
+          className={`obsidian-agent__reasoning-block${
+            openBlocks.has(index) ? " obsidian-agent__reasoning-block-open" : ""
+          }`}
         >
-          <span className="obsidian-agent__reasoning-block__name">
-            Reasoning summary
-          </span>
-          <span
-            className={`obsidian-agent__reasoning-block__dropdown-arrow obsidian-agent__margin-left-auto${
-              isOpen ? " obsidian-agent__reasoning-block__dropdown-arrow-open" : ""
-            }`}
+          <div
+            className="obsidian-agent__reasoning-block__header obsidian-agent__reasoning-block__dropdown-header obsidian-agent__cursor-pointer"
+            onClick={() => toggleBlock(index)}
           >
-            <ChevronRight size={14} />
-          </span>
-        </div>
-
-        {isOpen && (
-          <div className="obsidian-agent__animate__reasoning-block-dropdown-content">
-            <div 
-              ref={contentRef}
-              className="obsidian-agent__reasoning-block__content"
+            <span className="obsidian-agent__reasoning-block__name">
+              {block.title}
+            </span>
+            <span
+              className={`obsidian-agent__reasoning-block__dropdown-arrow ${
+                openBlocks.has(index) ? " obsidian-agent__reasoning-block__dropdown-arrow-open" : ""
+              }`}
             >
-              {reasoning}
-            </div>
+              <ChevronRight size={14} />
+            </span>
           </div>
-        )}
-      </div>
+
+          {openBlocks.has(index) && (
+            <div className="obsidian-agent__animate__reasoning-block-dropdown-content">
+              <div 
+                ref={(el) => { contentRefs.current[index] = el }}
+                className="obsidian-agent__reasoning-block__content"
+              ></div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
