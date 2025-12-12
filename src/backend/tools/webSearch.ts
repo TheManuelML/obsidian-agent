@@ -1,36 +1,80 @@
-import { tool } from 'langchain';
-import { z } from 'zod';
-import { callModel } from "src/backend/managers/modelRunner";
+import { 
+  GoogleGenAI,
+  GoogleGenAIOptions,
+  SafetySetting,
+  HarmCategory,
+  HarmBlockThreshold,
+  GenerateContentConfig,
+  Part, 
+  Type,
+  ApiError,
+  GenerateContentResponse,
+} from '@google/genai';
+import { getSettings } from 'src/plugin';
+import { prepareModelInputs } from 'src/backend/managers/prompts/inputs';
 
-// Tool to search notes and folders
-export const webSearch = tool(async (input: {
-  query: string 
-}) => {
-  // Declare input
-  const { query } = input;  
-  
+
+export const webSearchFunctionDeclaration = {
+  name: "web_search",
+  description: "Search someting in the web",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      query: {
+        type: Type.STRING,
+        description: "Query for the web search",
+      },
+    },
+    required: ["query"],
+  },
+};
+
+// Do a web search using Google GenAI
+export async function webSearch(
+  query: string,
+) {
+  const settings = getSettings();
+
+  // Initialize model and its configuration
+  const config: GoogleGenAIOptions = { apiKey: settings.googleApiKey, apiVersion: "v1beta" };
+  const ai = new GoogleGenAI(config);
+
+  const safetySettings: SafetySetting[] = [
+    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  ];
+
+  const generationConfig: GenerateContentConfig = {
+    systemInstruction: "You are a web search tool that provides relevant information based on user queries.",
+    safetySettings: safetySettings,
+    tools: [{ googleSearch: {} }],
+  };
+  const inputs: Part[] = await prepareModelInputs(query, []);
+
+  // Call the model
+  let response: GenerateContentResponse | undefined;
   try {
-    const groundingSearch = await callModel("You are a helpful assistant", query, [], true);
-  
-    if (typeof groundingSearch === "string") {
-      return { success: false, error: 'Web search failed: ' + groundingSearch};
-    }
-  
-    return {
-      success: true,
-      query,
-      response: groundingSearch.response,
-      sources: groundingSearch.sources,
-    };
+    response = await ai.models.generateContent({
+      model: settings.model,
+      contents: inputs,
+      config: generationConfig,
+    });
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    return { success: false, error: `An error occurred during web search: ${errorMsg}` };
+    if (error instanceof ApiError) {
+      if (error.status === 403) return { success: false, response: "API quota exceeded. Please check your Google Cloud account."};
+      if (error.status === 503) return { success: false, response: "API service overloaded. Please try again later." }
+      return { success: false, response: `API Error: ${error.message}` };
+    }
+    return { success: false, response: `Unexpected Error: ${error}` };
   }
-}, {
-  // Tool schema and metadata
-  name: 'web_search',
-  description: 'Search someting in the web',
-  schema: z.object({
-    query: z.string().describe('Query for the web search')
-  }),
-});
+  
+  if (!response || !response.text) return { success: false, response: "Error: No results found."};
+  
+  return {
+    success: true,
+    response: response.text,
+  }
+};

@@ -7,12 +7,28 @@ export interface AgentSettings {
   provider: string;
   model: string;
   googleApiKey: string;
+  thinkingBudget: number;
   rules: string;
   chatsFolder: string;
-  debug: boolean;
-  readImages: boolean;
+  maxHistoryTurns: number;
   generateChatName: boolean;
+  readImages: boolean;
+  debug: boolean;
 }
+
+// Default settings for the plugin
+export const DEFAULT_SETTINGS: AgentSettings = {
+  provider: "google",
+  model: "gemini-2.0-flash",
+  googleApiKey: '',
+  thinkingBudget: -1,
+  rules: '',
+  chatsFolder: 'Chats',
+  maxHistoryTurns: 2,
+  generateChatName: false,
+  readImages: true,
+  debug: false,
+};
 
 // Settings tab class
 export class AgentSettingsTab extends PluginSettingTab {
@@ -27,24 +43,6 @@ export class AgentSettingsTab extends PluginSettingTab {
   display(): void {
     let { containerEl } = this;
     containerEl.empty();
-
-    // Chat history folder
-    new Setting(containerEl)
-      .setName("Chat history folder")
-      .setDesc("Select the folder where your chat histories will be saved.")
-      .addDropdown((dropdown: DropdownComponent) => {
-        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder && !file.isRoot());
-        folders.forEach(folder => {
-          dropdown.addOption(folder.path, folder.name);
-        });
-        
-        dropdown
-          .setValue(this.plugin.settings.chatsFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.chatsFolder = value;
-            await this.plugin.saveSettings();
-          });
-      });
 
     // Language model settings
     new Setting(containerEl)
@@ -112,11 +110,48 @@ export class AgentSettingsTab extends PluginSettingTab {
       text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
     });
 
+    // Chat history folder
+    new Setting(containerEl)
+    .setName("Chat history folder")
+    .setDesc("Select the folder where your chat histories will be saved.")
+    .addDropdown((dropdown: DropdownComponent) => {
+      const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder && !file.isRoot());
+      folders.forEach(folder => {
+        dropdown.addOption(folder.path, folder.name);
+      });
+      
+      dropdown
+        .setValue(this.plugin.settings.chatsFolder)
+        .onChange(async (value) => {
+          this.plugin.settings.chatsFolder = value;
+          await this.plugin.saveSettings();
+        });
+    });
+
+    // Max turns settings
+    new Setting(containerEl)
+      .setName("Max history messages")
+      .setDesc("Set the maximum number of previous turns (user & bot messages) to include in the memory history. Set to 0 to disable history.")
+      .addText((text) =>
+        text
+          .setValue(String(this.plugin.settings.maxHistoryTurns))
+          .onChange(async (value) => {
+            const n = Number(value);
+            if (Number.isNaN(n) || n < 0) {
+              this.plugin.settings.maxHistoryTurns = 2;
+              await this.plugin.saveSettings();
+            } else {
+              this.plugin.settings.maxHistoryTurns = n;
+              await this.plugin.saveSettings();
+            }
+          })
+      );
+
     // Agent skills
     new Setting(containerEl).setName('Agent skills').setHeading();
 
     new Setting(containerEl)
-      .setName("Auto-generate chat name")
+      .setName("Generate chat name")
       .setDesc("Ask the model to automatically generate a name for the chat based on your first message.")
       .addToggle((toggle) =>
         toggle
@@ -153,6 +188,5 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
-    
   }
 }

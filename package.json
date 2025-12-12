@@ -25,12 +25,7 @@
 	},
 	"dependencies": {
 		"@google/genai": "^1.25.0",
-		"@langchain/community": "^1.0.0",
-		"@langchain/core": "^1.0.1",
-		"@langchain/google-genai": "^1.0.0",
-		"@langchain/langgraph": "^1.0.1",
 		"diff": "^8.0.2",
-		"langchain": "^1.0.1",
 		"lucide-react": "^0.503.0",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0"

@@ -492,7 +492,6 @@
 .obsidian-agent__tool-call__args-strong,
 .obsidian-agent__tool-call__result-strong {
     font-size: 0.85em;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
 
     color: var(--text-muted);
@@ -526,6 +525,53 @@
     transition: transform 0.2s;
 }
 .obsidian-agent__tool-call-open .obsidian-agent__tool-call__dropdown-arrow {
+    transform: rotate(90deg);
+}
+
+/* Reasoning Block Styling */
+.obsidian-agent__reasoning-block__container {
+    display: flex;
+    flex-direction: column;
+    padding-top: 1rem;
+}
+
+.obsidian-agent__reasoning-block {
+    background: var(--background-secondary);
+}
+
+.obsidian-agent__reasoning-block__header {
+    display: flex;
+    align-items: start;
+    color: var(--text-faint);
+    font-size: var(--font-ui-medium);
+    
+}
+
+.obsidian-agent__reasoning-block__content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-faint);
+    font-style: italic;
+    font-size: var(--font-ui-medium);
+    margin-right: 0.2rem;
+}
+
+/* Reasoning block dropdown styles */
+.obsidian-agent__reasoning-block__dropdown-header {
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.obsidian-agent__reasoning-block__dropdown-arrow {
+    display: inline-block;
+    font-size: 1.1em;
+    margin-left: 0.5rem;
+    transform: rotate(0deg);
+    transition: transform 0.2s;
+    color: var(--text-faint);
+}
+
+.obsidian-agent__reasoning-block-open .obsidian-agent__reasoning-block__dropdown-arrow {
     transform: rotate(90deg);
 }
 
@@ -659,6 +705,13 @@
     margin-top: 0.5rem;
     animation: obsidian-agent__animation__dropdown-fade-in 0.2s;
 }
+
+/* Dropdown animation for reasoning block */
+.obsidian-agent__animate__reasoning-block-dropdown-content {
+    margin-top: 0.5rem;
+    animation: obsidian-agent__animation__dropdown-fade-in 0.2s;
+}
+
 @keyframes obsidian-agent__animation__dropdown-fade-in {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }

@@ -25,16 +25,34 @@ export async function extractImagesFromNote(content: string) {
   // Detect images, capture MIME type and base64
   const imageRegex = /!\[[^\]]*]\(data:(image\/[a-zA-Z]+);base64,([^)]+)\)/g;
 
-  const images: Array<{ base64: string; mimeType: "image/png" | "image/jpeg" }> = [];
+  const images: File[] = [];
   let match: RegExpExecArray | null;
+
+  // base64 → File object
+  function base64ToFile(base64: string, mimeType: string, filename: string): File {
+    const byteChars = atob(base64);
+    const byteNumbers = new Array(byteChars.length);
+
+    for (let i = 0; i < byteChars.length; i++) {
+      byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    return new File([byteArray], filename, { type: mimeType });
+  }
+
+  let index = 0;
 
   while ((match = imageRegex.exec(content)) !== null) {
     const mime = match[1] as "image/png" | "image/jpeg";
     const base64 = match[2];
 
-    // Filter only png and jpeg
     if (mime === "image/png" || mime === "image/jpeg") {
-      images.push({ base64, mimeType: mime });
+      const filename = `embedded-image-${index}.${mime === "image/png" ? "png" : "jpg"}`;
+      const file = base64ToFile(base64, mime, filename);
+
+      images.push(file);
+      index++;
     }
   }
 

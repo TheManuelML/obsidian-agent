@@ -1,15 +1,19 @@
-import { ToolCall } from "langchain";
 import { TFile, Notice } from "obsidian";
-import { exportMessage, removeMessagesAfterIndexN, removeLastNMessages, importConversation } from "src/utils/chat/chatHistory";
+import { FunctionCall } from "@google/genai";
+import { getApp, getSettings } from "src/plugin";
+import { 
+  exportMessage, 
+  removeMessagesAfterIndexN, 
+  removeLastNMessages, 
+  importConversation,
+} from "src/utils/chat/chatHistory";
 import { callAgent } from "src/backend/managers/agentRunner";
 import { callModel } from "src/backend/managers/modelRunner";
-import { Attachment, Message } from "src/types/chat";
-import { getApp, getSettings } from "src/plugin";
-import { imageToBase64 } from "src/utils/parsing/imageBase64";
+import { Attachment, Message, ToolCall } from "src/types/chat";
 
 
-// This function should call callAgent() and add the new user and bot messages to the History
-// And remove all messages that were after the edited user message
+// This function call callAgent and writes the new user and bot messages to the obsidian chat file 
+// If you are regenerating a message this will remove all messages that were generated after the regenerated user message
 export const handleCall = async (
   chat: TFile,
   messageIndex: number | null,
@@ -19,6 +23,8 @@ export const handleCall = async (
   updateConversation: (value: Message[] | ((prev: Message[]) => Message[])) => void,
   isRegeneration: boolean,
 ) => {
+  const settings = getSettings();
+
   // If regenerating, remove the messages after the regenerated message
   if (isRegeneration && messageIndex !== null) {
     // Rewrites the chat file from messages from 0 to n. If n is 0 empties the chat file
@@ -28,24 +34,29 @@ export const handleCall = async (
   }
 
   // If is the first message, generate a name for the chat file
-  const settings = getSettings();
   if (settings.generateChatName) {
     const conversation = await importConversation(chat);
     if (conversation.length === 0) {
       const app = getApp();
   
       const newName = await generateChatFileName(message, files);
-      const newPath = chat.parent?.path + "/" + newName + ".md";
+      if (newName) {
+        const newPath = chat.parent?.path + "/" + newName + ".md";
   
-      await app.vault.rename(chat, newPath);
-      chat = app.vault.getFileByPath(newPath)!;
+        await app.vault.rename(chat, newPath);
+        chat = app.vault.getFileByPath(newPath)!;
+      };
     }
   }
+
+  // Get the conversation before adding the new messages
+  const conversation = await importConversation(chat);
 
   // Create the user message
   const userMessage: Message = {
     sender: "user",
     content: message,
+    reasoning: "",
     attachments,
     toolCalls: [],
     processed: false,
@@ -59,6 +70,7 @@ export const handleCall = async (
   const tempMessage: Message = {
     sender: "bot",
     content: "",
+    reasoning: "",
     attachments: [],
     toolCalls: [],
     processed: false,
@@ -70,13 +82,17 @@ export const handleCall = async (
   // The calls to the agent are in streaming mode
   // We need to update the content of the tmp message
   let accumulatedContent = "";
+  let accumulatedReasoning = "";
   let accumulatedToolCalls: ToolCall[] = []
-  const updateMessage = (chunk: string, toolCalls: ToolCall[]) => {
+  const updateMessage = (chunk: string, reasoning: string, toolCalls: ToolCall[]) => {
     // Add upcoming chunks
     if (chunk) accumulatedContent += chunk;
     
+    // Add reasoning chunks
+    if (reasoning) accumulatedReasoning += `\n\n*${reasoning}*`;
+
     // Add upcoming toolcalls
-    if (toolCalls && toolCalls.length) accumulatedToolCalls = [...accumulatedToolCalls, ...toolCalls];
+    if (toolCalls && toolCalls.length > 0) accumulatedToolCalls = [...accumulatedToolCalls, ...toolCalls];
 
     // Update the conversation with the upcoming chunks
     updateConversation((prev: Message[]) => {
@@ -86,6 +102,7 @@ export const handleCall = async (
       update[lastIndex] = {
         ...update[lastIndex],
         content: accumulatedContent,
+        reasoning: accumulatedReasoning,
         toolCalls: accumulatedToolCalls
       };
       return update;
@@ -95,7 +112,7 @@ export const handleCall = async (
   // Call
   let callError: string = "";
   try {
-    await callAgent(chat, message, attachments, files, updateMessage);
+    await callAgent(conversation, message, attachments, files, updateMessage);
   } catch (error) {
     callError = String(error);
   };
@@ -110,27 +127,21 @@ export const handleCall = async (
   if (somethingWentWrong) {
     // Clean up the accumulated content and tool calls
     if (callError) {
-      let errorMsg = `Error while processing the request: ${callError}`;        
-      
-      if (callError.includes("[429 ] You exceeded your current quota")) {
-        errorMsg = "You have exceeded your current quota. Please check your plan and usage or consult with your API key provider.";
-      }
-      
-      if (getSettings().debug) console.error(errorMsg);
-      new Notice (errorMsg, 5000);
+      if (getSettings().debug) console.error(callError);
+      new Notice (callError, 5000);
       
       accumulatedContent = "";
-      accumulatedToolCalls = [];
     }
     
     // Create an error message to show on the chat, replacing the empty tmp message
     errorMessage = {
       sender: "error",
-      content: callError
-        ? "*Something went wrong while processing the request.*"
-        : "*No answer was generated for the request.*",
+      content: callError ? 
+        `${accumulatedContent}\n*Something went wrong while processing the request.*` : 
+        "*No answer was generated for the request.*",
+      reasoning: accumulatedReasoning,
       attachments: [],
-      toolCalls: [],
+      toolCalls: accumulatedToolCalls,
       processed: true,
     };
 
@@ -152,6 +163,7 @@ export const handleCall = async (
     botMessage = {
       sender: "bot",
       content: accumulatedContent,
+      reasoning: accumulatedReasoning,
       attachments: [],
       toolCalls: accumulatedToolCalls,
       processed: true,
@@ -199,24 +211,11 @@ export const handleCall = async (
 
 // Function that generates a name for a chat file
 async function generateChatFileName(userMessage: string, images: File[]) {
-  const base64Images: {
-    base64: string, 
-    mimeType: "image/png" | "image/jpeg"
-  }[] = [];
-  
-  for (const image of images) {
-    const base64 = await imageToBase64(image);
-    base64Images.push({
-      base64: base64,
-      mimeType: image.type === "image/png" ? "image/png" : "image/jpeg",
-    });
-  }
-
   const newName = await callModel(
     "You have the task of generating a title for a user-bot chat based on the user message provided to you. The title should be short and descriptive, no more than four words.",
     userMessage,
-    base64Images,
-  )
+    images,
+  );
 
   return newName;
 }

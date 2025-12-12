@@ -1,5 +1,4 @@
 import { TFile } from "obsidian";
-import { ToolCall } from "langchain";
 
 // Input
 export interface InputProps {
@@ -28,14 +27,10 @@ export interface FormProps {
 }
 
 // Message
-export interface Attachment {
-  path: string;
-  basename: string;
-}
-
 export interface Message {
   sender: "user" | "bot" | "error";
   content: string;
+  reasoning: string;
   attachments: Attachment[];
   toolCalls: ToolCall[];
   processed?: boolean;
@@ -50,11 +45,28 @@ export interface MessageProps {
 }
 
 // Tools
+export interface ToolCall {
+  name: string;
+  args?: Record<string, any>;
+  response?: Record<string, any>;
+}
+
 export interface ToolCallsProps {
   toolCalls: ToolCall[];
 }
 
+// Reasoning Block
+export interface ReasoningBlockProps {
+  reasoning: string;
+  isProcessed: boolean;
+}
+
 // Attachments
+export interface Attachment {
+  path: string;
+  basename: string;
+}
+
 export interface AttachmentsProps {
   attachments: Attachment[];
 }

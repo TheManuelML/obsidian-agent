@@ -1,71 +1,61 @@
-import { HumanMessage, SystemMessage } from "langchain";
-import { ModelManager } from "src/backend/managers/modelManager";
+import { 
+  GoogleGenAI,
+  GoogleGenAIOptions,
+  GenerateContentConfig,
+  Part,
+  SafetySetting, 
+  HarmCategory, 
+  HarmBlockThreshold,
+  ApiError,
+  GenerateContentResponse,
+} from "@google/genai";
+import { getSettings } from "src/plugin";
+import { prepareModelInputs } from "src/backend/managers/prompts/inputs";
 
-// Function that calls the agent
+
+// Function that calls the llm model without chat history and tools binded
 export async function callModel(
   system: string,
   user: string,
-  base64Images: Array<{base64: string, mimeType: "image/png" | "image/jpeg"}>,
-  webSearch: boolean = false, // If to use web search
-) {
-  // Get the instance of the model
-  const llm = ModelManager.getInstance().getModel();
-  // Prepare the inputs
-  const input = await prepareModelInputs(system, user, base64Images);
-  
-  if (webSearch) {
-    // Create tool
-    const searchTool = {
-      googleSearch: {}
-    };
+  files: File[],
+): Promise<string> {
+  const settings = getSettings();
 
-    // Bind the web search tool to the model
-    // And call the model
-    const response = await llm
-      .bindTools([searchTool])
-      .invoke(input);
+  // Initialize model and its configuration
+  const config: GoogleGenAIOptions = { apiKey: settings.googleApiKey, apiVersion: "v1beta" };
+  const ai = new GoogleGenAI(config);
 
-    //! Sources cannot be extracted yet
-    //! https://github.com/langchain-ai/langchainjs/issues/9264
+  const safetySettings: SafetySetting[] = [
+    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  ];
 
-    return {
-      response: response.content.toString(),
-      //sources: [],
-    };
-  }
+  const generationConfig: GenerateContentConfig = {
+    systemInstruction: system,
+    safetySettings: safetySettings,
+  };
+  const inputs: Part[] = await prepareModelInputs(user, files);
 
   // Call the model
-  const response = await llm.bindTools([]).invoke(input);
-  return response.content.toString();
-}
-
-// Function that prepare the prompts into inputs for the agent
-async function prepareModelInputs(
-  system: string,
-  user: string,
-  filesBase64: Array<{base64: string, mimeType: "image/png" | "image/jpeg"}>,
-) {
-  const inputs: Array<{
-    type: "text" | "image",
-    text?: string,
-    source_type?: "base64"
-    data?: string,
-    mime_type?: "image/png" | "image/jpeg",
-  }> = [{ type: "text", text: user }];
-
-  if (filesBase64 && filesBase64.length > 0) {
-    for (const f64 of filesBase64) {
-      inputs.push({
-        type: "image",
-        source_type: "base64",
-        data: f64.base64,
-        mime_type: f64.mimeType,
-      })
+  let response: GenerateContentResponse | undefined;
+  try {
+    response = await ai.models.generateContent({
+      model: settings.model,
+      contents: inputs,
+      config: generationConfig,
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 429) throw new Error("API quota exceeded. Please check your Google Cloud account.");
+      if (error.status === 503) throw new Error("API service overloaded. Please try again later.");
+      throw new Error(`API Error: ${error.message}`);
     }
+    throw new Error(`Unexpected Error: ${String(error)}`);
   }
 
-  return [
-    new SystemMessage({content: system}),
-    new HumanMessage({ content: inputs })
-  ]
+  if (!response) throw new Error("No message generated.");
+  return response.text || "";
 }

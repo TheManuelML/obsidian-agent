@@ -5,6 +5,7 @@ import { getApp } from "src/plugin";
 import { handleCall } from "src/feature/chat/handlers/aiHandlers";
 import Attachments from "src/feature/chat/ui/Attachments";
 import ToolCalls from "src/feature/chat/ui/ToolCalls";
+import ReasoningBlock from "src/feature/chat/ui/ReasoningBlock";
 import Input from "src/feature/chat/components/Input";
 import { MessageProps } from "src/types/chat";
 
@@ -118,11 +119,17 @@ export default function Message({
   
   return (
     <div className="obsidian-agent__chat-single-message__bot-message">
+      {/* Reasoning block */}
+      <ReasoningBlock 
+        reasoning={message.reasoning || ""} 
+        isProcessed={message.processed !== false}
+      />
+    
       {/* Tool calls */}
       {message.toolCalls.length > 0 && (
         <ToolCalls toolCalls={message.toolCalls} />        
       )}
-      
+    
       {/* Message content */}
       <div 
         ref={contentRef}

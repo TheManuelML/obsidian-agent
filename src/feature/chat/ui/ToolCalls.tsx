@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolCall } from "langchain";
+import { FunctionCall } from "@google/genai";
 import { Wrench, ChevronRight, Check, Copy } from "lucide-react";
 import type { ToolCallsProps } from "src/types/chat";
 
@@ -13,12 +13,6 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
     );
   };
 
-  const handleCopy = (toolCall: ToolCall, index: number) => {
-    navigator.clipboard.writeText(JSON.stringify(toolCall.args, null, 2));
-    setCopiedIndex(index);
-    window.setTimeout(() => setCopiedIndex(null), 1000);
-  };
-
   return (
     <div className="obsidian-agent__tool-call__container">
       {toolCalls.map((toolCall, index) => {
@@ -27,7 +21,7 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
 
         return (
           <div
-            key={toolCall.id || index}
+            key={index}
             className={`obsidian-agent__tool-call${
               isOpen ? " obsidian-agent__tool-call-open" : ""
             }`}
@@ -54,22 +48,8 @@ export default function ToolCalls({ toolCalls }: ToolCallsProps) {
                 {toolCall.args && Object.keys(toolCall.args).length > 0 && (
                   <div className="obsidian-agent__tool-call__args">
                     <div className="obsidian-agent__tool-call__args-header">
-                      <button
-                        title="Copy arguments"
-                        onClick={() => handleCopy(toolCall, index)}
-                        className="obsidian-agent__button-icon"
-                      >
-                        {isCopied ? (
-                          <Check
-                            size={16}
-                            className="obsidian-agent__animate__copy-check-animate"
-                          />
-                        ) : (
-                          <Copy size={16} />
-                        )}
-                      </button>
                       <strong className="obsidian-agent__tool-call__args-strong">
-                        Response:
+                        Args:
                       </strong>
                     </div>
                     <pre className="obsidian-agent__tool-call__args-pre">

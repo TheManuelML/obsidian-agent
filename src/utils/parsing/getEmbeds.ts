@@ -3,19 +3,21 @@ import { getApp } from "src/plugin";
 import path from "path";
 import fs from "fs";
 
-export function getEmbeds(file: TFile) {
+
+// Return File objects for every embedded image in a note
+export function getEmbeds(file: TFile) { 
   if (file.extension !== "md") return [];
 
   const app = getApp();
-  
   const meta = app.metadataCache.getFileCache(file);
   const embeddedFiles = meta?.embeds?.map((embed) => embed.link);
-  
-  if (embeddedFiles && embeddedFiles.length > 0) {  
-    const base64Images: Array<{base64: string, mimeType: "image/png" | "image/jpeg"}> = [];
-    
+
+  if (embeddedFiles && embeddedFiles.length > 0) {
+    const images: File[] = [];
+
     let vaultPath = "";
-    let adapter = app.vault.adapter;
+    const adapter = app.vault.adapter;
+
     if (adapter instanceof FileSystemAdapter) {
       vaultPath = adapter.getBasePath();
     } else {
@@ -24,32 +26,45 @@ export function getEmbeds(file: TFile) {
     }
 
     for (const embedFile of embeddedFiles) {
-      // If not an image, skip
-      if (!embedFile.endsWith(".png") && !embedFile.endsWith(".jpg") && !embedFile.endsWith(".jpeg")) continue;
-
-
+      // Ignore non-image embeds
+      if (
+        !embedFile.endsWith(".png") &&
+        !embedFile.endsWith(".jpg") &&
+        !embedFile.endsWith(".jpeg")
+      ) {
+        continue;
+      }
 
       try {
-        // Search the file by its name
-        const match = app.vault.getFiles().find(f => f.extension !== "md" && f.name === embedFile);
-        
-        if (match) {
-          const filePath = path.join(vaultPath, match.path);
-          
-          const buffer = fs.readFileSync(filePath);
+        // Find referenced file in vault
+        const match = app.vault
+          .getFiles()
+          .find((f) => f.extension !== "md" && f.name === embedFile);
 
-          base64Images.push({
-            base64: buffer.toString("base64"), 
-            mimeType: match.extension === "png" ? "image/png" : "image/jpeg"
-          });
-        }
+        if (!match) continue;
+
+        const filePath = path.join(vaultPath, match.path);
+
+        const buffer = fs.readFileSync(filePath);
+
+        // Detect MIME type
+        const mimeType =
+          match.extension === "png"
+            ? "image/png"
+            : "image/jpeg";
+
+        // Convert Buffer → File (copy into ArrayBuffer-backed Uint8Array)
+        const uint8Array = Uint8Array.from(buffer);
+        const fileObj = new File([uint8Array], match.name, { type: mimeType });
+
+        images.push(fileObj);
       } catch (error) {
         console.error("Error reading embedded file:", error);
         return [];
       }
     }
 
-    return base64Images;
+    return images;
   }
 
   return [];
