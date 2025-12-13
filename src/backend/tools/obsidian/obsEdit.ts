@@ -69,7 +69,7 @@ export async function editNote(
       const errorMsg = "It seems like there is not an active note, and you haven't opened any recently."
       if (settings.debug) console.error(errorMsg);
       
-      return { success: false, error: errorMsg}
+      return { success: false, response: errorMsg}
     }
   } else if (fileName && !activeNote) {
     // Find the closest file
@@ -78,13 +78,13 @@ export async function editNote(
       const errorMsg = `Could not find any note with the exact name or similar to "${fileName}".`
       if (settings.debug) console.error(errorMsg);
       
-      return { success: false, error: errorMsg };
+      return { success: false, response: errorMsg };
     }
   } else {
     const errorMsg = "No file name provided and 'active note' is not set as true.";
     if (settings.debug) console.error(errorMsg);
     
-    return { success: false, error: errorMsg };
+    return { success: false, response: errorMsg };
   }
 
   // Read the file
@@ -115,13 +115,13 @@ export async function editNote(
       const errorMsg = 'Error invoking LLM: ' + error;  
       if (settings.debug) console.error(errorMsg);
       
-      return { success: false, error: errorMsg };
+      return { success: false, response: errorMsg };
     }
   } else {
     const errorMsg = 'No new content, tags, or topic provided to update the note.';  
     if (settings.debug) console.error(errorMsg);
     
-    return { success: false, error: errorMsg };
+    return { success: false, response: errorMsg };
   }
 
   // Clean updated content
@@ -144,9 +144,9 @@ export async function editNote(
 
   return { 
     success: true, 
-    useLlm, 
-    path: matchedFile.path, 
-    diff: diffText, 
-    tags,
+    response: {
+      diff: diffText, 
+      tags,
+    }
   };
 }

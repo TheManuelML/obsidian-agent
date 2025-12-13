@@ -61,10 +61,10 @@ export async function noteFiltering(
   
   // Parse dateRange
   if (typeof dateRange !== "string" && typeof dateRange !== "object") {
-    return { success: false, error: `Invalid 'dateRange' type, expected string or object, got ${typeof dateRange}.` };
+    return { success: false, response: `Invalid 'dateRange' type, expected string or object, got ${typeof dateRange}.` };
   }
   const validDateRange = parseDateRange(dateRange);
-  if (!validDateRange) return { success: false, error: `Invalid date range: "${dateRange}".` };
+  if (!validDateRange) return { success: false, response: `Invalid date range: "${dateRange}".` };
   // By now validDateRange is guaranteed to be a {start: number, end: number} object
 
   // Get notes based on the date range and field  
@@ -88,13 +88,6 @@ export async function noteFiltering(
 
   return { 
     success: true, 
-    notes: notePaths, 
-    meta: {
-      field, 
-      dateRange, 
-      msRange: validDateRange, 
-      limit, 
-      sortOrder 
-    },
+    response: notePaths,
   };
 }

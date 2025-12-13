@@ -18,3 +18,6 @@ Pipeline:
 ## Model Runner
 The function `callModel` in `modelRunner.ts` simply calls a gemini llm model.
 NO streaming, NO tools, NO memory. Simple requests
+
+## Function Runner
+Imports the available function declarations from `src/backend/tools` and uses a switch to execute them using the model Function Call.

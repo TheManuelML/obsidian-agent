@@ -43,7 +43,7 @@ export async function readNote(
       const errorMsg = "It seems like there is not an active note, and you haven't opened any recently."
       if (settings.debug) console.error(errorMsg);
       
-      return { success: false, error: errorMsg }
+      return { success: false, response: errorMsg }
     }
   
   } else if (fileName) {
@@ -53,14 +53,14 @@ export async function readNote(
       const errorMsg = `Could not find any note with the name or similar to "${fileName}".`;
       if (settings.debug) console.error(errorMsg);
 
-      return { success: false, error: `Could not find any note similar to "${fileName}".`};
+      return { success: false, response: `Could not find any note similar to "${fileName}".`};
     }
   
   } else {
     const errorMsg = "No file name provided and 'active note' is not set as true.";
     if (settings.debug) console.error(errorMsg);
     
-    return { success: false, error: errorMsg };
+    return { success: false, response: errorMsg };
   }
 
   // Read the file
@@ -93,7 +93,13 @@ export async function readNote(
         // Remove images from the content
         content = await removeImagesFromNote(content);
         
-        return { success: true, content: "\n" + content, path: matchedFile.path, imageDescriptions};
+        return { 
+          success: true, 
+          response: {
+            content: "\n" + content, 
+            imageDescriptions,
+          }
+        };
 
       } else {
         content = await removeImagesFromNote(content);
@@ -106,8 +112,13 @@ export async function readNote(
     const errorMsg = 'Error processing images in the note: ' + error;
     if (settings.debug) console.error(errorMsg);
     
-    return { success: false, error: errorMsg };
+    return { success: false, response: errorMsg };
   }    
 
-  return { success: true, content: "\n" + content, path: matchedFile.path };
+  return { 
+    success: true, 
+    response: {
+      content: "\n" + content,
+    },
+  };
 }

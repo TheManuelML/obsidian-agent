@@ -93,7 +93,7 @@ export async function createNote(
         if (tags.length > 0) content = formatTags(tags) + "\n" + content
 
       } catch (error) {
-        return { success: false, error: String(error) };
+        return { success: false, response: String(error) };
       }
     } else if (tags.length > 0) {
       content = formatTags(tags);
@@ -117,6 +117,6 @@ export async function createNote(
   await app.vault.create(fullPath, content);
   return { 
     success: true,
-    result: `Note created successfully at: ${fullPath}.`, 
+    response: `Note created successfully at: ${fullPath}.`, 
   };
 }
