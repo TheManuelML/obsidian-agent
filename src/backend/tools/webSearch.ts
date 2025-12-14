@@ -71,10 +71,21 @@ export async function webSearch(
     return { success: false, response: `Unexpected Error: ${error}` };
   }
   
-  if (!response || !response.text) return { success: false, response: "Error: No results found."};
+  if (!response || !response.text || !response.candidates) return { success: false, response: "Error: No results found."};
   
+  // Extract sources from grounding metadata
+  const groundingChunks = response.candidates[0].groundingMetadata?.groundingChunks || [];
+  const sources: Array<{ title?: string, url?: string }> = [];
+  for (const source of groundingChunks) {
+    const web = source.web;
+    if (web) sources.push(web);
+  }
+
   return {
     success: true,
-    response: response.text,
+    response: {
+      search: response.text,
+      sources: sources,
+    },
   }
 };

@@ -134,7 +134,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
     .setName("Thinking level")
-    .setDesc("Set the level of reasoning the model should use. This setting only applies to Gemini 3 models, others use default reasoning.")
+    .setDesc("Set the level of reasoning the model should use. This setting only applies to Gemini 3 models, others use default reasoning level.")
       .addDropdown((dropdown: DropdownComponent) => {
         dropdown.addOption("LOW", "Low");
         dropdown.addOption("HIGH", "High");
