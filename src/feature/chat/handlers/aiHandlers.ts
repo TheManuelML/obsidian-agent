@@ -1,5 +1,4 @@
 import { TFile, Notice } from "obsidian";
-import { FunctionCall } from "@google/genai";
 import { getApp, getSettings } from "src/plugin";
 import { 
   exportMessage, 
@@ -66,7 +65,7 @@ export const handleCall = async (
   // Export the user message into the chat file
   exportMessage(userMessage, chat);
 
-  // Create the agent message
+  // Create the model message
   const tempMessage: Message = {
     sender: "bot",
     content: "",

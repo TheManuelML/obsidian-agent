@@ -8,9 +8,9 @@ export interface AgentSettings {
   provider: string;
   model: string;
   googleApiKey: string;
-  temperature: number;
+  temperature: string;
   thinkingLevel: string;
-  maxOutputTokens: number;
+  maxOutputTokens: string;
   rules: string;
   chatsFolder: string;
   maxHistoryTurns: number;
@@ -22,15 +22,15 @@ export interface AgentSettings {
 // Default settings for the plugin
 export const DEFAULT_SETTINGS: AgentSettings = {
   provider: "google",
-  model: "gemini-2.0-flash",
-  googleApiKey: '',
-  temperature: 0.7,
-  thinkingLevel: "LOW",
-  maxOutputTokens: 2048,
-  rules: '',
-  chatsFolder: 'Chats',
+  model: "gemini-2.5-flash",
+  googleApiKey: "",
+  temperature: "Default",
+  thinkingLevel: "Default",
+  maxOutputTokens: "Default",
+  rules: "",
+  chatsFolder: "Chats",
   maxHistoryTurns: 2,
-  generateChatName: false,
+  generateChatName: true,
   readImages: true,
   debug: false,
 };
@@ -103,12 +103,12 @@ export class AgentSettingsTab extends PluginSettingTab {
       text
         .setValue(String(this.plugin.settings.temperature))
         .onChange(async (value) => {
-          const n = Number(value);
-          if (Number.isNaN(n) || n < 0) {
+          const num = Number(value);
+          if (Number.isNaN(num) || num > 2 || num < 0) {
             this.plugin.settings.temperature = DEFAULT_SETTINGS.temperature;
             await this.plugin.saveSettings();
           } else {
-            this.plugin.settings.temperature = n;
+            this.plugin.settings.temperature = value;
             await this.plugin.saveSettings();
           }
         })
@@ -121,12 +121,12 @@ export class AgentSettingsTab extends PluginSettingTab {
       text
         .setValue(String(this.plugin.settings.maxOutputTokens))
         .onChange(async (value) => {
-          const n = Number(value);
-          if (Number.isNaN(n) || n < 0) {
+          const num = Number(value);
+          if (Number.isNaN(num) || num < 0) {
             this.plugin.settings.maxOutputTokens = DEFAULT_SETTINGS.maxOutputTokens;
             await this.plugin.saveSettings();
           } else {
-            this.plugin.settings.maxOutputTokens = n;
+            this.plugin.settings.maxOutputTokens = value;
             await this.plugin.saveSettings();
           }
         })
@@ -136,8 +136,9 @@ export class AgentSettingsTab extends PluginSettingTab {
     .setName("Thinking level")
     .setDesc("Set the level of reasoning the model should use. This setting only applies to Gemini 3 models, others use default reasoning level.")
       .addDropdown((dropdown: DropdownComponent) => {
-        dropdown.addOption("LOW", "Low");
-        dropdown.addOption("HIGH", "High");
+        dropdown.addOption("Low", "Low");
+        dropdown.addOption("High", "High");
+        dropdown.addOption("Default", "Default");
         
         dropdown
         .setValue(this.plugin.settings.thinkingLevel)
@@ -168,6 +169,10 @@ export class AgentSettingsTab extends PluginSettingTab {
       text.inputEl.classList.add("obsidian-agent__settings-rules-textarea");
     });
 
+    // History settings
+    new Setting(containerEl).setName('History settings').setHeading();
+
+
     // Chat history folder
     new Setting(containerEl)
     .setName("Chat history folder")
@@ -189,13 +194,13 @@ export class AgentSettingsTab extends PluginSettingTab {
     // Max turns settings
     new Setting(containerEl)
       .setName("Max history messages")
-      .setDesc("Set the maximum number of previous turns (user & bot messages) to include in the memory history. Set to 0 to disable history.")
+      .setDesc("Set the maximum number of previous turns (user & bot messages) to include in the memory history. Min value of 1.")
       .addText((text) =>
         text
           .setValue(String(this.plugin.settings.maxHistoryTurns))
           .onChange(async (value) => {
             const n = Number(value);
-            if (Number.isNaN(n) || n < 0) {
+            if (Number.isNaN(n) || n <= 0) {
               this.plugin.settings.maxHistoryTurns = DEFAULT_SETTINGS.maxHistoryTurns;
               await this.plugin.saveSettings();
             } else {
@@ -246,5 +251,26 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl)
+    .setName("Reset settings")
+    .setDesc("Reset settings to default values. Push the button and close the Settings to apply changes.")
+    .addButton((button) => {
+      button.setButtonText("Reset");
+      button.onClick(async () => {
+        this.plugin.settings.model = DEFAULT_SETTINGS.model;
+        this.plugin.settings.temperature = DEFAULT_SETTINGS.temperature;
+        this.plugin.settings.thinkingLevel = DEFAULT_SETTINGS.thinkingLevel;
+        this.plugin.settings.maxOutputTokens = DEFAULT_SETTINGS.maxOutputTokens;
+        this.plugin.settings.rules = DEFAULT_SETTINGS.rules;
+        this.plugin.settings.chatsFolder = DEFAULT_SETTINGS.chatsFolder;
+        this.plugin.settings.maxHistoryTurns = DEFAULT_SETTINGS.maxHistoryTurns;
+        this.plugin.settings.generateChatName = DEFAULT_SETTINGS.generateChatName;
+        this.plugin.settings.readImages = DEFAULT_SETTINGS.readImages;
+        this.plugin.settings.debug = DEFAULT_SETTINGS.debug;
+        await this.plugin.saveSettings();
+      });
+      return button;
+    });
   }
 }

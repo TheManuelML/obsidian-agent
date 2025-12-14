@@ -11,6 +11,7 @@ import {
   ThinkingLevel,
 } from "@google/genai";
 import { getSettings } from "src/plugin";
+import { DEFAULT_SETTINGS } from "src/settings/SettingsTab";
 import { prepareModelInputs } from "src/backend/managers/prompts/inputs";
 
 
@@ -37,18 +38,21 @@ export async function callModel(
   const generationConfig: GenerateContentConfig = {
     systemInstruction: system,
     safetySettings: safetySettings,
-    temperature: settings.temperature,
-    maxOutputTokens: settings.maxOutputTokens,
     thinkingConfig: {
       includeThoughts: true,
     },
   };
   // Special settings for Gemini 3 models
-  if (settings.model.includes("3")) {
-    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "LOW" 
-        ? ThinkingLevel.LOW 
-        : ThinkingLevel.HIGH;
-    generationConfig.temperature = 1;
+  if (settings.model.includes("3") && settings.thinkingLevel !== DEFAULT_SETTINGS.thinkingLevel) {
+    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "Low" 
+      ? ThinkingLevel.LOW 
+      : ThinkingLevel.HIGH;
+  }
+  if (settings.temperature !== DEFAULT_SETTINGS.temperature) {
+    generationConfig.temperature = Number(settings.temperature);
+  }
+  if (settings.maxOutputTokens !== DEFAULT_SETTINGS.maxOutputTokens) {
+    generationConfig.maxOutputTokens = Number(settings.maxOutputTokens);
   }
   
   const inputs: Part[] = await prepareModelInputs(user, files);

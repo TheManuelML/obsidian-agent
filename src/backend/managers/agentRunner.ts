@@ -17,6 +17,7 @@ import { Message, Attachment, ToolCall } from "src/types/chat";
 import { prepareModelInputs, buildChatHistory } from "src/backend/managers/prompts/inputs";
 import { agentSystemPrompt } from "src/backend/managers/prompts/library";  
 import { callableFunctionDeclarations, executeFunction } from "src/backend/managers/functionRunner";
+import { DEFAULT_SETTINGS } from "src/settings/SettingsTab";
 
 
 // Function that calls the agent with chat history and tools binded
@@ -44,8 +45,6 @@ export async function callAgent(
   const generationConfig: GenerateContentConfig = {
     systemInstruction: agentSystemPrompt,
     safetySettings: safetySettings,
-    temperature: settings.temperature,
-    maxOutputTokens: settings.maxOutputTokens,
     thinkingConfig: {
       includeThoughts: true,
     },
@@ -54,11 +53,16 @@ export async function callAgent(
     }]
   };
   // Special settings for Gemini 3 models
-  if (settings.model.includes("3")) {
-    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "LOW" 
-        ? ThinkingLevel.LOW 
-        : ThinkingLevel.HIGH;
-    generationConfig.temperature = 1;
+  if (settings.model.includes("3") && settings.thinkingLevel !== DEFAULT_SETTINGS.thinkingLevel) {
+    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "Low" 
+      ? ThinkingLevel.LOW 
+      : ThinkingLevel.HIGH;
+  }
+  if (settings.temperature !== DEFAULT_SETTINGS.temperature) {
+    generationConfig.temperature = Number(settings.temperature);
+  }
+  if (settings.maxOutputTokens !== DEFAULT_SETTINGS.maxOutputTokens) {
+    generationConfig.maxOutputTokens = Number(settings.maxOutputTokens);
   }
 
   // Build chat
