@@ -67,6 +67,7 @@ export async function callModel(
     });
   } catch (error) {
     if (error instanceof ApiError) {
+      if (error.status === 403) throw new Error("API key not set, or isn't valid.")
       if (error.status === 429) throw new Error("API quota exceeded. Please check your Google Cloud account.");
       if (error.status === 503) throw new Error("API service overloaded. Please try again later.");
       throw new Error(`API Error: ${error.message}`);
