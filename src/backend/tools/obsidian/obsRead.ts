@@ -16,6 +16,7 @@ export const readNoteFunctionDeclaration = {
       fileName: {
         type: Type.STRING,
         description: "The name or path of the note to read",
+        default: "",
       },
       activeNote: {
         type: Type.BOOLEAN,
@@ -29,8 +30,8 @@ export const readNoteFunctionDeclaration = {
 
 // Obsidian tool to read notes
 export async function readNote(
-  fileName: string,
-  activeNote: boolean,
+  fileName: string = "",
+  activeNote: boolean = false,
 ) {
   const app = getApp();
   const settings = getSettings();

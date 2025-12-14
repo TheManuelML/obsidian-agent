@@ -25,7 +25,7 @@ export const vaultSearchFunctionDeclaration = {
 // Search notes or folders in the vault with their name or path
 export async function vaultSearch(
   name: string, 
-  isNote: boolean,
+  isNote: boolean = true,
 ) {
   if (isNote) {
     // Search for the note

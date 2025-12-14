@@ -17,6 +17,7 @@ export const editNoteFunctionDeclaration = {
       fileName: {
         type: Type.STRING,
         description: "The name or path of the note to edit. Without the markdown extension .md",
+        default: "",
       },
       activeNote: {
         type: Type.BOOLEAN,
@@ -44,18 +45,18 @@ export const editNoteFunctionDeclaration = {
         default: "",
       },
     },
-    required: [],
+    required: ["newContent"],
   },
 }
 
 // Obsidian tool to update or write on existing notes
 export async function editNote(
-  fileName: string,
-  activeNote: boolean,
+  fileName: string = "",
+  activeNote: boolean = false,
   newContent: string,
-  useLlm: boolean,
-  tags: string[],
-  context: string,
+  useLlm: boolean = true,
+  tags: string[] = [],
+  context: string = "",
 ) {
   const app = getApp();
   const settings = getSettings();

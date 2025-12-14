@@ -56,13 +56,13 @@ export const createNoteFunctionDeclaration = {
 
 // Obsidian tool to write notes
 export async function createNote(
-  topic: string,
-  name: string,
-  tags: string[],
-  context: string,
-  dirPath: string,
-  content: string,
-  useLlm: boolean,
+  topic: string = "",
+  name: string = "Generated note.md",
+  tags: string[] = [],
+  context: string = "",
+  dirPath: string = "",
+  content: string = "",
+  useLlm: boolean = true,
 ) {
   const app = getApp();
   

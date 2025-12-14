@@ -26,7 +26,7 @@ export const listFilesFunctionDeclaration = {
 // List a tree of files and directories in a directory
 export async function listFiles(
   dirPath: string, 
-  limit: number,
+  limit: number = 10,
 ) {
   // Find the matching folder if the path is not absolute    
   const matchingFolder = findMatchingFolder(dirPath);

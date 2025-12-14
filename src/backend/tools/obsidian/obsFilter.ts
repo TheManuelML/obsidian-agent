@@ -52,10 +52,10 @@ If YYYY-MM-DD is provided, day bounds are applied (start=00:00, end=23:59:59.999
 
 // Search notes based on their date of modification or creation
 export async function noteFiltering(
-  field: string,
+  field: string = "modification",
   dateRange: string | { start: number; end: number },
-  limit: number,
-  sortOrder: string,
+  limit: number = 10,
+  sortOrder: string = "desc",
 ) {
   const app = getApp();
   

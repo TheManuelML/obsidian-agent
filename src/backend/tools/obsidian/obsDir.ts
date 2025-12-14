@@ -25,8 +25,8 @@ export const createDirFunctionDeclaration = ({
 
 // Obsidian tool to create directories
 export async function createDir(
-  name: string,
-  dirPath: string,
+  name: string = "New directory",
+  dirPath: string = "",
 ) {
   // Declaring the app and inputs
   const app = getApp();
