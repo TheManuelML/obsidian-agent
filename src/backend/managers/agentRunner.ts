@@ -10,6 +10,7 @@ import {
   HarmCategory, 
   HarmBlockThreshold,
   ApiError,
+  ThinkingLevel,
 } from "@google/genai";
 import { getSettings } from "src/plugin";
 import { Message, Attachment, ToolCall } from "src/types/chat";
@@ -43,13 +44,22 @@ export async function callAgent(
   const generationConfig: GenerateContentConfig = {
     systemInstruction: agentSystemPrompt,
     safetySettings: safetySettings,
-    thinkingConfig: { 
+    temperature: settings.temperature,
+    maxOutputTokens: settings.maxOutputTokens,
+    thinkingConfig: {
       includeThoughts: true,
     },
     tools: [{
       functionDeclarations: callableFunctionDeclarations,
     }]
   };
+  // Special settings for Gemini 3 models
+  if (settings.model.includes("3")) {
+    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "LOW" 
+        ? ThinkingLevel.LOW 
+        : ThinkingLevel.HIGH;
+    generationConfig.temperature = 1;
+  }
 
   // Build chat
   const chatHistory = conversation.length > 0 ? await buildChatHistory(conversation) : [];  

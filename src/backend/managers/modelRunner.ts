@@ -8,6 +8,7 @@ import {
   HarmBlockThreshold,
   ApiError,
   GenerateContentResponse,
+  ThinkingLevel,
 } from "@google/genai";
 import { getSettings } from "src/plugin";
 import { prepareModelInputs } from "src/backend/managers/prompts/inputs";
@@ -36,7 +37,20 @@ export async function callModel(
   const generationConfig: GenerateContentConfig = {
     systemInstruction: system,
     safetySettings: safetySettings,
+    temperature: settings.temperature,
+    maxOutputTokens: settings.maxOutputTokens,
+    thinkingConfig: {
+      includeThoughts: true,
+    },
   };
+  // Special settings for Gemini 3 models
+  if (settings.model.includes("3")) {
+    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "LOW" 
+        ? ThinkingLevel.LOW 
+        : ThinkingLevel.HIGH;
+    generationConfig.temperature = 1;
+  }
+  
   const inputs: Part[] = await prepareModelInputs(user, files);
 
   // Call the model

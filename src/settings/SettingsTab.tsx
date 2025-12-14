@@ -1,13 +1,16 @@
 import { PluginSettingTab, App, Setting, DropdownComponent, TFolder } from "obsidian";
 import { ObsidianAgentPlugin, getApp, getPlugin } from "src/plugin";
 import { ChooseModelModal } from "src/feature/modals/ChooseModelModal";
+import { ThinkingLevel } from "@google/genai";
 
 // Interface for the settings of the plugin
 export interface AgentSettings {
   provider: string;
   model: string;
   googleApiKey: string;
-  thinkingBudget: number;
+  temperature: number;
+  thinkingLevel: string;
+  maxOutputTokens: number;
   rules: string;
   chatsFolder: string;
   maxHistoryTurns: number;
@@ -21,7 +24,9 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   provider: "google",
   model: "gemini-2.0-flash",
   googleApiKey: '',
-  thinkingBudget: -1,
+  temperature: 0.7,
+  thinkingLevel: "LOW",
+  maxOutputTokens: 2048,
   rules: '',
   chatsFolder: 'Chats',
   maxHistoryTurns: 2,
@@ -89,6 +94,59 @@ export class AgentSettingsTab extends PluginSettingTab {
           btn.setIcon(googleRevealed ? "eye-off" : "eye");
         });
     });
+
+    // LLM settings
+    new Setting(containerEl)
+    .setName("Temperature")
+    .setDesc("Higher values make output more random, while lower values make it more focused and deterministic. Min: 0, Max: 2.")
+    .addText((text) =>
+      text
+        .setValue(String(this.plugin.settings.temperature))
+        .onChange(async (value) => {
+          const n = Number(value);
+          if (Number.isNaN(n) || n < 0) {
+            this.plugin.settings.temperature = DEFAULT_SETTINGS.temperature;
+            await this.plugin.saveSettings();
+          } else {
+            this.plugin.settings.temperature = n;
+            await this.plugin.saveSettings();
+          }
+        })
+    );
+
+    new Setting(containerEl)
+    .setName("Max output tokens")
+    .setDesc("Set the maximum number of tokens the model can generate in its response.")
+    .addText((text) =>
+      text
+        .setValue(String(this.plugin.settings.maxOutputTokens))
+        .onChange(async (value) => {
+          const n = Number(value);
+          if (Number.isNaN(n) || n < 0) {
+            this.plugin.settings.maxOutputTokens = DEFAULT_SETTINGS.maxOutputTokens;
+            await this.plugin.saveSettings();
+          } else {
+            this.plugin.settings.maxOutputTokens = n;
+            await this.plugin.saveSettings();
+          }
+        })
+    );
+
+    new Setting(containerEl)
+    .setName("Thinking level")
+    .setDesc("Set the level of reasoning the model should use. This setting only applies to Gemini 3 models, others use default reasoning.")
+      .addDropdown((dropdown: DropdownComponent) => {
+        dropdown.addOption("LOW", "Low");
+        dropdown.addOption("HIGH", "High");
+        
+        dropdown
+        .setValue(this.plugin.settings.thinkingLevel)
+        .onChange(async (value) => {
+          this.plugin.settings.thinkingLevel = value as ThinkingLevel;
+          await this.plugin.saveSettings();
+        });
+      }
+    );
     
     // Agent rules
     const rulesSetting = new Setting(containerEl)
@@ -138,7 +196,7 @@ export class AgentSettingsTab extends PluginSettingTab {
           .onChange(async (value) => {
             const n = Number(value);
             if (Number.isNaN(n) || n < 0) {
-              this.plugin.settings.maxHistoryTurns = 2;
+              this.plugin.settings.maxHistoryTurns = DEFAULT_SETTINGS.maxHistoryTurns;
               await this.plugin.saveSettings();
             } else {
               this.plugin.settings.maxHistoryTurns = n;
@@ -152,7 +210,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Generate chat name")
-      .setDesc("Ask the model to automatically generate a name for the chat based on your first message.")
+      .setDesc("The model will automatically generate a name for the chat based on your first message.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.generateChatName)
@@ -164,7 +222,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Read images")
-      .setDesc("Pass images from notes as inputs to the model when running the 'read note' tool. Otherwise, images will be removed and only text content will be readed.")
+      .setDesc("The model will generate captions of the images to understand them, only when reading a note. Otherwise, images will be removed and only text content will be readed.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.readImages)

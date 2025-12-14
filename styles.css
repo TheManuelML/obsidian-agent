@@ -453,7 +453,6 @@
   
 .obsidian-agent__tool-call {
     font-family: var(--font-monospace);
-    font-size: 0.9em;
     background: var(--background-secondary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 8px;
@@ -463,23 +462,11 @@
 .obsidian-agent__tool-call__header {
     display: flex;
     align-items: center;
-    font-weight: 600;
     gap: 0.5rem;
 }
   
 .obsidian-agent__tool-call__name {
-    font-weight: 600;
-    color: var(--text-normal);
-}
-  
-.obsidian-agent__tool-call__status {
-    font-size: 0.8em;
-    font-weight: 500;
-    text-transform: uppercase;
-
-    border-radius: 4px;
-
-    padding: 0.2rem 0.5rem;
+    color: var(--text-muted);
 }
   
 .obsidian-agent__tool-call__args,
@@ -487,12 +474,38 @@
     margin-top: 0.5rem;
 }
   
-.obsidian-agent__tool-call__args-strong,
-.obsidian-agent__tool-call__result-strong {
+.obsidian-agent__tool-call__args-header {
     font-size: 0.85em;
     letter-spacing: 0.5px;
-
     color: var(--text-muted);
+}
+
+.obsidian-agent__tool-call__result-header {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.obsidian-agent__tool-call__copy-button {
+    color: var(--text-faint) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+    padding: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-s);
+    transition: 0.2s ease;
+}
+
+.obsidian-agent__tool-call__copy-button:hover {
+    color: var(--text-normal) !important;
+    background: var(--background-secondary-alt) !important;
 }
   
 .obsidian-agent__tool-call__args-pre,
