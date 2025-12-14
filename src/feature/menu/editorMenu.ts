@@ -55,18 +55,16 @@ function addAskAgentItem(
         const updateConversation = chatView.getUpdateConversation();
         if (!updateConversation) return;
 
-        const attachments: Attachment[] = [
-          {
-            path: currentFile.path,
-            basename: currentFile.basename,
-          },
-        ];
+        const attachments: Attachment[] = [{
+          path: currentFile.path,
+          basename: currentFile.basename,
+        }];
 
         await handleCall(
           activeChat,
           null,
           `Explain in detail the following text:\n---\n${selectedText}\n---\n`,
-          [],
+          attachments,
           [],
           updateConversation,
           false
@@ -100,18 +98,16 @@ function addSummarizeItem(
         const updateConversation = chatView.getUpdateConversation();
         if (!activeChat || !updateConversation) return;
 
-        const attachments: Attachment[] = [
-          {
-            path: currentFile.path,
-            basename: currentFile.basename,
-          },
-        ];
+        const attachments: Attachment[] = [{
+          path: currentFile.path,
+          basename: currentFile.basename,
+        }];
 
         await handleCall(
           activeChat,
           null,
           `Return a summary of the following text:\n---\n${selectedText}\n---\n`,
-          [],
+          attachments,
           [],
           updateConversation,
           false
