@@ -442,6 +442,74 @@
     gap: 10px;
 }
 
+/* DiffReviewModal.tsx */
+.obsidian-agent__diff-review-modal__container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.obsidian-agent__diff-review-modal__diff-container {
+    overflow: auto;
+    max-height: 600px;
+    margin-bottom: 10px;
+}
+
+.obsidian-agent__diff-review-modal__unchanged-content {
+    padding: 5px 10px;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.obsidian-agent__diff-review-modal__change-container {
+    margin-bottom: 10px;
+}
+
+.obsidian-agent__diff-review-modal__change-content {
+    padding: 5px 10px;
+    margin: 2px 0;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.obsidian-agent__diff-review-modal__change-content-declined {
+    opacity: 0.5;
+    color: var(--text-muted);
+}
+
+.obsidian-agent__diff-review-modal__change-content-added {
+    background: #90ee9038;
+}
+
+.obsidian-agent__diff-review-modal__change-content-removed {
+    background: #ff6b6b33;
+}
+
+.obsidian-agent__diff-review-modal__changes-actions-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+
+.obsidian-agent__diff-review-modal__confirmation-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+}
+
+
 /* Tool Call Styling */
 .obsidian-agent__tool-call__container {
     display: flex;

@@ -212,14 +212,7 @@ async function manageFunctionCall(
     role: "user",
     parts: userInput,
   };
-  // Update chat history, keeping the length to a maximum of settings.maxTurns
-  if (originalHistory.length === settings.maxHistoryTurns*2) {
-    if (settings.maxHistoryTurns === 0) {
-      originalHistory = [];
-    } else {
-      originalHistory.shift();
-    }
-  }
+
   const newHistory = [...originalHistory, userContent, modelContent];
 
   // Create a new chat with the updated history

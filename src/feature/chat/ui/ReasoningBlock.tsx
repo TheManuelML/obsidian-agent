@@ -13,6 +13,8 @@ export default function Reasoning({
   
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const componentRefs = useRef<(Component | null)[]>([]);
+  const streamingRef = useRef<HTMLDivElement | null>(null);
+  const streamingComponentRef = useRef<Component | null>(null);
 
   const cleanGoogleReasoning = (content: string): string => {
     let t = content;
@@ -77,13 +79,31 @@ export default function Reasoning({
   };  
 
   useEffect(() => {
-    if (!isProcessed) return;
-    if (!reasoning) return;
-  
+    if (!reasoning) {
+      setReasoningBlocks([]);
+      return;
+    }
+
     const cleaned = cleanGoogleReasoning(reasoning);
     const pre = preprocess(cleaned);
+
+    if (!isProcessed) {
+      // Render streaming reasoning while the final structure is not ready
+      const container = streamingRef.current;
+      if (!container) return;
+
+      container.innerHTML = "";
+      streamingComponentRef.current?.unload();
+
+      const app = getApp();
+      const component = new Component();
+      streamingComponentRef.current = component;
+
+      MarkdownRenderer.render(app, pre, container, "", component);
+      return;
+    }
+
     const blocks = getReasoningBlocks(pre);
-  
     setReasoningBlocks(blocks);
   }, [reasoning, isProcessed]);
 
@@ -113,8 +133,31 @@ export default function Reasoning({
     };
   }, [openBlocks, reasoningBlocks]);
 
+  useEffect(() => {
+    return () => {
+      streamingComponentRef.current?.unload();
+    };
+  }, []);
+
   if (!reasoning || !reasoning.trim()) return null;
-  if (!isProcessed) return null;
+
+  if (!isProcessed) {
+    return (
+      <div className="obsidian-agent__reasoning-block__container">
+        <div className="obsidian-agent__reasoning-block obsidian-agent__reasoning-block-open">
+          <div className="obsidian-agent__reasoning-block__header">
+            <span className="obsidian-agent__reasoning-block__name">Reasoning</span>
+          </div>
+          <div className="obsidian-agent__animate__reasoning-block-dropdown-content">
+            <div
+              ref={streamingRef}
+              className="obsidian-agent__reasoning-block__content"
+            ></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="obsidian-agent__reasoning-block__container">

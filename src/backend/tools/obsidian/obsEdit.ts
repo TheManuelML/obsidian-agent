@@ -1,11 +1,12 @@
 import { Type } from "@google/genai";
-import { diffLines } from "diff";
-import { TFile } from 'obsidian';
+import { ChangeObject } from "diff";
+import { App, TFile } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
 import { findClosestFile } from 'src/utils/notes/searching';
 import { formatTags } from 'src/utils/notes/tags';
 import { writingSystemPrompt } from 'src/backend/managers/prompts/library';
 import { callModel } from 'src/backend/managers/modelRunner';
+import { DiffReviewModal } from "src/feature/modals/DiffReviewModal";
 
 
 export const editNoteFunctionDeclaration = {
@@ -132,22 +133,36 @@ export async function editNote(
     updatedContent = updatedContent.slice(1);
   }
 
+  const { finalContent, finalDiff } = await initReview(app, oldContent, updatedContent);
+
   // Save the updated content
-  await app.vault.modify(matchedFile, updatedContent);
-  
-  // Send the diff instead both old and new texts. This is to save tokens
-  let changes = diffLines(oldContent, updatedContent);
-  let diffText = "";
-  changes.forEach(part => {
-    const prefix = part.added ? "+" : part.removed ? "-" : " ";
-    diffText += prefix + part.value;
-  });
+  await app.vault.modify(matchedFile, finalContent);
 
   return { 
     success: true, 
     response: {
-      diff: diffText, 
+      diff: finalDiff, 
       tags,
     }
   };
+}
+
+
+async function initReview(
+  app: App,
+  oldContent: string,
+  newContent: string,
+): Promise<{ finalContent: string, finalDiff: ChangeObject<string>[] }> {
+  
+  return new Promise<{ finalContent: string, finalDiff: ChangeObject<string>[] }>((resolve) => {
+    const modal = new DiffReviewModal(
+      app,
+      (finalContent: string, finalDiff: ChangeObject<string>[]) => {
+        resolve({ finalContent, finalDiff });
+      },
+      oldContent,
+      newContent
+    );
+    modal.open();
+  });
 }

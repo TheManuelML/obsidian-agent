@@ -33,7 +33,7 @@ export const handleCall = async (
   }
 
   // If is the first message, generate a name for the chat file
-  if (settings.generateChatName) {
+  if (settings.generateChatName && !isRegeneration) {
     const conversation = await importConversation(chat);
     if (conversation.length === 0) {
       const app = getApp();
@@ -216,5 +216,9 @@ async function generateChatFileName(userMessage: string, images: File[]) {
     images,
   );
 
-  return newName;
+  const cleanedName = newName
+  .replace(/[*"\\/<>:|?]/g, "")
+  .trim();
+  
+  return cleanedName;
 }

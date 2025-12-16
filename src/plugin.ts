@@ -5,6 +5,7 @@ import { ChooseModelModal } from 'src/feature/modals/ChooseModelModal';
 import { AgentSettings, DEFAULT_SETTINGS, AgentSettingsTab } from "src/settings/SettingsTab";
 import { Model } from 'src/types/ai';
 import { registerEditorMenuItems } from 'src/feature/menu/editorMenu';
+import { DiffReviewModal } from './feature/modals/DiffReviewModal';
 
 let pluginInstance: ObsidianAgentPlugin;
 
@@ -49,6 +50,13 @@ export class ObsidianAgentPlugin extends Plugin {
           return;
         }).open();
       },
+    });
+    this.addCommand({
+      id: "open-agent-sidebar",
+      name: "Open agent sidebar",
+      callback: () => {
+        this.activateAgentChatView();
+      }
     });
 
     // Menu Items (Actions when right click on a markdown view)
