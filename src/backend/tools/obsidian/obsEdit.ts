@@ -160,6 +160,9 @@ async function initReview(
       (finalContent: string, finalDiff: ChangeObject<string>[]) => {
         resolve({ finalContent, finalDiff });
       },
+      (finalContent: string, finalDiff: ChangeObject<string>[]) => { 
+        resolve({ finalContent, finalDiff }) 
+      },
       oldContent,
       newContent
     );

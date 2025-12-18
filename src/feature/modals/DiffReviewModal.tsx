@@ -13,7 +13,7 @@ function DiffReviewModalContent({
   oldContent: string,
   newContent: string,
   onConfirm: (finalContent: string, finalDiff: ChangeObject<string>[]) => void,
-  onCancel: () => void,
+  onCancel: (finalContent: string, finalDiff: ChangeObject<string>[]) => void,
 }) {
   const initialDiff = diffLines(oldContent, newContent);
   
@@ -162,6 +162,10 @@ function DiffReviewModalContent({
     onConfirm(acceptedContent, acceptedDiff);
   };
 
+  const handleCancel = () => {
+    onCancel(oldContent, []);
+  }
+
   return (
     <div className="obsidian-agent__diff-review-modal__container">
       <div className="obsidian-agent__diff-review-modal__diff-container">
@@ -218,7 +222,7 @@ function DiffReviewModalContent({
         })}
       </div>
       <div className="obsidian-agent__diff-review-modal__confirmation-buttons-container">
-        <button className="obsidian-agent__button-background" onClick={onCancel}>
+        <button className="obsidian-agent__button-background" onClick={handleCancel}>
           Cancel
         </button>
         
@@ -233,8 +237,10 @@ function DiffReviewModalContent({
 export class DiffReviewModal extends Modal {
   private root: Root | undefined;
   private onConfirm: (finalContent: string, finalDiff: ChangeObject<string>[]) => void;
+  private onCloseCallback: (finalContent: string, finalDiff: ChangeObject<string>[]) => void;
   private oldContent: string;
   private newContent: string;
+  private callbackCalled: boolean = false;
   
   public finalContent: string = "";
   public finalDiff: ChangeObject<string>[] = [];
@@ -242,11 +248,13 @@ export class DiffReviewModal extends Modal {
   constructor(
     app: App,
     onConfirm: (finalContent: string, finalDiff: ChangeObject<string>[]) => void,
+    onClose: (finalContent: string, finalDiff: ChangeObject<string>[]) => void,
     oldContent: string,
-    newContent: string,    
+    newContent: string,
   ) {
     super(app);
     this.onConfirm = onConfirm;
+    this.onCloseCallback = onClose;
     this.oldContent = oldContent;
     this.newContent = newContent;
     this.setTitle("Review changes");
@@ -262,13 +270,20 @@ export class DiffReviewModal extends Modal {
     this.modalEl.style.maxHeight = '800px';
     
     const handleConfirm = (finalContent: string, finalDiff: ChangeObject<string>[]) => {
+      if (this.callbackCalled) return;
+      this.callbackCalled = true;
       this.finalContent = finalContent;
       this.finalDiff = finalDiff;
       this.onConfirm(finalContent, finalDiff);
       this.close();
     };
     
-    const handleCancel = () => {
+    const handleCancel = (finalContent: string, finalDiff: ChangeObject<string>[]) => {
+      if (this.callbackCalled) return;
+      this.callbackCalled = true;
+      this.finalContent = finalContent;
+      this.finalDiff = finalDiff;
+      this.onCloseCallback(finalContent, finalDiff);
       this.close();
     };
 
@@ -284,5 +299,12 @@ export class DiffReviewModal extends Modal {
 
   onClose() {
     this.root?.unmount();
+    // If callback wasn't called (e.g., Esc key pressed), treat it as cancel
+    if (!this.callbackCalled) {
+      this.callbackCalled = true;
+      this.finalContent = this.oldContent;
+      this.finalDiff = [];
+      this.onCloseCallback(this.oldContent, []);
+    }
   }
 }
