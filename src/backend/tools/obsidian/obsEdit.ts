@@ -1,5 +1,5 @@
 import { Type } from "@google/genai";
-import { ChangeObject } from "diff";
+import { ChangeObject, diffLines } from "diff";
 import { App, TFile } from 'obsidian';
 import { getApp, getSettings } from "src/plugin";
 import { findClosestFile } from 'src/utils/notes/searching';
@@ -133,7 +133,15 @@ export async function editNote(
     updatedContent = updatedContent.slice(1);
   }
 
-  const { finalContent, finalDiff } = await initReview(app, oldContent, updatedContent);
+  if (updatedContent === oldContent) return { success: true, response: "No changes made" };
+
+  let finalContent, finalDiff;
+  if (settings.reviewChanges) {
+    ({ finalContent, finalDiff } = await initReview(app, oldContent, updatedContent));
+  } else {
+    finalContent = updatedContent;
+    finalDiff = diffLines(oldContent, updatedContent);  
+  }
 
   // Save the updated content
   await app.vault.modify(matchedFile, finalContent);

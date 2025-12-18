@@ -16,6 +16,7 @@ export interface AgentSettings {
   maxHistoryTurns: number;
   generateChatName: boolean;
   readImages: boolean;
+  reviewChanges: boolean;
   debug: boolean;
 }
 
@@ -32,6 +33,7 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   maxHistoryTurns: 2,
   generateChatName: true,
   readImages: true,
+  reviewChanges: true,
   debug: false,
 };
 
@@ -236,6 +238,18 @@ export class AgentSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    new Setting(containerEl)
+      .setName("Review changes")
+      .setDesc("Open a modal every time you execute the edit note tool to review the changes made by the agent.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.reviewChanges)
+          .onChange(async (value) => {
+            this.plugin.settings.reviewChanges = value;
+            await this.plugin.saveSettings();
+          })
+      );
     
     // Developer settings
     new Setting(containerEl).setName('Developer settings').setHeading();
@@ -254,7 +268,7 @@ export class AgentSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
     .setName("Reset settings")
-    .setDesc("Reset settings to default values. Push the button and close the Settings to apply changes.")
+    .setDesc("Reset settings to default values. Push the button reopen the Settings tab see the applied changes.")
     .addButton((button) => {
       button.setButtonText("Reset");
       button.onClick(async () => {
@@ -267,6 +281,7 @@ export class AgentSettingsTab extends PluginSettingTab {
         this.plugin.settings.maxHistoryTurns = DEFAULT_SETTINGS.maxHistoryTurns;
         this.plugin.settings.generateChatName = DEFAULT_SETTINGS.generateChatName;
         this.plugin.settings.readImages = DEFAULT_SETTINGS.readImages;
+        this.plugin.settings.reviewChanges = DEFAULT_SETTINGS.reviewChanges;
         this.plugin.settings.debug = DEFAULT_SETTINGS.debug;
         await this.plugin.saveSettings();
       });
