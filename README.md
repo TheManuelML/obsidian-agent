@@ -71,7 +71,7 @@ e.g: *Search on the web for todays temperature in Austin, Texas*
 
 Also you can right click over selected text, in your markdown notes, to `summarize selection` or `ask agent`.
 
-![action-menu](./imgs/action-menu.png)
+<img height=400 src="./imgs/action-menu.png" alt="Obsidian">
 
 And finally, you can also attach images by clicking the image icon, and notes with the `@` icon in the input.
 
