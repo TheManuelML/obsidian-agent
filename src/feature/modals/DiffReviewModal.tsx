@@ -149,16 +149,6 @@ function DiffReviewModalContent({
         return group.items.map(item => item.change);
       });
     
-    // Log the accepted diff
-    console.log('Accepted changes (diff):', {
-      original: oldContent,
-      final: acceptedContent,
-      changes: acceptedDiff
-    });
-    
-    // Log the final text separately
-    console.log('Final text:', acceptedContent);
-    
     onConfirm(acceptedContent, acceptedDiff);
   };
 
