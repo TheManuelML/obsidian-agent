@@ -23,43 +23,57 @@ A simple and lightweight AI extension for Obsidian. Delegate basic tasks to an a
 
 It features a user-friendly UI, inspired by other agentic apps.
 
-<p>
-  <img src="imgs/demo.png" alt="Obsidian Agent Chat Overview"/>
-</p>
+![main UI](./imgs/demo.png)
 
 
 ## 🧠 Getting Started
+
+> [!IMPORTANT]  
+> Make sure you have an API key from Google with the Gemini service enable.
 
 1. Download from **Community Plugins** in Obsidian or clone the repository inside your `~/vault/.obsidian/plugins/` folder.
 2. Enable the plugin from Obsidian's settings panel.
 3. Add the corresponding Google API key in the plugin's settings panel.
 
-> Make sure you have an API key from Google with the Gemini service enable.
+Start chating with the agent by locating  and clicking on the brain icon in the left and right sidebars. Or add a hotkey to kickly acces your most recent chat.
 
+![hotkeys](./imgs/hotkeys.png)
 
-## ✨ Core Features
-<ul>
-  <li><b>Note Reading:</b> Understands and edit your notes.</li>
-  <li><b>Web search:</b> Search information across the web.</li>
-  <li><b>Customizable:</b> Tweak agent rules to fit your workflow.</li>
-  <li><b>Built-in actions:</b> Right click on selected text to open the menu items.</li>
-</ul>
+## 💬 Chats
 
+Manage your chats as Obsidian notes. Rename the chat by renaming the file.
+
+![chat-management](./imgs/manage-chats.png)
+
+> [!CAUTION]  
+> Chat files are design to store the chat history and the messages metadata. Do not modify or move them.
 
 ## 🛠️ Tools
 
 The agent can use the following tools to interact with your vault:
 
-- **Create note**: Create a new note in your vault, e.g: *Create a note titled 'Project Ideas'*
-- **Read note**: Read the content of a note, e.g: *Read the active note*
-- **Edit note**: Edit an existing note, e.g: *Add a summary of this text: [...] to the note 'Book Review'*
-- **Create folder**: Create a new folder, e.g: *Create a folder called '2024 Plans'*
-- **List files**: List files in a folder, e.g: *List all files in the folder 'Research'*
-- **Vault Search**: Search for content across your vault, e.g: *Search if it exist a note called 'AI agent'*
-- **Note filtering**: Return note paths that fall inside a date range, e.g: *Give me yesterday's notes*
-- **Web search**: Search for content on the web. e.g: *Search on the web for todays temperature in Austin, Texas*
+- **Create note**: Create a new note in your vault.   
+e.g: *Create a note titled 'Project Ideas'*
+- **Read note**: Read the content of a note.  
+e.g: *Read the active note*
+- **Edit note**: Edit an existing note.  
+e.g: *Add a summary of this text: [...] to the note 'Book Review'*
+- **Create folder**: Create a new folder.  
+e.g: *Create a folder called '2024 Plans'*
+- **List files**: List files in a folder.  
+e.g: *List all files in the folder 'Research'*
+- **Vault Search**: Search for content across your vault.  
+e.g: *Search if it exist a note called 'AI agent'*
+- **Note filtering**: Return note paths that fall inside a date range.  
+e.g: *Give me yesterday's notes*
+- **Web search**: Search for content on the web.  
+e.g: *Search on the web for todays temperature in Austin, Texas*
 
-Also you can right click over select text, in your markdown notes, to summarize or ask the agent about the selection.
+Also you can right click over selected text, in your markdown notes, to `summarize selection` or `ask agent`.
+
+![action-menu](./imgs/action-menu.png)
+
+And finally, you can also attach images by clicking the image icon, and notes with the `@` icon in the input.
 
 ## 🟡 Disclosures
 This plugin connects to remote Google AI services to process your requests.
