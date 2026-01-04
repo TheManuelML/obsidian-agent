@@ -28,6 +28,12 @@ export const allAvailableModels: Model[] = [
   },
   {
     provider: "google",
+    name: "gemini-3-flash-preview",
+    capabilities: ["vision", "websearch"],
+    description: "Google's most balanced model built for speed, scale, and frontier intelligence.",
+  },
+  {
+    provider: "google",
     name: "gemini-3-pro-preview",
     capabilities: ["vision", "websearch"],
     description: "The best model in the world for multimodal understanding, and our most powerful agentic and vibe-coding model yet, delivering richer visuals and deeper interactivity, all built on a foundation of state-of-the-art reasoning.",
