@@ -8,6 +8,7 @@ export interface AgentSettings {
   provider: string;
   model: string;
   googleApiKey: string;
+  baseUrl: string;
   temperature: string;
   thinkingLevel: string;
   maxOutputTokens: string;
@@ -25,6 +26,7 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   provider: "google",
   model: "gemini-2.5-flash",
   googleApiKey: "",
+  baseUrl: "",
   temperature: "Default",
   thinkingLevel: "Default",
   maxOutputTokens: "Default",
@@ -94,6 +96,20 @@ export class AgentSettingsTab extends PluginSettingTab {
           const input = googleSetting.controlEl.querySelector("input");
           if (input) input.type = googleRevealed ? "text" : "password";
           btn.setIcon(googleRevealed ? "eye-off" : "eye");
+        });
+    });
+
+    // Base URL settings
+    const baseUrlSetting = new Setting(containerEl)
+      .setName("Base URL")
+      .setDesc("Enter your URL for the Google API. Leave blank to use the default URL.");
+    baseUrlSetting.addText((text) => {
+      text
+        .setPlaceholder("https://generativelanguage.googleapis.com")
+        .setValue(this.plugin.settings.baseUrl)
+        .onChange(async (value) => {
+          this.plugin.settings.baseUrl = value;
+          await this.plugin.saveSettings();
         });
     });
 

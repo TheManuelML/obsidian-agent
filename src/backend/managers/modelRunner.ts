@@ -24,7 +24,14 @@ export async function callModel(
   const settings = getSettings();
 
   // Initialize model and its configuration
-  const config: GoogleGenAIOptions = { apiKey: settings.googleApiKey, apiVersion: "v1beta" };
+  let baseUrl = settings.baseUrl.trim();
+  if (!baseUrl) baseUrl = "https://generativelanguage.googleapis.com";
+  
+  const config: GoogleGenAIOptions = { 
+    apiKey: settings.googleApiKey,
+    apiVersion: "v1beta", 
+    httpOptions: { baseUrl: baseUrl}
+  };
   const ai = new GoogleGenAI(config);
 
   const safetySettings: SafetySetting[] = [
