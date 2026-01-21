@@ -1,7 +1,7 @@
 {
 	"id": "ai-agent",
 	"name": "AI Agent",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"minAppVersion": "0.15.0",
 	"description": "Empower your vault with Google Gemini. This AI agent integrates Google's artificial intelligence language models to help you perform tasks and conduct web searches.",
 	"author": "Manuel Magaña López",

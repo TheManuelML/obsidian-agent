@@ -28,12 +28,12 @@ It features a user-friendly UI, inspired by other agentic apps.
 
 ## 🧠 Getting Started
 
-> [!IMPORTANT]  
-> Make sure you have an API key from Google with the Gemini service enable.
-
 1. Download from **Community Plugins** in Obsidian or clone the repository inside your `~/vault/.obsidian/plugins/` folder.
 2. Enable the plugin from Obsidian's settings panel.
 3. Add the corresponding Google API key in the plugin's settings panel.
+
+> [!IMPORTANT]  
+> Additionally you can add a custom URL to get connected to google services. Also, make sure you have a valid Google API key with the Gemini service enable. 
 
 Start chating with the agent by locating  and clicking on the brain icon in the left and right sidebars. Or add a hotkey to kickly acces your most recent chat.
 
