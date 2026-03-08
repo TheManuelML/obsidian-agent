@@ -1,23 +1,17 @@
 import {
   GoogleGenAI,
-  GoogleGenAIOptions,
   GenerateContentConfig,
   GenerateContentResponse,
   Chat,
   Content,
   Part,
-  SafetySetting, 
-  HarmCategory, 
-  HarmBlockThreshold,
   ApiError,
-  ThinkingLevel,
 } from "@google/genai";
 import { getSettings } from "src/plugin";
 import { Message, Attachment, ToolCall } from "src/types/chat";
 import { prepareModelInputs, buildChatHistory } from "src/backend/managers/prompts/inputs";
-import { agentSystemPrompt } from "src/backend/managers/prompts/library";  
-import { callableFunctionDeclarations, executeFunction } from "src/backend/managers/functionRunner";
-import { DEFAULT_SETTINGS } from "src/settings/SettingsTab";
+import { executeFunction } from "src/backend/managers/functionRunner";
+import { createGoogleClient } from "src/backend/managers/googleClient";
 
 
 // Function that calls the agent with chat history and tools binded
@@ -31,46 +25,7 @@ export async function callAgent(
   const settings = getSettings();
 
   // Initialize model and its configuration
-  let baseUrl = settings.baseUrl.trim();
-  if (!baseUrl) baseUrl = "https://generativelanguage.googleapis.com";
-  
-  const config: GoogleGenAIOptions = { 
-    apiKey: settings.googleApiKey, 
-    apiVersion: "v1beta", 
-    httpOptions: { baseUrl: baseUrl }
-  };
-  const ai = new GoogleGenAI(config);
-
-  const safetySettings: SafetySetting[] = [
-    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-  ];
-
-  const generationConfig: GenerateContentConfig = {
-    systemInstruction: agentSystemPrompt,
-    safetySettings: safetySettings,
-    thinkingConfig: {
-      includeThoughts: true,
-    },
-    tools: [{
-      functionDeclarations: callableFunctionDeclarations,
-    }]
-  };
-  // Special settings for Gemini 3 models
-  if (settings.model.includes("3") && settings.thinkingLevel !== DEFAULT_SETTINGS.thinkingLevel) {
-    generationConfig.thinkingConfig!.thinkingLevel = settings.thinkingLevel === "Low" 
-      ? ThinkingLevel.LOW 
-      : ThinkingLevel.HIGH;
-  }
-  if (settings.temperature !== DEFAULT_SETTINGS.temperature) {
-    generationConfig.temperature = Number(settings.temperature);
-  }
-  if (settings.maxOutputTokens !== DEFAULT_SETTINGS.maxOutputTokens) {
-    generationConfig.maxOutputTokens = Number(settings.maxOutputTokens);
-  }
+  const { ai, generationConfig } = await createGoogleClient();
 
   // Build chat
   const chatHistory = conversation.length > 0 ? await buildChatHistory(conversation) : [];  

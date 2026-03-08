@@ -52,10 +52,10 @@ export class ObsidianAgentPlugin extends Plugin {
       },
     });
     this.addCommand({
-      id: "open-agent-sidebar",
-      name: "Open agent sidebar",
+      id: "toggle-agent-sidebar",
+      name: "Toggle agent sidebar",
       callback: () => {
-        this.activateAgentChatView();
+        this.toggleAgentSidebar();
       }
     });
 
@@ -89,6 +89,17 @@ export class ObsidianAgentPlugin extends Plugin {
     }
   }
   
+  // Toggle agent sidebar: if open, close it; if closed, open it
+  toggleAgentSidebar(): void {
+    const { workspace } = this.app;
+    const rightSplit = workspace.rightSplit;
+    if (rightSplit && !rightSplit.collapsed) {
+      rightSplit.collapse();
+    } else {
+      this.activateAgentChatView();
+    }
+  }
+
   // Method that opens the agent chat view
   async activateAgentChatView(): Promise<void> {
     const { workspace } = this.app;
