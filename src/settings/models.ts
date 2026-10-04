@@ -56,6 +56,23 @@ export const suggestedModels: SuggestedModel[] = [
     description: "Versatile general-purpose model with a large context window.",
   },
 
+  // OpenRouter (model names use OpenRouter's vendor/model format)
+  {
+    provider: "openrouter",
+    name: "anthropic/claude-sonnet-5.5",
+    description: "Claude Sonnet routed through OpenRouter, one API key for many vendors.",
+  },
+  {
+    provider: "openrouter",
+    name: "openai/gpt-6-astra",
+    description: "GPT-6 Astra routed through OpenRouter, one API key for many vendors.",
+  },
+  {
+    provider: "openrouter",
+    name: "google/gemini-3.8-flash",
+    description: "Gemini Flash routed through OpenRouter, one API key for many vendors.",
+  },
+
   // Ollama (local)
   {
     provider: "ollama",

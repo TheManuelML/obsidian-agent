@@ -16,6 +16,7 @@ function getActiveProviderCredential(settings: AgentSettings): string {
     case "google": return settings.googleApiKey?.trim() ?? "";
     case "anthropic": return settings.anthropicApiKey?.trim() ?? "";
     case "openai": return settings.openaiApiKey?.trim() ?? "";
+    case "openrouter": return settings.openrouterApiKey?.trim() ?? "";
     case "ollama": return settings.ollamaBaseUrl?.trim() ?? "";
   }
 }

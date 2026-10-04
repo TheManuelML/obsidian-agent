@@ -11,6 +11,7 @@ export interface AgentSettings {
   googleApiKey: string;
   anthropicApiKey: string;
   openaiApiKey: string;
+  openrouterApiKey: string;
   ollamaBaseUrl: string;
   baseUrl: string;
   temperature: string;
@@ -33,6 +34,7 @@ export const DEFAULT_SETTINGS: AgentSettings = {
   googleApiKey: "",
   anthropicApiKey: "",
   openaiApiKey: "",
+  openrouterApiKey: "",
   ollamaBaseUrl: "http://localhost:11434",
   baseUrl: "",
   temperature: "Default",
@@ -52,6 +54,7 @@ const PROVIDER_LABELS: Record<Provider, string> = {
   google: "Google",
   anthropic: "Anthropic",
   openai: "OpenAI",
+  openrouter: "OpenRouter",
   ollama: "Ollama (local)",
 };
 
@@ -205,6 +208,16 @@ export class AgentSettingsTab extends PluginSettingTab {
           (value) => (this.plugin.settings.openaiApiKey = value)
         );
         break;
+      case "openrouter":
+        this.addSecretField(
+          containerEl,
+          "OpenRouter API key",
+          "Enter your OpenRouter API key. Model names use OpenRouter's vendor/model format (e.g. anthropic/claude-sonnet-5.5).",
+          "Enter your API key.",
+          () => this.plugin.settings.openrouterApiKey,
+          (value) => (this.plugin.settings.openrouterApiKey = value)
+        );
+        break;
       case "ollama":
         new Setting(containerEl)
           .setName("Ollama base URL")
@@ -221,8 +234,10 @@ export class AgentSettingsTab extends PluginSettingTab {
         break;
     }
 
-    // Base URL override (not applicable to Ollama, which has its own dedicated field)
-    if (this.plugin.settings.provider !== "ollama") {
+    // Base URL override (not applicable to Ollama, which has its own dedicated
+    // field, or OpenRouter, which always uses its fixed endpoint)
+    const provider = this.plugin.settings.provider;
+    if (provider !== "ollama" && provider !== "openrouter") {
       new Setting(containerEl)
         .setName("Base URL override")
         .setDesc("Optionally override the default API endpoint for the selected provider. Leave blank to use the provider's default.")
@@ -404,8 +419,8 @@ export class AgentSettingsTab extends PluginSettingTab {
       button.setButtonText("Reset");
       button.onClick(async () => {
         // Reset to defaults, but keep the provider credentials (API keys) the user entered
-        const { googleApiKey, anthropicApiKey, openaiApiKey } = this.plugin.settings;
-        Object.assign(this.plugin.settings, DEFAULT_SETTINGS, { googleApiKey, anthropicApiKey, openaiApiKey });
+        const { googleApiKey, anthropicApiKey, openaiApiKey, openrouterApiKey } = this.plugin.settings;
+        Object.assign(this.plugin.settings, DEFAULT_SETTINGS, { googleApiKey, anthropicApiKey, openaiApiKey, openrouterApiKey });
         await this.plugin.saveSettings();
         this.render();
       });

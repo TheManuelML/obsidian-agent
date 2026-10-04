@@ -22,7 +22,7 @@
 </div>
 
 ## 🚀 Overview
-A simple and lightweight AI extension for Obsidian. Connect Google Gemini, Anthropic Claude, OpenAI, or a local Ollama model, and delegate basic tasks to an agent that can write, edit, and create notes and folders within your vault.
+A simple and lightweight AI extension for Obsidian. Connect Google Gemini, Anthropic Claude, OpenAI, OpenRouter, or a local Ollama model, and delegate basic tasks to an agent that can write, edit, and create notes and folders within your vault.
 
 It features a user-friendly UI, inspired by other agentic apps.
 
@@ -33,10 +33,11 @@ It features a user-friendly UI, inspired by other agentic apps.
 
 1. Clone the repository inside your `~/vault/.obsidian/plugins/` folder.
 2. Enable the plugin from Obsidian's settings panel.
-3. In the plugin's settings panel, choose your AI provider (Google, Anthropic, OpenAI, or Ollama) and add the corresponding credentials.
+3. In the plugin's settings panel, choose your AI provider (Google, Anthropic, OpenAI, OpenRouter, or Ollama) and add the corresponding credentials.
 
 > [!IMPORTANT]  
-> - For **Google**, **Anthropic**, and **OpenAI**, make sure you have a valid API key for the selected provider.
+> - For **Google**, **Anthropic**, **OpenAI**, and **OpenRouter**, make sure you have a valid API key for the selected provider.
+> - For **OpenRouter**, use OpenRouter's `vendor/model` names (e.g. `anthropic/claude-sonnet-5.5`).
 > - For **Ollama**, no API key is needed, just make sure your local Ollama server is running and the model has been pulled.
 > - You can also add a custom base URL to connect to a different endpoint for the selected provider.
 
@@ -71,7 +72,7 @@ e.g: *List all files in the folder 'Research'*
 e.g: *Search if it exist a note called 'AI agent'*
 - **Note filtering**: Return note paths that fall inside a date range.  
 e.g: *Give me yesterday's notes*
-- **Web search**: Search for content on the web. Not available with Ollama models.  
+- **Web search**: Search for content on the web. Not available with OpenRouter or Ollama models.  
 e.g: *Search on the web for todays temperature in Austin, Texas*
 
 Also you can right click over selected text, in your markdown notes, to `summarize selection` or `ask agent`.
@@ -81,16 +82,16 @@ Also you can right click over selected text, in your markdown notes, to `summari
 And finally, you can also attach images by clicking the image icon, and notes with the `@` icon in the input.
 
 ## 🟡 Disclosures
-This plugin can connect to remote AI services (Google Gemini, Anthropic Claude, or OpenAI) to process your requests, or to a local Ollama instance.
+This plugin can connect to remote AI services (Google Gemini, Anthropic Claude, OpenAI, or OpenRouter) to process your requests, or to a local Ollama instance.
 
 > **Why is this needed?**  
 > The AI models that power these features run on external servers and require an internet connection, with the exception of Ollama, which runs locally on your machine. Your notes or queries are sent securely to the selected provider for processing, and the results are only returned to your vault.
 
-To use Google, Anthropic, or OpenAI, you must set the corresponding API key. You are responsible for obtaining and managing your API keys. Ollama does not require an API key, but does require a local Ollama installation.
+To use Google, Anthropic, OpenAI, or OpenRouter, you must set the corresponding API key. You are responsible for obtaining and managing your API keys. Ollama does not require an API key, but does require a local Ollama installation.
 
 **Network usage in detail:**
 
-- Your messages, the notes and images you attach, and any note content the agent reads with its tools are sent to the AI provider you selected (Google, Anthropic, or OpenAI) — or stay on your machine if you use Ollama. Nothing is sent anywhere until you send a message.
+- Your messages, the notes and images you attach, and any note content the agent reads with its tools are sent to the AI provider you selected (Google, Anthropic, OpenAI, or OpenRouter, which forwards it to the model's vendor) — or stay on your machine if you use Ollama. Nothing is sent anywhere until you send a message.
 - The bundled LangChain library may download token-counting data from `tiktoken.pages.dev` (a public CDN for the js-tiktoken library) when estimating message sizes for OpenAI models.
 - The plugin makes no other network requests: there is no telemetry, no analytics, and no data is shared with the plugin author.
 

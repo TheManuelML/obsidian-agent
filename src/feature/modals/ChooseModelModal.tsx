@@ -8,6 +8,7 @@ const providerColorMap: Record<Provider, string> = {
   google: "#7895F9",
   anthropic: "#D97757",
   openai: "#74AA9C",
+  openrouter: "#6467F2",
   ollama: "#CCCCCC",
 };
 
@@ -15,6 +16,7 @@ const providerLabelMap: Record<Provider, string> = {
   google: "Google",
   anthropic: "Anthropic",
   openai: "OpenAI",
+  openrouter: "OpenRouter",
   ollama: "Ollama",
 };
 

@@ -7,6 +7,9 @@ import { getSettings } from "src/plugin";
 import { DEFAULT_SETTINGS } from "src/settings/SettingsTab";
 import { Provider } from "src/types/ai";
 
+// Default endpoint for the OpenRouter provider (OpenAI-compatible API)
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+
 // Parses a settings text field into a number, treating the sentinel
 // "Default" value (and anything non-numeric) as "let the provider decide".
 function parseOptionalNumber(value: string, fallback: string): number | undefined {
@@ -84,6 +87,30 @@ export function buildChatModel(): BaseChatModel {
       });
     }
 
+    case "openrouter": {
+      if (!settings.openrouterApiKey.trim()) {
+        throw new Error("Set your OpenRouter API key in the plugin settings before sending a message.");
+      }
+
+      // OpenRouter exposes an OpenAI-compatible Chat Completions API, so the
+      // OpenAI client is reused. The Responses API stays off because
+      // OpenRouter's support for it is partial and it is only needed for
+      // OpenAI's native web search, which OpenRouter can't run.
+      // The endpoint is fixed: the shared base URL override is ignored so a
+      // value left over from another provider can't break OpenRouter calls.
+      return new ChatOpenAI({
+        model: settings.model,
+        apiKey: settings.openrouterApiKey,
+        temperature,
+        maxTokens: maxOutputTokens,
+        useResponsesApi: false,
+        configuration: {
+          baseURL: OPENROUTER_BASE_URL,
+          dangerouslyAllowBrowser: true,
+        },
+      });
+    }
+
     case "ollama": {
       const ollamaBaseUrl = settings.ollamaBaseUrl.trim() || DEFAULT_SETTINGS.ollamaBaseUrl;
 
@@ -97,7 +124,7 @@ export function buildChatModel(): BaseChatModel {
 }
 
 // Returns the provider-native web search tool descriptor to register with the
-// agent, or null when the provider has no native web search (Ollama).
+// agent, or null when the provider has no native web search (OpenRouter, Ollama).
 // These descriptors are executed server-side by the provider, the agent's
 // tool node never runs them locally.
 export function getNativeWebSearchTool(provider: Provider): Record<string, unknown> | null {
@@ -110,6 +137,10 @@ export function getNativeWebSearchTool(provider: Provider): Record<string, unkno
       // Gemini's API rejects requests that combine built-in tools (like
       // googleSearch) with function declarations, and this agent always
       // registers vault function tools, so native search can't be offered here.
+      return null;
+    case "openrouter":
+      // Provider-native search descriptors are tied to each vendor's own API
+      // and are not forwarded by OpenRouter's Chat Completions endpoint.
       return null;
     case "ollama":
       return null;

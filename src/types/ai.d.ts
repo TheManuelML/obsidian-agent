@@ -1,6 +1,6 @@
 // Supported LangChain chat model providers. The user picks one in settings
 // and types the model name manually (no curated model list anymore).
-export type Provider = "google" | "anthropic" | "openai" | "ollama";
+export type Provider = "google" | "anthropic" | "openai" | "openrouter" | "ollama";
 
 // A provider/model-name pair, used by the model picker modal and the
 // "switch-model" command to update settings together as a unit.

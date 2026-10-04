@@ -37,13 +37,21 @@ export const handleCall = async (
     const conversation = await importConversation(chat);
     if (conversation.length === 0) {
       const app = getApp();
-  
-      const newName = await generateChatFileName(message, files);
-      if (newName) {
-        const newPath = chat.parent?.path + "/" + newName + ".md";
-  
-        await app.vault.rename(chat, newPath);
-        chat = app.vault.getFileByPath(newPath)!;
+
+      // Naming is best-effort: a failure here (bad credentials, network,
+      // name collision) must not abort the call, so the chat keeps its
+      // default name. Model errors resurface through the agent call below.
+      try {
+        const newName = await generateChatFileName(message, files);
+        if (newName) {
+          const newPath = chat.parent?.path + "/" + newName + ".md";
+
+          await app.vault.rename(chat, newPath);
+          chat = app.vault.getFileByPath(newPath)!;
+        }
+      } catch (error) {
+        if (settings.debug) console.error(error);
+        new Notice("Could not generate a chat name, keeping the default one.", 5000);
       }
     }
   }
